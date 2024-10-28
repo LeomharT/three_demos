@@ -3,19 +3,50 @@ import {
 	AppShell,
 	AppShellHeader,
 	AppShellMain,
+	Button,
 	Card,
 	Container,
 	Group,
 	Image,
-	Kbd,
+	rem,
 	SimpleGrid,
 	Text,
-	TextInput,
 	Title,
+	useMantineColorScheme,
 } from '@mantine/core';
-import { IconBrandGithub, IconSearch } from '@tabler/icons-react';
+import { Spotlight, spotlight, SpotlightActionData } from '@mantine/spotlight';
+import {
+	IconBrandGithub,
+	IconMoon,
+	IconSearch,
+	IconSun,
+} from '@tabler/icons-react';
+import classes from './app.module.css';
+
+const actions: SpotlightActionData[] = [
+	{
+		id: 'home',
+		label: 'Home',
+		description: 'Get to home page',
+		onClick: () => console.log('Home'),
+	},
+	{
+		id: 'dashboard',
+		label: 'Dashboard',
+		description: 'Get full information about current system status',
+		onClick: () => console.log('Dashboard'),
+	},
+	{
+		id: 'documentation',
+		label: 'Documentation',
+		description: 'Visit documentation to lean more about all features',
+		onClick: () => console.log('Documentation'),
+	},
+];
 
 export default function App() {
+	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+
 	return (
 		<AppShell
 			header={{
@@ -29,25 +60,39 @@ export default function App() {
 							<Image h='32px' src='/favicon.ico' />
 							<Title order={3}>Three Demos</Title>
 						</Group>
-						<Group>
-							<TextInput
-								placeholder='search'
-								leftSection={<IconSearch />}
-								rightSection={<Kbd mr='lg'>CtrlK</Kbd>}
-							/>
+						<Group gap='xs'>
+							<Button
+								unstyled
+								className={classes.search}
+								onClick={spotlight.toggle}
+							>
+								<Group>
+									<IconSearch />
+									<Text size='sm'>Search</Text>
+									<Text size='xs'>Ctrl+K</Text>
+								</Group>
+							</Button>
 							<ActionIcon variant='default' radius='md' size='lg'>
 								<IconBrandGithub />
+							</ActionIcon>
+							<ActionIcon
+								size='lg'
+								radius='md'
+								variant='default'
+								onClick={toggleColorScheme}
+							>
+								{colorScheme === 'light' ? <IconMoon /> : <IconSun />}
 							</ActionIcon>
 						</Group>
 					</Group>
 				</Container>
 			</AppShellHeader>
-			<AppShellMain>
+			<AppShellMain className={classes.main}>
 				<Container size='xl' pt='md'>
 					<Title order={2}>Basic</Title>
 					<Text c='dimmed'>Basic demo, learning how to create scene</Text>
 					<SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} pt='md'>
-						<Card withBorder component='a' href='/smoothstep-test'>
+						<Card withBorder component='a' href='/mix-color'>
 							<Card.Section>
 								<Image
 									src='https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png'
@@ -60,6 +105,20 @@ export default function App() {
 						</Card>
 					</SimpleGrid>
 				</Container>
+				<Spotlight
+					actions={actions}
+					nothingFound='Nothing found...'
+					highlightQuery
+					searchProps={{
+						leftSection: (
+							<IconSearch
+								stroke={1.5}
+								style={{ width: rem(20), height: rem(20) }}
+							/>
+						),
+						placeholder: 'Search...',
+					}}
+				/>
 			</AppShellMain>
 		</AppShell>
 	);

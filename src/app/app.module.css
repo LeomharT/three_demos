@@ -1,0 +1,47 @@
+.search {
+	border: 1px solid var(--mantine-color-default-border);
+	border-radius: var(--mantine-radius-md);
+	background-color: var(--mantine-color-body);
+	padding: 0 4px 0 12px;
+	height: calc(2.125rem * var(--mantine-scale));
+	color: var(--mantine-color-placeholder);
+	cursor: pointer;
+
+	&:active {
+		transform: translateY(1px);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--mantine-primary-color-filled);
+		outline-offset: calc(0.125rem * var(--mantine-scale));
+	}
+
+	& div > p:nth-last-of-type(1) {
+		line-height: 1;
+		font-weight: 700;
+		padding: 4px 7px;
+		color: var(--mantine-color-gray-7);
+		background: var(--mantine-color-gray-0);
+		border-radius: var(--mantine-radius-sm);
+		border: 1px solid var(--mantine-color-gray-3);
+		margin-left: calc(3rem * var(--mantine-scale));
+		font-size: calc(0.6875rem * var(--mantine-scale));
+	}
+}
+
+.main {
+	& :global(.mantine-Card-root) {
+		& :global(.mantine-Card-section) {
+			overflow: hidden;
+		}
+		& img {
+			transition: all ease-in 0.3s 0s;
+		}
+		&:hover {
+			& img {
+				transition: all ease-out 0.3s 0s;
+				transform: scale(1.1);
+			}
+		}
+	}
+}
