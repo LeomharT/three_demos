@@ -100,7 +100,7 @@ export default function App() {
 									alt='Norway'
 								/>
 							</Card.Section>
-							<Text mt='sm'>Shader Smoothstep Test</Text>
+							<Text mt='sm'>Shader Mix Color Test</Text>
 							<Text c='dimmed'>Shader</Text>
 						</Card>
 					</SimpleGrid>

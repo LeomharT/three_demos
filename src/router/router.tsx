@@ -8,12 +8,14 @@ import {
 import App from '../app';
 
 const MixColor = lazy(() => import('../pages/MixColor'));
+const PortalScene = lazy(() => import('../pages/PortalScene'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route path='/'>
 			<Route index element={<App />} />
 			<Route path='mix-color' element={<MixColor />} />
+			<Route path='portal-scene' element={<PortalScene />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	)
