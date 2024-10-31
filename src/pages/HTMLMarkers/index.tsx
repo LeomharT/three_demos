@@ -1,5 +1,7 @@
 import { Box, useMantineTheme } from '@mantine/core';
+import { IconMapPinFilled } from '@tabler/icons-react';
 import { useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
 import {
 	AmbientLight,
 	AxesHelper,
@@ -27,7 +29,6 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Pane } from 'tweakpane';
 import EarthModel from './assets/earth.gltf?url';
-
 import HDRTexture from './assets/park_sunset_sky_dome_4k.png?url';
 
 export default function HTMLMarkers() {
@@ -154,12 +155,17 @@ export default function HTMLMarkers() {
 			scene.add(group);
 		});
 
-		const elMarker = document.createElement('div');
-		elMarker.append('Hello World');
+		const css3DContainer = document.createElement('div');
+		css3DContainer.id = 'css3DContainer';
 
-		const marker = new CSS3DObject(elMarker);
-		marker.position.set(0, 4, 0);
-		css3DScene.add(marker);
+		const css3DRoot = ReactDOM.createRoot(css3DContainer);
+		css3DRoot.render(<IconMapPinFilled color={theme.colors.yellow[5]} />);
+		css3DContainer.append();
+
+		const markers = new CSS3DObject(css3DContainer);
+		markers.scale.set(0.03, 0.03, 0.03);
+		markers.position.set(0, 2.4, 0);
+		css3DScene.add(markers);
 
 		// Debuger params
 		const params = {
