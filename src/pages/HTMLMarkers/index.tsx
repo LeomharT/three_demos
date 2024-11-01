@@ -51,7 +51,7 @@ export default function HTMLMarkers() {
 		renderer.setClearAlpha(0);
 		renderer.setSize(innerWidth, innerHeight);
 		renderer.domElement.style.position = 'relative';
-		renderer.domElement.style.zIndex = '2';
+		renderer.domElement.style.zIndex = '1';
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
@@ -64,10 +64,9 @@ export default function HTMLMarkers() {
 		css3DRenderer.setSize(innerWidth, innerHeight);
 		css3DRenderer.domElement.style.position = 'absolute';
 		css3DRenderer.domElement.style.top = '0';
-		css3DRenderer.domElement.style.zIndex = '1';
+		css3DRenderer.domElement.style.zIndex = '2';
+		css3DRenderer.domElement.style.pointerEvents = 'none';
 		el.append(css3DRenderer.domElement);
-
-		const css3DScene = new Scene();
 
 		const camera = new PerspectiveCamera(
 			75,
@@ -129,6 +128,12 @@ export default function HTMLMarkers() {
 		spotLightHelper.visible = false;
 		scene.add(spotLightHelper);
 
+		const css3DContainer = document.createElement('div');
+		css3DContainer.id = 'css3DContainer';
+
+		const css3DRoot = ReactDOM.createRoot(css3DContainer);
+		css3DRoot.render(<IconMapPinFilled color={theme.colors.blue[5]} />);
+
 		gltfLoader.load(EarthModel, (data) => {
 			const lampd = data.scene.getObjectByName('URF-Height_Lampd_0')!;
 			const lampdIce = data.scene.getObjectByName('URF-Height_Lampd_Ice_0')!;
@@ -136,6 +141,12 @@ export default function HTMLMarkers() {
 			lampd.castShadow = true;
 			lampdIce.castShadow = true;
 			lampdWater.castShadow = true;
+
+			const markers = new CSS3DObject(css3DContainer);
+			markers.scale.set(0.03, 0.03, 0.03);
+			markers.position.set(0, 1.5, 0);
+
+			lampdWater.add(markers);
 
 			if (lampdWater instanceof Mesh) {
 				if (lampdWater.material instanceof MeshStandardMaterial) {
@@ -154,18 +165,6 @@ export default function HTMLMarkers() {
 
 			scene.add(group);
 		});
-
-		const css3DContainer = document.createElement('div');
-		css3DContainer.id = 'css3DContainer';
-
-		const css3DRoot = ReactDOM.createRoot(css3DContainer);
-		css3DRoot.render(<IconMapPinFilled color={theme.colors.yellow[5]} />);
-		css3DContainer.append();
-
-		const markers = new CSS3DObject(css3DContainer);
-		markers.scale.set(0.03, 0.03, 0.03);
-		markers.position.set(0, 2.4, 0);
-		css3DScene.add(markers);
 
 		// Debuger params
 		const params = {
@@ -202,7 +201,7 @@ export default function HTMLMarkers() {
 			state.update();
 			controler.update(time);
 			renderer.render(scene, camera);
-			css3DRenderer.render(css3DScene, camera);
+			css3DRenderer.render(scene, camera);
 		}
 		render();
 

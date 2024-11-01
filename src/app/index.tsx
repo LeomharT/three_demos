@@ -4,12 +4,14 @@ import {
 	AppShellHeader,
 	AppShellMain,
 	Button,
-	Card,
+	Center,
 	Container,
 	Group,
 	Image,
+	Loader,
 	rem,
-	SimpleGrid,
+	Tabs,
+	TabsList,
 	Text,
 	Title,
 	useMantineColorScheme,
@@ -21,6 +23,8 @@ import {
 	IconSearch,
 	IconSun,
 } from '@tabler/icons-react';
+import { Suspense } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router';
 import classes from './app.module.css';
 
 const actions: SpotlightActionData[] = [
@@ -47,6 +51,12 @@ const actions: SpotlightActionData[] = [
 export default function App() {
 	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
+	const navigate = useNavigate();
+
+	const location = useLocation();
+
+	const active = location.pathname.split('/').filter((val) => val)[0] ?? '/';
+
 	return (
 		<AppShell
 			header={{
@@ -55,12 +65,23 @@ export default function App() {
 		>
 			<AppShellHeader>
 				<Container size='xl' h='100%'>
-					<Group h='100%' justify='space-between'>
+					<Group h='100%'>
 						<Group>
 							<Image h='32px' src='/favicon.ico' />
 							<Title order={3}>Three Demos</Title>
 						</Group>
-						<Group gap='xs'>
+						<Tabs
+							ml='md'
+							value={active}
+							className={classes.tabs}
+							onChange={(val) => val && navigate(val)}
+						>
+							<TabsList>
+								<Tabs.Tab value='/'>Examples</Tabs.Tab>
+								<Tabs.Tab value='docs'>Docs</Tabs.Tab>
+							</TabsList>
+						</Tabs>
+						<Group gap='xs' ml='auto'>
 							<Button
 								unstyled
 								className={classes.search}
@@ -88,49 +109,32 @@ export default function App() {
 				</Container>
 			</AppShellHeader>
 			<AppShellMain className={classes.main}>
-				<Container size='xl' pt='md'>
-					<Title order={2}>Basic</Title>
-					<Text c='dimmed'>Basic demo, learning how to create scene</Text>
-					<SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} pt='md'>
-						<Card withBorder component='a' href='/mix-color'>
-							<Card.Section>
-								<Image
-									src='https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png'
-									height={160}
-									alt='Norway'
-								/>
-							</Card.Section>
-							<Text mt='sm'>Shader Mix Color Test</Text>
-							<Text c='dimmed'>Shader</Text>
-						</Card>
-						<Card withBorder component='a' href='/html-markers'>
-							<Card.Section>
-								<Image
-									src='https://images.unsplash.com/photo-1579227114347-15d08fc37cae?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2550&q=80'
-									height={160}
-									alt='Norway'
-								/>
-							</Card.Section>
-							<Text mt='sm'>HTML Markers</Text>
-							<Text c='dimmed'>CSS3DRenderer</Text>
-						</Card>
-					</SimpleGrid>
-				</Container>
-				<Spotlight
-					actions={actions}
-					nothingFound='Nothing found...'
-					highlightQuery
-					searchProps={{
-						leftSection: (
-							<IconSearch
-								stroke={1.5}
-								style={{ width: rem(20), height: rem(20) }}
-							/>
-						),
-						placeholder: 'Search...',
-					}}
-				/>
+				<Suspense fallback={<Fallback />}>
+					<Outlet />
+				</Suspense>
 			</AppShellMain>
+			<Spotlight
+				actions={actions}
+				nothingFound='Nothing found...'
+				highlightQuery
+				searchProps={{
+					leftSection: (
+						<IconSearch
+							stroke={1.5}
+							style={{ width: rem(20), height: rem(20) }}
+						/>
+					),
+					placeholder: 'Search...',
+				}}
+			/>
 		</AppShell>
+	);
+}
+
+function Fallback() {
+	return (
+		<Center mt={'lg'}>
+			<Loader />
+		</Center>
 	);
 }

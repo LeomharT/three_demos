@@ -29,6 +29,14 @@
 	}
 }
 
+.tabs {
+	align-self: flex-end;
+
+	& button > span {
+		padding-bottom: 12px;
+	}
+}
+
 .main {
 	& :global(.mantine-Card-root) {
 		& :global(.mantine-Card-section) {
