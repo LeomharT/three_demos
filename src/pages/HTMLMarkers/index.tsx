@@ -206,6 +206,7 @@ export default function HTMLMarkers() {
 		render();
 
 		function resize() {
+			css3DRenderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
