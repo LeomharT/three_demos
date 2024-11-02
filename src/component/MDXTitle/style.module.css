@@ -2,18 +2,20 @@
 	position: relative;
 	margin-top: calc(var(--mantine-spacing-xl) * 1.2);
 
-	> div {
+	& > div {
 		position: relative;
 		top: calc(-5rem * var(--mantine-scale));
 	}
 
-	> button {
+	& > button {
 		position: absolute;
 		left: -40px;
 	}
 
-	> a {
+	& > a {
+		color: var(--mantine-color-text);
 		cursor: pointer;
+		text-decoration: none;
 		font-size: inherit;
 	}
 }

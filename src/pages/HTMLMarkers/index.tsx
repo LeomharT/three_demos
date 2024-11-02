@@ -12,11 +12,13 @@ import {
 	MeshStandardMaterial,
 	PerspectiveCamera,
 	PlaneGeometry,
+	Raycaster,
 	Scene,
 	ShadowMaterial,
 	SpotLight,
 	SpotLightHelper,
 	TextureLoader,
+	Vector2,
 	WebGLRenderer,
 } from 'three';
 import {
@@ -82,7 +84,7 @@ export default function HTMLMarkers() {
 		controler.enablePan = true;
 
 		const axesHelper = new AxesHelper();
-		scene.add(axesHelper);
+		// scene.add(axesHelper);
 
 		const state = new Stats();
 		el.append(state.dom);
@@ -126,13 +128,7 @@ export default function HTMLMarkers() {
 			theme.colors.blue[5]
 		);
 		spotLightHelper.visible = false;
-		scene.add(spotLightHelper);
-
-		const css3DContainer = document.createElement('div');
-		css3DContainer.id = 'css3DContainer';
-
-		const css3DRoot = ReactDOM.createRoot(css3DContainer);
-		css3DRoot.render(<IconMapPinFilled color={theme.colors.blue[5]} />);
+		// scene.add(spotLightHelper);
 
 		gltfLoader.load(EarthModel, (data) => {
 			const lampd = data.scene.getObjectByName('URF-Height_Lampd_0')!;
@@ -142,15 +138,50 @@ export default function HTMLMarkers() {
 			lampdIce.castShadow = true;
 			lampdWater.castShadow = true;
 
+			const css3DContainer = document.createElement('div');
+			css3DContainer.id = 'css3DContainer';
+
+			const css3DRoot = ReactDOM.createRoot(css3DContainer);
+			css3DRoot.render(<IconMapPinFilled color={theme.colors.blue[5]} />);
+
 			const markers = new CSS3DObject(css3DContainer);
 			markers.scale.set(0.03, 0.03, 0.03);
-			markers.position.set(0, 1.5, 0);
+			markers.position.set(0, 2.5, 0);
+			scene.add(markers);
 
-			lampdWater.add(markers);
+			controler.addEventListener('change', () => {
+				const markersPosition = markers.position.clone();
+				markersPosition.project(camera);
+
+				const raycaster = new Raycaster();
+				raycaster.setFromCamera(
+					new Vector2(markersPosition.x, markersPosition.y),
+					camera
+				);
+				const intersects = raycaster.intersectObjects(scene.children, true);
+
+				if (intersects.length === 0) {
+					markers.visible = true;
+				} else {
+					const intersectionDistance = intersects[0].distance;
+					const markerDestance = markers.position.distanceTo(camera.position);
+					if (intersectionDistance < markerDestance) {
+						// marker is hidden
+						markers.visible = false;
+					} else {
+						markers.visible = true;
+					}
+				}
+			});
 
 			if (lampdWater instanceof Mesh) {
 				if (lampdWater.material instanceof MeshStandardMaterial) {
 					lampdWater.material.roughness = 0;
+				}
+			}
+			if (lampdIce instanceof Mesh) {
+				if (lampdIce.material instanceof MeshStandardMaterial) {
+					lampdIce.material.roughness = 0;
 				}
 			}
 			if (lampd instanceof Mesh) {
@@ -173,6 +204,8 @@ export default function HTMLMarkers() {
 			ambientIntensity: 0.5,
 		};
 		const pane = new Pane({ title: 'params' });
+		pane.element.style.position = 'relative';
+		pane.element.style.zIndex = '99';
 		pane.addBinding(params, 'debugger').on('change', (val) => {
 			spotLightHelper.visible = !!val.value;
 			axesHelper.visible = !!val.value;
