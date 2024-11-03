@@ -32,7 +32,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Pane } from 'tweakpane';
 import EarthModel from './assets/earth.gltf?url';
 import HDRTexture from './assets/park_sunset_sky_dome_4k.png?url';
-
+import classes from './style.module.css';
 export default function HTMLMarkers() {
 	const theme = useMantineTheme();
 
@@ -106,6 +106,7 @@ export default function HTMLMarkers() {
 			opacity: 0.2,
 		});
 		const plane = new Mesh(planeGemotry, shadowMaterial);
+		plane.userData.name = 'Floor_Shadow';
 		plane.receiveShadow = true;
 		scene.add(plane);
 
@@ -142,7 +143,12 @@ export default function HTMLMarkers() {
 			css3DContainer.id = 'css3DContainer';
 
 			const css3DRoot = ReactDOM.createRoot(css3DContainer);
-			css3DRoot.render(<IconMapPinFilled color={theme.colors.blue[5]} />);
+			css3DRoot.render(
+				<IconMapPinFilled
+					className={`${classes.marker} ${classes.visiable}`}
+					color={theme.colors.blue[5]}
+				/>
+			);
 
 			const markers = new CSS3DObject(css3DContainer);
 			markers.scale.set(0.03, 0.03, 0.03);
@@ -161,15 +167,20 @@ export default function HTMLMarkers() {
 				const intersects = raycaster.intersectObjects(scene.children, true);
 
 				if (intersects.length === 0) {
-					markers.visible = true;
+					css3DContainer.querySelector('svg')?.classList.add(classes.visiable);
 				} else {
 					const intersectionDistance = intersects[0].distance;
 					const markerDestance = markers.position.distanceTo(camera.position);
+
+					// if css object is far to camera, then its blocked
 					if (intersectionDistance < markerDestance) {
-						// marker is hidden
-						markers.visible = false;
+						css3DContainer
+							.querySelector('svg')
+							?.classList.remove(classes.visiable);
 					} else {
-						markers.visible = true;
+						css3DContainer
+							.querySelector('svg')
+							?.classList.add(classes.visiable);
 					}
 				}
 			});
