@@ -31,7 +31,7 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Pane } from 'tweakpane';
 import EarthModel from './assets/earth.gltf?url';
-import HDRTexture from './assets/park_sunset_sky_dome_4k.png?url';
+import HDRTexture from './assets/park_sunset_sky_dome_1k.png?url';
 import classes from './style.module.css';
 export default function HTMLMarkers() {
 	const theme = useMantineTheme();
@@ -238,6 +238,13 @@ export default function HTMLMarkers() {
 			})
 			.on('change', (val) => {
 				scene.environmentIntensity = val.value;
+			});
+		pane
+			.addButton({
+				title: 'Documentation',
+			})
+			.on('click', () => {
+				window.location.href = '/docs';
 			});
 
 		function render(time?: number) {

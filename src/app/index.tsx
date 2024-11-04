@@ -3,12 +3,14 @@ import {
 	AppShell,
 	AppShellHeader,
 	AppShellMain,
+	AppShellNavbar,
 	Button,
 	Center,
 	Container,
 	Group,
 	Image,
 	Loader,
+	NavLink,
 	rem,
 	Tabs,
 	TabsList,
@@ -62,6 +64,14 @@ export default function App() {
 			header={{
 				height: 64,
 			}}
+			navbar={{
+				width: '16.25rem',
+				breakpoint: 'sm',
+				collapsed: {
+					desktop: active === 'docs' ? false : true,
+					mobile: true,
+				},
+			}}
 		>
 			<AppShellHeader>
 				<Container size='xl' h='100%'>
@@ -108,6 +118,9 @@ export default function App() {
 					</Group>
 				</Container>
 			</AppShellHeader>
+			<AppShellNavbar>
+				<NavLink active href='/docs' label='HTML Mixing With WegGL' />
+			</AppShellNavbar>
 			<AppShellMain className={classes.main}>
 				<Suspense fallback={<Fallback />}>
 					<Outlet />

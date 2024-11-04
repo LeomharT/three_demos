@@ -1,7 +1,6 @@
-import { Box, Container, Group } from '@mantine/core';
+import { Box, Container } from '@mantine/core';
 import { useLayoutEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
-import TableOfContent from '../../component/TableOfContents';
 
 export default function Docs() {
 	const location = useLocation();
@@ -15,12 +14,9 @@ export default function Docs() {
 
 	return (
 		<Box>
-			<Group align='start'>
-				<Container size='xl'>
-					<Outlet />
-				</Container>
-				<TableOfContent />
-			</Group>
+			<Container w='100%' size='sm'>
+				<Outlet />
+			</Container>
 		</Box>
 	);
 }
