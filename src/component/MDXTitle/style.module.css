@@ -8,6 +8,7 @@
 	}
 
 	& > button {
+		color: var(--mantine-color-gray-3);
 		position: absolute;
 		left: -40px;
 	}

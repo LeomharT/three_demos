@@ -18,6 +18,7 @@ import {
 	Title,
 	useMantineColorScheme,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { Spotlight, spotlight, SpotlightActionData } from '@mantine/spotlight';
 import {
 	IconBrandGithub,
@@ -27,6 +28,7 @@ import {
 } from '@tabler/icons-react';
 import { Suspense } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
+import Hiddent from '../component/Hiddent';
 import classes from './app.module.css';
 
 const actions: SpotlightActionData[] = [
@@ -56,6 +58,8 @@ export default function App() {
 	const navigate = useNavigate();
 
 	const location = useLocation();
+
+	const matches = useMediaQuery('(min-width: 56.25em)');
 
 	const active = location.pathname.split('/').filter((val) => val)[0] ?? '/';
 
@@ -91,30 +95,32 @@ export default function App() {
 								<Tabs.Tab value='docs'>Docs</Tabs.Tab>
 							</TabsList>
 						</Tabs>
-						<Group gap='xs' ml='auto'>
-							<Button
-								unstyled
-								className={classes.search}
-								onClick={spotlight.toggle}
-							>
-								<Group>
-									<IconSearch />
-									<Text size='sm'>Search</Text>
-									<Text size='xs'>Ctrl+K</Text>
-								</Group>
-							</Button>
-							<ActionIcon variant='default' radius='md' size='lg'>
-								<IconBrandGithub />
-							</ActionIcon>
-							<ActionIcon
-								size='lg'
-								radius='md'
-								variant='default'
-								onClick={toggleColorScheme}
-							>
-								{colorScheme === 'light' ? <IconMoon /> : <IconSun />}
-							</ActionIcon>
-						</Group>
+						<Hiddent hidden={!matches}>
+							<Group gap='xs' ml='auto'>
+								<Button
+									unstyled
+									className={classes.search}
+									onClick={spotlight.toggle}
+								>
+									<Group>
+										<IconSearch />
+										<Text size='sm'>Search</Text>
+										<Text size='xs'>Ctrl+K</Text>
+									</Group>
+								</Button>
+								<ActionIcon variant='default' radius='md' size='lg'>
+									<IconBrandGithub />
+								</ActionIcon>
+								<ActionIcon
+									size='lg'
+									radius='md'
+									variant='default'
+									onClick={toggleColorScheme}
+								>
+									{colorScheme === 'light' ? <IconMoon /> : <IconSun />}
+								</ActionIcon>
+							</Group>
+						</Hiddent>
 					</Group>
 				</Container>
 			</AppShellHeader>

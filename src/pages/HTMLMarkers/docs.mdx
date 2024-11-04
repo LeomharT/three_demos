@@ -1,10 +1,66 @@
-import { Button, Code, Text, Group } from '@mantine/core';
+import {
+	Button,
+	Code,
+	Text,
+	Group,
+	Anchor,
+	Blockquote,
+	Card,
+} from '@mantine/core';
 import MDXTitle from '../../component/MDXTitle';
+import { CodeHighlight } from '@mantine/code-highlight';
+import MDXCode from '../../component/MDXCode';
 
 # HTML CSS3DObject mixing with WebGL
 
 <MDXTitle order={2} id='HTML-MIX' href='#HTML-Element'>
-	Hello
+	WebGL 3D mixing renderer with HTML
 </MDXTitle>
 
-<Code>Helper</Code>类会影响<Code>Raycaster</Code>的检测
+混合渲染 `HTML` 和 `WegGL Object3D` 已知有两种方法实现:
+
+- 使用`CSS3DRenderer`渲染`CSS3DObject`, 与`Object3D`共享相同的坐标系.
+- 使用原生`HTML`标签, 手动计算`transform: translate3d`的坐标.
+
+Threejs journey 教程中使用第二种方法, 区别在与是否需要手动计算`HTML`的坐标转换.
+
+<MDXCode
+	code={`
+	const screenPosition = point.position.clone();
+	screenPosition.project(camera);
+	const translateX = screenPosition.x * sizes.width * 0.5;
+	const translateY = - screenPosition.y * sizes.height * 0.5;
+	point.element.style.transform = 'translateX(\${translateX}px) translateY(\${translateY}px)'
+    `}
+	language='tsx'
+/>
+
+<MDXTitle order={2} id='Raycaster' href='#raycaster'>
+	Raycaster
+</MDXTitle>
+Raycaster射线检测(光线投射), 在3D中主要用与鼠标拾取, 理解为从鼠标坐标处发射一条射线,
+按照距离从近到远的顺序返回与之向交的3D物体.
+
+<MDXCode
+	code={`
+const markersPosition = markers.position.clone();
+// Vector3().project(camera : Camera)用于将物体的世界位置归一化为相机(屏幕)的二维坐标
+markersPosition.project(camera);
+
+const raycaster = new Raycaster();
+// 目标位置只需要 x, y 的坐标, 因为已经映射为二维坐标系
+// setFromCamera 第一个参数可以为一个 3D 物体的坐标, 那么可以认为射线从那个物体发射出
+raycaster.setFromCamera(coords : Vector2, camera : Camera);
+// intersectObjects 第一个参数用于传入需要和那些物体判断相交, 一般都是和场景内的所有物体, 会在按照从近到远排序
+const intersects = raycaster.intersectObjects(scene.children, true);
+`}
+language='tsx'
+/>
+
+`Helper`类会影响`Raycaster`的检测, 举例:
+`AxesHelper`的线段同样会遮挡`CSS3DObject`
+
+<MDXTitle order={2} id='fog-shadow' href='#fog-shadow'>
+	Fog Shadow
+</MDXTitle>
+柔和阴影

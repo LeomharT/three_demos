@@ -1,6 +1,7 @@
 import { Box, Container } from '@mantine/core';
 import { useLayoutEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import classes from './style.module.css';
 
 export default function Docs() {
 	const location = useLocation();
@@ -13,7 +14,7 @@ export default function Docs() {
 	}, [location]);
 
 	return (
-		<Box>
+		<Box className={classes.root}>
 			<Container w='100%' size='sm'>
 				<Outlet />
 			</Container>
