@@ -1,4 +1,10 @@
-import { Box, useMantineTheme } from '@mantine/core';
+import {
+	Box,
+	Group as MantineGroup,
+	MantineProvider,
+	Title,
+	useMantineTheme,
+} from '@mantine/core';
 import { IconMapPinFilled } from '@tabler/icons-react';
 import { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -10,6 +16,7 @@ import {
 	Group,
 	Mesh,
 	MeshStandardMaterial,
+	PCFSoftShadowMap,
 	PerspectiveCamera,
 	PlaneGeometry,
 	Raycaster,
@@ -50,11 +57,12 @@ export default function HTMLMarkers() {
 			alpha: true,
 			antialias: true,
 		});
-		renderer.shadowMap.enabled = true;
 		renderer.setClearAlpha(0);
 		renderer.setSize(innerWidth, innerHeight);
 		renderer.domElement.style.position = 'relative';
 		renderer.domElement.style.zIndex = '1';
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMap.type = PCFSoftShadowMap;
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
@@ -118,11 +126,11 @@ export default function HTMLMarkers() {
 		const spotLight = new SpotLight(0xffffff);
 		spotLight.castShadow = true;
 		spotLight.intensity = 0.2;
-		spotLight.angle = 0.5;
-		spotLight.decay = 0.5;
+		spotLight.angle = 1.1;
+		spotLight.decay = 0.1;
 		spotLight.shadow.bias = 0.0111;
 		spotLight.shadow.radius = 4;
-		spotLight.shadow.mapSize.set(2048, 2048);
+		spotLight.shadow.mapSize.set(512, 512);
 		spotLight.position.set(0, 40, 0);
 		scene.add(spotLight);
 
@@ -137,9 +145,6 @@ export default function HTMLMarkers() {
 			const lampd = data.scene.getObjectByName('URF-Height_Lampd_0')!;
 			const lampdIce = data.scene.getObjectByName('URF-Height_Lampd_Ice_0')!;
 			const lampdWater = data.scene.getObjectByName('URF-Height_watr_0')!;
-			lampd.castShadow = true;
-			lampdIce.castShadow = true;
-			lampdWater.castShadow = true;
 
 			const markers = [
 				{
@@ -151,11 +156,14 @@ export default function HTMLMarkers() {
 						angle: 0,
 					},
 					element: (
-						<IconMapPinFilled
+						<MantineGroup
+							gap={0}
 							id='markerNorth'
 							className={`${classes.marker} ${classes.visiable}`}
-							color={theme.colors.blue[5]}
-						/>
+						>
+							<IconMapPinFilled color={theme.colors.blue[5]} />
+							<Title order={6}>North</Title>
+						</MantineGroup>
 					),
 				},
 				{
@@ -178,10 +186,9 @@ export default function HTMLMarkers() {
 
 			for (const m of markers) {
 				const css3DContainer = document.createElement('div');
-				css3DContainer.id = m.id;
 
 				const css3DRoot = ReactDOM.createRoot(css3DContainer);
-				css3DRoot.render(m.element);
+				css3DRoot.render(<MantineProvider>{m.element}</MantineProvider>);
 
 				const marker = new CSS3DObject(css3DContainer);
 				marker.scale.set(...m.scalc.toArray());
@@ -204,9 +211,7 @@ export default function HTMLMarkers() {
 
 					const intersects = raycaster.intersectObjects(scene.children, true);
 
-					const element = document
-						.querySelector(`#${marker.id}`)
-						?.querySelector('svg');
+					const element = document.querySelector(`#${marker.id}`);
 
 					if (intersects.length === 0) {
 						element?.classList.add(classes.visiable);
@@ -243,7 +248,9 @@ export default function HTMLMarkers() {
 			const group = new Group();
 			group.add(lampd, lampdIce, lampdWater);
 			group.position.set(0, 1.1, 0);
-
+			group.traverse((object) => {
+				object.castShadow = true;
+			});
 			scene.add(group);
 		});
 
@@ -252,7 +259,7 @@ export default function HTMLMarkers() {
 			debugger: false,
 			environmentIntensity: 0.5,
 			ambientIntensity: 0.5,
-			spotlightAngle: 1.0,
+			spotlightAngle: 1.1,
 		};
 		const pane = new Pane({ title: 'params' });
 		pane.element.style.position = 'relative';
