@@ -19,6 +19,7 @@ import {
 	SpotLightHelper,
 	TextureLoader,
 	Vector2,
+	Vector3,
 	WebGLRenderer,
 } from 'three';
 import {
@@ -117,11 +118,12 @@ export default function HTMLMarkers() {
 		const spotLight = new SpotLight(0xffffff);
 		spotLight.castShadow = true;
 		spotLight.intensity = 0.2;
-		spotLight.angle = 1;
+		spotLight.angle = 0.5;
 		spotLight.decay = 0.5;
-		spotLight.position.set(0, 10, 0);
-		spotLight.shadow.bias = 0.0001;
-		spotLight.shadow.radius = 5;
+		spotLight.shadow.bias = 0.0111;
+		spotLight.shadow.radius = 4;
+		spotLight.shadow.mapSize.set(2048, 2048);
+		spotLight.position.set(0, 40, 0);
 		scene.add(spotLight);
 
 		const spotLightHelper = new SpotLightHelper(
@@ -139,48 +141,85 @@ export default function HTMLMarkers() {
 			lampdIce.castShadow = true;
 			lampdWater.castShadow = true;
 
-			const css3DContainer = document.createElement('div');
-			css3DContainer.id = 'css3DContainer';
+			const markers = [
+				{
+					id: 'markerNorth',
+					position: new Vector3(0, 2.5, 0),
+					scalc: new Vector3(0.03, 0.03, 0.03),
+					rotate: {
+						axis: new Vector3(0, 0, 0),
+						angle: 0,
+					},
+					element: (
+						<IconMapPinFilled
+							id='markerNorth'
+							className={`${classes.marker} ${classes.visiable}`}
+							color={theme.colors.blue[5]}
+						/>
+					),
+				},
+				{
+					id: 'markerSouth',
+					position: new Vector3(-1.5, 1.5, 0),
+					scalc: new Vector3(0.03, 0.03, 0.03),
+					rotate: {
+						axis: new Vector3(0, 0, 1),
+						angle: Math.PI / 2,
+					},
+					element: (
+						<IconMapPinFilled
+							id='markerSouth'
+							className={`${classes.marker} ${classes.visiable}`}
+							color={theme.colors.yellow[5]}
+						/>
+					),
+				},
+			];
 
-			const css3DRoot = ReactDOM.createRoot(css3DContainer);
-			css3DRoot.render(
-				<IconMapPinFilled
-					className={`${classes.marker} ${classes.visiable}`}
-					color={theme.colors.blue[5]}
-				/>
-			);
+			for (const m of markers) {
+				const css3DContainer = document.createElement('div');
+				css3DContainer.id = m.id;
 
-			const markers = new CSS3DObject(css3DContainer);
-			markers.scale.set(0.03, 0.03, 0.03);
-			markers.position.set(0, 2.5, 0);
-			scene.add(markers);
+				const css3DRoot = ReactDOM.createRoot(css3DContainer);
+				css3DRoot.render(m.element);
+
+				const marker = new CSS3DObject(css3DContainer);
+				marker.scale.set(...m.scalc.toArray());
+				marker.rotateOnAxis(m.rotate.axis, m.rotate.angle);
+				marker.position.set(...m.position.toArray());
+				scene.add(marker);
+			}
 
 			controler.addEventListener('change', () => {
-				const markersPosition = markers.position.clone();
-				markersPosition.project(camera);
-
 				const raycaster = new Raycaster();
-				raycaster.setFromCamera(
-					new Vector2(markersPosition.x, markersPosition.y),
-					camera
-				);
-				const intersects = raycaster.intersectObjects(scene.children, true);
 
-				if (intersects.length === 0) {
-					css3DContainer.querySelector('svg')?.classList.add(classes.visiable);
-				} else {
-					const intersectionDistance = intersects[0].distance;
-					const markerDestance = markers.position.distanceTo(camera.position);
+				for (const marker of markers) {
+					const markerPosition = marker.position.clone();
+					markerPosition.project(camera);
 
-					// if css object is far to camera, then its blocked
-					if (intersectionDistance < markerDestance) {
-						css3DContainer
-							.querySelector('svg')
-							?.classList.remove(classes.visiable);
+					raycaster.setFromCamera(
+						new Vector2(markerPosition.x, markerPosition.y),
+						camera
+					);
+
+					const intersects = raycaster.intersectObjects(scene.children, true);
+
+					const element = document
+						.querySelector(`#${marker.id}`)
+						?.querySelector('svg');
+
+					if (intersects.length === 0) {
+						element?.classList.add(classes.visiable);
 					} else {
-						css3DContainer
-							.querySelector('svg')
-							?.classList.add(classes.visiable);
+						const intersectionDistance = intersects[0].distance;
+						const markerDestance = marker.position.distanceTo(camera.position);
+
+						// if css object is far to camera, then its blocked
+						if (intersectionDistance < markerDestance) {
+							element?.classList.remove(classes.visiable);
+						} else {
+							element?.classList.add(classes.visiable);
+						}
 					}
 				}
 			});
@@ -213,6 +252,7 @@ export default function HTMLMarkers() {
 			debugger: false,
 			environmentIntensity: 0.5,
 			ambientIntensity: 0.5,
+			spotlightAngle: 1.0,
 		};
 		const pane = new Pane({ title: 'params' });
 		pane.element.style.position = 'relative';
@@ -245,6 +285,16 @@ export default function HTMLMarkers() {
 			})
 			.on('click', () => {
 				window.location.href = '/docs';
+			});
+		pane
+			.addBinding(params, 'spotlightAngle', {
+				step: 0.1,
+				max: Math.PI / 2,
+				min: 0.1,
+			})
+			.on('change', (val) => {
+				spotLight.angle = val.value;
+				spotLightHelper.update();
 			});
 
 		function render(time?: number) {
