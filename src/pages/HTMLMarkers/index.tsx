@@ -46,7 +46,6 @@ export default function HTMLMarkers() {
 
 	useEffect(() => {
 		const el = document.querySelector('#container') as HTMLDivElement;
-
 		el.innerHTML = '';
 
 		const { innerWidth, innerHeight } = window;

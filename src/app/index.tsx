@@ -63,6 +63,11 @@ export default function App() {
 
 	const active = location.pathname.split('/').filter((val) => val)[0] ?? '/';
 
+	const docs = [
+		{ href: '/docs/html-marker', label: 'HTML Mixing With WegGL' },
+		{ href: '/docs/rendertarget', label: 'WebGLRenderTarget Usage' },
+	];
+
 	return (
 		<AppShell
 			header={{
@@ -125,7 +130,13 @@ export default function App() {
 				</Container>
 			</AppShellHeader>
 			<AppShellNavbar>
-				<NavLink active href='/docs' label='HTML Mixing With WegGL' />
+				{docs.map((value, index) => (
+					<NavLink
+						key={index}
+						{...value}
+						active={location.pathname === value.href}
+					/>
+				))}
 			</AppShellNavbar>
 			<AppShellMain className={classes.main}>
 				<Suspense fallback={<Fallback />}>

@@ -14,6 +14,12 @@ const HTMLMarkers = lazy(() => import('../pages/HTMLMarkers'));
 const HTMLMarkersDocs = lazy(() => import('../pages/HTMLMarkers/docs.mdx'));
 const Examples = lazy(() => import('../pages/Examples'));
 const Docs = lazy(() => import('../pages/Docs'));
+const WebGLRenderTargetDemoDcos = lazy(
+	() => import('../pages/WebGLRenderTargetDemo/docs.mdx')
+);
+const WebGLRenderTargetDemo = lazy(
+	() => import('../pages/WebGLRenderTargetDemo')
+);
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -23,10 +29,12 @@ export const router = createBrowserRouter(
 				<Route path='docs' element={<Docs />}>
 					<Route index element={<Navigate to='html-marker' />} />
 					<Route path='html-marker' element={<HTMLMarkersDocs />} />
+					<Route path='rendertarget' element={<WebGLRenderTargetDemoDcos />} />
 				</Route>
 			</Route>
 			<Route path='mix-color' element={<MixColor />} />
 			<Route path='html-markers' element={<HTMLMarkers />} />
+			<Route path='rendertarget' element={<WebGLRenderTargetDemo />} />
 			<Route path='portal-scene' element={<PortalScene />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
