@@ -6,6 +6,7 @@ import {
 	useMantineTheme,
 } from '@mantine/core';
 import { IconMapPinFilled } from '@tabler/icons-react';
+import { Easing } from '@tweenjs/tween.js';
 import { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import {
@@ -36,6 +37,7 @@ import {
 	RGBELoader,
 } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
+import { Tween } from 'three/examples/jsm/libs/tween.module.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Pane } from 'tweakpane';
 import EarthModel from './assets/earth.gltf?url';
@@ -141,6 +143,47 @@ export default function HTMLMarkers() {
 		spotLightHelper.visible = false;
 		// scene.add(spotLightHelper);
 
+		const tween = new Tween({
+			position: {
+				x: camera.position.x,
+				y: camera.position.y,
+				z: camera.position.z,
+			},
+			rotation: {
+				x: camera.rotation.x,
+				y: camera.rotation.y,
+				z: camera.rotation.z,
+			},
+		});
+
+		function cameraMoveToCenter(camera: PerspectiveCamera) {
+			if (tween.isPlaying()) return;
+
+			tween
+				.to({
+					position: {
+						x: 0,
+						y: 0,
+						z: 0,
+					},
+					rotation: {
+						x: 0,
+						y: 0,
+						z: 0,
+					},
+				})
+				.easing(Easing.Quadratic.InOut)
+				.duration(2000)
+				.onUpdate((value) => {
+					camera.rotateX(Math.PI / 2);
+					console.log({ ...value.rotation });
+					camera.updateMatrix();
+					camera.updateMatrixWorld();
+				});
+
+			tween.start();
+		}
+
 		gltfLoader.load(EarthModel, (data) => {
 			const lampd = data.scene.getObjectByName('URF-Height_Lampd_0')!;
 			const lampdIce = data.scene.getObjectByName('URF-Height_Lampd_Ice_0')!;
@@ -179,6 +222,7 @@ export default function HTMLMarkers() {
 							id='markerSouth'
 							className={`${classes.marker} ${classes.visiable}`}
 							color={theme.colors.yellow[5]}
+							onClick={() => cameraMoveToCenter(camera)}
 						/>
 					),
 				},
@@ -306,10 +350,12 @@ export default function HTMLMarkers() {
 
 		function render(time?: number) {
 			requestAnimationFrame(render);
+
 			state.update();
 			controler.update(time);
 			renderer.render(scene, camera);
 			css3DRenderer.render(scene, camera);
+			tween.update(time);
 		}
 		render();
 
