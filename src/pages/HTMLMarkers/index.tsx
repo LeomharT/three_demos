@@ -24,7 +24,6 @@ import {
 	ShadowMaterial,
 	SpotLight,
 	SpotLightHelper,
-	TextureLoader,
 	Vector2,
 	Vector3,
 	WebGLRenderer,
@@ -34,12 +33,13 @@ import {
 	CSS3DRenderer,
 	GLTFLoader,
 	OrbitControls,
+	RGBELoader,
 } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Pane } from 'tweakpane';
 import EarthModel from './assets/earth.gltf?url';
-import HDRTexture from './assets/park_sunset_sky_dome_1k.png?url';
+import CityHDR from './assets/modern_european_city_street_1k.hdr?url';
 import classes from './style.module.css';
 export default function HTMLMarkers() {
 	const theme = useMantineTheme();
@@ -50,7 +50,7 @@ export default function HTMLMarkers() {
 
 		const { innerWidth, innerHeight } = window;
 
-		const textureLoader = new TextureLoader();
+		const rgbeLoader = new RGBELoader();
 
 		const renderer = new WebGLRenderer({
 			alpha: true,
@@ -65,7 +65,8 @@ export default function HTMLMarkers() {
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
-		textureLoader.load(HDRTexture, (data) => {
+
+		rgbeLoader.load(CityHDR, (data) => {
 			scene.environment = data;
 			scene.environment.mapping = EquirectangularReflectionMapping;
 		});
