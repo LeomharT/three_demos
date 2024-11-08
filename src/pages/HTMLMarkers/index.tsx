@@ -287,13 +287,6 @@ export default function HTMLMarkers() {
 				scene.environmentIntensity = val.value;
 			});
 		pane
-			.addButton({
-				title: 'Documentation',
-			})
-			.on('click', () => {
-				window.location.href = '/docs';
-			});
-		pane
 			.addBinding(params, 'spotlightAngle', {
 				step: 0.1,
 				max: Math.PI / 2,
@@ -302,6 +295,13 @@ export default function HTMLMarkers() {
 			.on('change', (val) => {
 				spotLight.angle = val.value;
 				spotLightHelper.update();
+			});
+		pane
+			.addButton({
+				title: 'Documentation',
+			})
+			.on('click', () => {
+				window.location.href = '/docs';
 			});
 
 		function render(time?: number) {

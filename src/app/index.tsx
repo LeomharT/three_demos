@@ -85,7 +85,7 @@ export default function App() {
 			<AppShellHeader>
 				<Container size='xl' h='100%'>
 					<Group h='100%'>
-						<Group>
+						<Group className={classes.logo} onClick={() => navigate('/')}>
 							<Image h='32px' src='/favicon.ico' />
 							<Title order={3}>Three Demos</Title>
 						</Group>

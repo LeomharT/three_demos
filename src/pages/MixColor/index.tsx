@@ -68,6 +68,14 @@ export default function MixColor() {
 			.on('change', (val) => {
 				material.uniforms.u_angle.value = val.value;
 			});
+		pane
+			.addButton({
+				label: 'docs',
+				title: 'Docs',
+			})
+			.on('click', () => {
+				window.location.href = '/docs';
+			});
 
 		// Plane
 		const geometry = new PlaneGeometry(1, 1, 16, 16);
