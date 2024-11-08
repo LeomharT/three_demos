@@ -43,6 +43,7 @@ import { Pane } from 'tweakpane';
 import EarthModel from './assets/earth.gltf?url';
 import CityHDR from './assets/modern_european_city_street_1k.hdr?url';
 import classes from './style.module.css';
+
 export default function HTMLMarkers() {
 	const theme = useMantineTheme();
 
@@ -67,6 +68,7 @@ export default function HTMLMarkers() {
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
+		scene.background = new Color(theme.colors.gray[2]);
 
 		rgbeLoader.load(CityHDR, (data) => {
 			scene.environment = data;
@@ -93,6 +95,7 @@ export default function HTMLMarkers() {
 		const controler = new OrbitControls(camera, renderer.domElement);
 		controler.enableDamping = true;
 		controler.enablePan = true;
+		controler.maxPolarAngle = Math.PI / 3;
 
 		const axesHelper = new AxesHelper();
 		// scene.add(axesHelper);
@@ -143,18 +146,7 @@ export default function HTMLMarkers() {
 		spotLightHelper.visible = false;
 		// scene.add(spotLightHelper);
 
-		const tween = new Tween({
-			position: {
-				x: camera.position.x,
-				y: camera.position.y,
-				z: camera.position.z,
-			},
-			rotation: {
-				x: camera.rotation.x,
-				y: camera.rotation.y,
-				z: camera.rotation.z,
-			},
-		});
+		const tween = new Tween(camera);
 
 		function cameraMoveToCenter(camera: PerspectiveCamera) {
 			if (tween.isPlaying()) return;
@@ -163,8 +155,8 @@ export default function HTMLMarkers() {
 				.to({
 					position: {
 						x: 0,
-						y: 0,
-						z: 0,
+						y: 2,
+						z: 5,
 					},
 					rotation: {
 						x: 0,
@@ -173,14 +165,21 @@ export default function HTMLMarkers() {
 					},
 				})
 				.easing(Easing.Quadratic.InOut)
-				.duration(2000)
+				.duration(1000)
+				.onStart(() => {
+					controler.enabled = false;
+				})
+				.onComplete(() => {
+					controler.enabled = true;
+				})
 				.onUpdate((value) => {
-					camera.rotateX(Math.PI / 2);
-					console.log({ ...value.rotation });
-					camera.updateMatrix();
-					camera.updateMatrixWorld();
-				});
+					camera.position.x = value.position.x;
+					camera.position.y = value.position.y;
+					camera.position.z = value.position.z;
 
+					camera.lookAt(scene.position);
+					camera.updateProjectionMatrix();
+				});
 			tween.start();
 		}
 
