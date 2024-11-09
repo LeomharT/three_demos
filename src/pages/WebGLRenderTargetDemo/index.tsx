@@ -1,16 +1,20 @@
 import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
 import {
-	BoxGeometry,
+	AmbientLight,
+	Color,
+	MathUtils,
 	Mesh,
 	MeshBasicMaterial,
+	MeshStandardMaterial,
 	PerspectiveCamera,
 	PlaneGeometry,
 	Scene,
+	Vector3,
 	WebGLRenderer,
 	WebGLRenderTarget,
 } from 'three';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { OrbitControls, Sky } from 'three/examples/jsm/Addons.js';
 
 export default function WebGLRenderTargetDemo() {
 	const theme = useMantineTheme();
@@ -37,7 +41,7 @@ export default function WebGLRenderTargetDemo() {
 			0.1,
 			1000
 		);
-		camera.position.set(0, 0, 3);
+		camera.position.set(0, 1, 3);
 		camera.lookAt(scene.position);
 
 		const controler = new OrbitControls(camera, renderer.domElement);
@@ -46,25 +50,43 @@ export default function WebGLRenderTargetDemo() {
 		controler.dampingFactor = 0.5;
 
 		const portalScene = new Scene();
+		portalScene.background = new Color(1, 1, 0);
 
 		const portalCamera = new PerspectiveCamera(75, 512 / 512, 0.1, 1000);
 		portalCamera.position.set(0, 0, 0.5);
 		portalCamera.lookAt(portalScene.position);
 
-		const mesh__ = new Mesh(
-			new BoxGeometry(0.2, 0.2, 0.2, 4, 4),
-			new MeshBasicMaterial({ color: theme.colors.blue[5] })
-		);
-		portalScene.add(mesh__);
+		const sky = new Sky();
+		sky.scale.setScalar(450000);
+		const phi = MathUtils.degToRad(90);
+		const theta = MathUtils.degToRad(180);
+		const sunPosition = new Vector3().setFromSphericalCoords(1, phi, theta);
+		sky.material.uniforms.sunPosition.value = sunPosition;
+		scene.add(sky);
+
+		// Lights
+		const ambienLight = new AmbientLight();
+		ambienLight.intensity = 0.5;
+		scene.add(ambienLight);
 
 		const renderTarget = new WebGLRenderTarget(512, 512);
 
 		const material = new MeshBasicMaterial({
 			map: renderTarget.texture,
 		});
-		const geometry = new PlaneGeometry(2, 2);
+		const geometry = new PlaneGeometry(2, 4);
 		const mesh = new Mesh(geometry, material);
 		scene.add(mesh);
+
+		// Ground
+		const groundGeometry = new PlaneGeometry(200, 200, 16, 16);
+		const groundMaterial = new MeshStandardMaterial({
+			color: theme.colors.green[5],
+		});
+		const groundMesh = new Mesh(groundGeometry, groundMaterial);
+		groundMesh.rotateX(-Math.PI / 2);
+		groundMesh.position.y = -2;
+		scene.add(groundMesh);
 
 		controler.addEventListener('change', () => {
 			portalCamera.rotation.x = camera.rotation.x;
