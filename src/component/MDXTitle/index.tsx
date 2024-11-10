@@ -15,7 +15,7 @@ type MDXTitleProps = TitleProps & {
 
 export default function MDXTitle({ id, href = '#', ...props }: MDXTitleProps) {
 	return (
-		<Title {...props} classNames={{ ...classes }}>
+		<Title {...props} classNames={{ ...classes }} className='MDXTitle'>
 			<Box id={id}></Box>
 			<CopyButton value={href}>
 				{({ copied, copy }) => {

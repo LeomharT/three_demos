@@ -1,23 +1,27 @@
 import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import {
 	AmbientLight,
 	Color,
-	MathUtils,
 	Mesh,
 	MeshBasicMaterial,
 	MeshStandardMaterial,
 	PerspectiveCamera,
 	PlaneGeometry,
 	Scene,
-	Vector3,
 	WebGLRenderer,
 	WebGLRenderTarget,
 } from 'three';
-import { OrbitControls, Sky } from 'three/examples/jsm/Addons.js';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { Pane } from 'tweakpane';
 
 export default function WebGLRenderTargetDemo() {
 	const theme = useMantineTheme();
+
+	const navigate = useNavigate();
+
+	const location = useLocation();
 
 	useEffect(() => {
 		const el = document.querySelector('#container') as HTMLDivElement;
@@ -56,14 +60,6 @@ export default function WebGLRenderTargetDemo() {
 		portalCamera.position.set(0, 0, 0.5);
 		portalCamera.lookAt(portalScene.position);
 
-		const sky = new Sky();
-		sky.scale.setScalar(450000);
-		const phi = MathUtils.degToRad(90);
-		const theta = MathUtils.degToRad(180);
-		const sunPosition = new Vector3().setFromSphericalCoords(1, phi, theta);
-		sky.material.uniforms.sunPosition.value = sunPosition;
-		scene.add(sky);
-
 		// Lights
 		const ambienLight = new AmbientLight();
 		ambienLight.intensity = 0.5;
@@ -87,6 +83,17 @@ export default function WebGLRenderTargetDemo() {
 		groundMesh.rotateX(-Math.PI / 2);
 		groundMesh.position.y = -2;
 		scene.add(groundMesh);
+
+		// Pane
+		const pane = new Pane({
+			title: 'debug params',
+		});
+		pane
+			.addButton({
+				label: 'docs',
+				title: 'Docs',
+			})
+			.on('click', () => navigate('/docs/rendertarget'));
 
 		controler.addEventListener('change', () => {
 			portalCamera.rotation.x = camera.rotation.x;
