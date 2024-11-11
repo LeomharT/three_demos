@@ -95,7 +95,6 @@ export default function HTMLMarkers() {
 		const controler = new OrbitControls(camera, renderer.domElement);
 		controler.enableDamping = true;
 		controler.enablePan = true;
-		controler.maxPolarAngle = Math.PI / 3;
 
 		const axesHelper = new AxesHelper();
 		// scene.add(axesHelper);

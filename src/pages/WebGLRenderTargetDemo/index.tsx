@@ -51,7 +51,7 @@ export default function WebGLRenderTargetDemo() {
 		const controler = new OrbitControls(camera, renderer.domElement);
 		controler.enablePan = true;
 		controler.enableDamping = true;
-		controler.dampingFactor = 0.5;
+		controler.dampingFactor = 0.05;
 
 		const portalScene = new Scene();
 		portalScene.background = new Color(1, 0, 0);
@@ -70,7 +70,7 @@ export default function WebGLRenderTargetDemo() {
 		const material = new MeshBasicMaterial({
 			map: renderTarget.texture,
 		});
-		const geometry = new PlaneGeometry(2, 3);
+		const geometry = new PlaneGeometry(2, 2.5);
 		const mesh = new Mesh(geometry, material);
 		scene.add(mesh);
 
