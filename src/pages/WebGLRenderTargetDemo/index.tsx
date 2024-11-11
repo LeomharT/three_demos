@@ -54,7 +54,7 @@ export default function WebGLRenderTargetDemo() {
 		controler.dampingFactor = 0.5;
 
 		const portalScene = new Scene();
-		portalScene.background = new Color(1, 1, 0);
+		portalScene.background = new Color(1, 0, 0);
 
 		const portalCamera = new PerspectiveCamera(75, 512 / 512, 0.1, 1000);
 		portalCamera.position.set(0, 0, 0.5);
@@ -70,7 +70,7 @@ export default function WebGLRenderTargetDemo() {
 		const material = new MeshBasicMaterial({
 			map: renderTarget.texture,
 		});
-		const geometry = new PlaneGeometry(2, 4);
+		const geometry = new PlaneGeometry(2, 3);
 		const mesh = new Mesh(geometry, material);
 		scene.add(mesh);
 
@@ -88,6 +88,7 @@ export default function WebGLRenderTargetDemo() {
 		const pane = new Pane({
 			title: 'debug params',
 		});
+		pane.element.style.display = location.hash === '#debug' ? 'block' : 'none';
 		pane
 			.addButton({
 				label: 'docs',

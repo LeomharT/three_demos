@@ -1,5 +1,8 @@
-import { Anchor } from '@mantine/core';
+import { Anchor, Image, Center } from '@mantine/core';
 import MDMTitle from '../../component/MDXTitle';
+import WithoutRenderTargetPng from './assets/without_render_target.png?url';
+import WithRenderTargetPng from './assets/with_render_target.png?url';
+import MDXCode from '../../component/MDXCode';
 
 # Threejs WebGLRendererTarget usage
 
@@ -10,4 +13,44 @@ import MDMTitle from '../../component/MDXTitle';
 `WebGLRenderTarget(离屏渲染)`, 将`WebGLRenderer`渲染结果保存到一个帧缓冲区, 而非输出到`canvas`上,
 通常用于对最终的渲染结果做一些后期处理
 
-`WebGLRenderTarget`需要新的`Scene`和`Camera`, 而不需要额外的`Renderer`
+- `WebGLRenderTarget`需要新的`Scene`和`Camera`, 而不需要额外的`Renderer`
+- `WebGLRenderer`默认的渲染目标对象是`null`
+- `WebGLRenderTarget`最终会将处理后的像素数据输出为一个`Texture`
+
+<MDMTitle id='no-target' href='#no-target' order={2}>
+	Without Rendertarget
+</MDMTitle>
+
+`WebGLRenderer`默认的渲染目标对象是`null`, 在没有调用`setRenderTarget()`的情况下, 场景内的对象会保存到
+`Canvas`对应的默认帧缓冲区, 也就是直接显示到`Canvas`上
+
+<Center>
+	<Image style={{ width: '70%' }} src={WithoutRenderTargetPng} />
+</Center>
+
+<MDMTitle id='with-target' href='#with-target' order={2}>
+	With Rendertarget
+</MDMTitle>
+
+调用`WebGLRenderer.setRenderTarget(target:WebGLRendererTarget)`渲染结果的`RGBA`像素数据存储到了
+`WebGL`渲染目标对象`WebGLRenderTarget`中, 可以通过`WebGLRendererTarget.texture`获取这个帧缓冲区的渲染结果,
+也就是作为贴图材质输出到 3D 对象上
+
+<Center mb='xl'>
+	<Image src={WithRenderTargetPng} />
+</Center>
+
+实例化一个`WebGLRenderTarget`时需传入这个渲染目标的尺寸, 相对的 Camera2 的 aspect 需要为该渲染目标的宽高比
+
+<MDXCode
+	code={`
+// 设置了这个texture的尺寸为 512 x 512
+const renderTarget = new WebGLRenderTarget(512, 512);
+const camera2 = new PerspectiveCamera(75, 512 / 512, 0.1, 1000);
+camera2.position.set(0, 0, 0.5);
+camera2.lookAt(portalScene.position);
+    `}
+	language='ts'
+/>
+
+在 Threejs 文档中可以创建多个渲染目标, 分别用于保存不同的后期处理效果
