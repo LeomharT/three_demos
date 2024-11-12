@@ -21,6 +21,7 @@ const WebGLRenderTargetDemo = lazy(
 	() => import('../pages/WebGLRenderTargetDemo')
 );
 const MccreePortal = lazy(() => import('../pages/MccreePortal'));
+const MccreePortalDocs = lazy(() => import('../pages/MccreePortal/docs.mdx'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -31,6 +32,7 @@ export const router = createBrowserRouter(
 					<Route index element={<Navigate to='html-marker' />} />
 					<Route path='html-marker' element={<HTMLMarkersDocs />} />
 					<Route path='rendertarget' element={<WebGLRenderTargetDemoDcos />} />
+					<Route path='mccree' element={<MccreePortalDocs />} />
 				</Route>
 			</Route>
 			<Route path='mix-color' element={<MixColor />} />

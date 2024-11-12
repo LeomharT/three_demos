@@ -1,0 +1,34 @@
+import MDXTitle from '../../component/MDXTitle';
+import { Anchor, Center, Image } from '@mantine/core';
+import RadiusTheory from './assets/radius_theory.png?url';
+import MDXCode from '../../component/MDXCode';
+
+# Mccree Portal
+
+<MDXTitle order={2} id='round-plane' href='#round-plane'>
+	Round Plane
+</MDXTitle>
+
+Threejs 提供的`PlaneGeometry`没有配置圆角矩形的参数, 想要实现可以按照 CSS`border-radius`原理的思路
+
+- <Anchor
+  	target='_blank'
+  	href='https://blog.csdn.net/Ares5kong/article/details/115460818'
+  >
+  	CSS 圆角边框原理
+  </Anchor>
+- <Anchor
+  	target='_blank'
+  	href='https://www.ruanyifeng.com/blog/2010/12/detailed_explanation_of_css3_rounded_corners.html'
+  >
+  	CSS3 圆角详解
+  </Anchor>
+
+`border-radius`的含义是"边框半径", CSS3 之前的时代, 实现圆角需要多张图片作为背景图案, CSS3 提供了`border-radius`属性,
+可以使用 em、ex、pt、px、百分比等等
+
+圆角边框的原理是四个分别贴在盒子模型的圆, 然后根据四个角取重叠的部分, 就是去除掉四个圆之外的面积
+
+<Center>
+	<Image src={RadiusTheory} w={'50%'} />
+</Center>
