@@ -17,6 +17,7 @@ import {
 	DRACOLoader,
 	GLTFLoader,
 	OrbitControls,
+	Sky,
 } from 'three/examples/jsm/Addons.js';
 import { Pane } from 'tweakpane';
 import MccreeModel from './assets/low_poly_mccree/scene.gltf?url';
@@ -50,7 +51,7 @@ export default function MccreePortal() {
 		const camera = new PerspectiveCamera(
 			75,
 			innerWidth / innerHeight,
-			0.1,
+			0.5,
 			1000
 		);
 		camera.position.set(0, 0, 2);
@@ -62,13 +63,24 @@ export default function MccreePortal() {
 		controler.enablePan = false;
 		controler.panSpeed = 1;
 		controler.enabled = true;
+		controler.maxPolarAngle = Math.PI / 1.5;
+		controler.maxAzimuthAngle = Math.PI / 3;
+		controler.minAzimuthAngle = -Math.PI / 3;
+
+		const dracoLoader = new DRACOLoader();
+		dracoLoader.setDecoderPath('node_modules/three/examples/jsm/libs/draco/');
+		dracoLoader.setDecoderConfig({ type: 'js' });
+		dracoLoader.preload();
+
+		const gltfLoader = new GLTFLoader();
+		gltfLoader.dracoLoader = dracoLoader;
 
 		const axesHelper = new AxesHelper();
 		scene.add(axesHelper);
 
 		// Models
 		const planeGeometry = new PlaneGeometry(WIDTH + 0.05, GOLDENRATIO + 0.05);
-		const palne1Material = new ShaderMaterial({
+		const palneMaterial = new ShaderMaterial({
 			fragmentShader,
 			vertexShader,
 			transparent: true,
@@ -80,20 +92,32 @@ export default function MccreePortal() {
 				u_aspect: { value: (WIDTH + 0.05) / (GOLDENRATIO + 0.05) },
 			},
 		});
-		const plane = new Mesh(planeGeometry, palne1Material);
+		const plane = new Mesh(planeGeometry, palneMaterial);
 		scene.add(plane);
 
-		const planeClone = plane.clone();
-		planeClone.material;
-		scene.add(planeClone);
+		const viewPortGeometry = new PlaneGeometry(WIDTH, GOLDENRATIO);
+		const viewPortMaterial = new ShaderMaterial({
+			fragmentShader,
+			vertexShader,
+			transparent: true,
+			depthTest: false,
+			uniforms: {
+				u_color: {
+					value: new Vector4(...colorNormalize(theme.colors.blue[5])),
+				},
+				u_radius: { value: 0.05 },
+				u_aspect: { value: WIDTH / GOLDENRATIO },
+			},
+		});
+		const viewPort = new Mesh(viewPortGeometry, viewPortMaterial);
+		scene.add(viewPort);
 
-		const dracoLoader = new DRACOLoader();
-		dracoLoader.setDecoderPath('node_modules/three/examples/jsm/libs/draco/');
-		dracoLoader.setDecoderConfig({ type: 'js' });
-		dracoLoader.preload();
+		const sky = new Sky();
+		sky.scale.set(WIDTH, GOLDENRATIO, 1);
+		sky.position.set(0, 0, -0.5);
+		scene.add(sky);
 
-		const gltfLoader = new GLTFLoader();
-		gltfLoader.dracoLoader = dracoLoader;
+		// Mask
 
 		gltfLoader.load(MccreeModel, (data) => {
 			// scene.add(data.scene);
@@ -119,6 +143,14 @@ export default function MccreePortal() {
 			requestAnimationFrame(render);
 		}
 		render();
+
+		function resize() {
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+		}
+
+		window.addEventListener('resize', resize);
 	}, []);
 
 	return <div id='container'></div>;
