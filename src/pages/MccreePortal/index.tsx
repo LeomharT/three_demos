@@ -1,6 +1,7 @@
 import { useMantineTheme } from '@mantine/core';
 import colorNormalize from 'color-normalize';
 import { useEffect } from 'react';
+import { useLocation } from 'react-router';
 import {
 	AxesHelper,
 	Color,
@@ -17,11 +18,14 @@ import {
 	GLTFLoader,
 	OrbitControls,
 } from 'three/examples/jsm/Addons.js';
+import { Pane } from 'tweakpane';
 import MccreeModel from './assets/low_poly_mccree/scene.gltf?url';
 import fragmentShader from './shader/fragment.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
 export default function MccreePortal() {
 	const theme = useMantineTheme();
+
+	const location = useLocation();
 
 	useEffect(() => {
 		const el = document.querySelector('#container') as HTMLDivElement;
@@ -95,6 +99,19 @@ export default function MccreePortal() {
 			// scene.add(data.scene);
 		});
 
+		// Pane
+		const pane = new Pane();
+		pane.element.style.visibility =
+			location.hash === '#debug' ? 'visialbe' : 'hidden';
+		pane
+			.addButton({
+				label: 'Docs',
+				title: 'Docs',
+			})
+			.on('click', () => {
+				window.location.href = '/docs/mccree';
+			});
+
 		function render(time?: number) {
 			controler.update(time);
 
@@ -104,5 +121,5 @@ export default function MccreePortal() {
 		render();
 	}, []);
 
-	return <div id='container'>MccreePortal</div>;
+	return <div id='container'></div>;
 }
