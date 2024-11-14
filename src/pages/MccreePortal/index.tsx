@@ -8,6 +8,7 @@ import {
 	Box3,
 	BufferAttribute,
 	Color,
+	Group,
 	MathUtils,
 	Mesh,
 	OrthographicCamera,
@@ -68,7 +69,7 @@ export default function MccreePortal() {
 			0.5,
 			1000
 		);
-		camera.position.set(0, 0, 2);
+		camera.position.set(0, 0, 1.5);
 		camera.lookAt(scene.position);
 
 		const portalRenderTarget = new WebGLRenderTarget(512, 512);
@@ -86,6 +87,12 @@ export default function MccreePortal() {
 
 		controler.addEventListener('change', () => {
 			portalCamera.rotation.setFromQuaternion(camera.quaternion.clone());
+
+			portalCamera.position.set(
+				camera.position.x,
+				camera.position.y,
+				camera.position.z
+			);
 		});
 
 		const stats = new Stats();
@@ -139,9 +146,8 @@ export default function MccreePortal() {
 		scene.add(portalMesh);
 
 		const boundingBox = new Box3().setFromBufferAttribute(
-			portalGeometry.attributes.position as BufferAttribute
+			plane.geometry.attributes.position as BufferAttribute
 		);
-
 		const portalCamera = new OrthographicCamera(
 			boundingBox.min.x * (1 + 2 / 512),
 			boundingBox.max.x * (1 + 2 / 512),
@@ -151,7 +157,7 @@ export default function MccreePortal() {
 			1000
 		);
 		portalCamera.position.set(0, 0, 1);
-		portalCamera.lookAt(0, 0, 0);
+		portalCamera.lookAt(portalScene.position);
 
 		const sky = new Sky();
 		sky.scale.setScalar(450000);
@@ -175,7 +181,6 @@ export default function MccreePortal() {
 
 			const phi = MathUtils.degToRad(90 - effectController.elevation);
 			const theta = MathUtils.degToRad(effectController.azimuth);
-
 			const sunPosition = new Vector3().setFromSphericalCoords(1, phi, theta);
 			sky.material.uniforms.sunPosition.value = sunPosition;
 
@@ -188,7 +193,10 @@ export default function MccreePortal() {
 			const mccree = data.scene;
 			mccree.position.set(0, -2, 0);
 
-			portalScene.add(mccree);
+			const mccreeClone = mccree.clone() as Group;
+
+			scene.add(mccree);
+			portalScene.add(mccreeClone);
 		});
 
 		function renderPortalScene() {
