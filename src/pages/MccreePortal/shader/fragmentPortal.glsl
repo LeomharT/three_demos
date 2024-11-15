@@ -1,13 +1,13 @@
 varying vec2 v_uv;
 
-uniform vec4 u_color;
 uniform float u_radius;
 uniform float u_aspect;
 uniform sampler2D u_texture;
 
 #include <packing>
 
- 
+
+
 void main()
 {
     vec2 uv = vec2(v_uv.x * u_aspect, v_uv.y);
@@ -36,4 +36,7 @@ void main()
     }
   
     gl_FragColor = color;
+
+    // #include <tonemapping_fragment>
+    #include <colorspace_fragment>
 }

@@ -85,16 +85,6 @@ export default function MccreePortal() {
 		controler.maxAzimuthAngle = Math.PI / 3;
 		controler.minAzimuthAngle = -Math.PI / 3;
 
-		controler.addEventListener('change', () => {
-			portalCamera.rotation.setFromQuaternion(camera.quaternion.clone());
-
-			portalCamera.position.set(
-				camera.position.x,
-				camera.position.y,
-				camera.position.z
-			);
-		});
-
 		const stats = new Stats();
 		el.append(stats.dom);
 
@@ -282,6 +272,15 @@ export default function MccreePortal() {
 
 		function render(time?: number) {
 			requestAnimationFrame(render);
+
+			portalCamera.rotation.x = camera.rotation.x;
+			portalCamera.rotation.y = camera.rotation.y;
+			portalCamera.rotation.z = camera.rotation.z;
+
+			portalCamera.position.x = camera.position.x;
+			portalCamera.position.y = camera.position.y;
+			portalCamera.position.z = camera.position.z;
+
 			controler.update(time);
 			stats.update();
 
