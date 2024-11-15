@@ -8,7 +8,6 @@ import {
 	Box3,
 	BufferAttribute,
 	Color,
-	Group,
 	MathUtils,
 	Mesh,
 	OrthographicCamera,
@@ -147,7 +146,7 @@ export default function MccreePortal() {
 			1000
 		);
 		portalCamera.position.set(0, 0, 1);
-		portalCamera.lookAt(portalScene.position);
+		portalCamera.lookAt(0, 0, 0);
 
 		const sky = new Sky();
 		sky.scale.setScalar(450000);
@@ -183,17 +182,14 @@ export default function MccreePortal() {
 			const mccree = data.scene;
 			mccree.position.set(0, -2, 0);
 
-			const mccreeClone = mccree.clone() as Group;
-
 			scene.add(mccree);
-			portalScene.add(mccreeClone);
+			portalScene.add(mccree.clone(true));
 		});
 
 		function renderPortalScene() {
 			const currentRenderTarget = renderer.getRenderTarget();
 
 			renderer.setRenderTarget(portalRenderTarget);
-
 			renderer.state.buffers.depth.setMask(true);
 			renderer.render(portalScene, portalCamera);
 
@@ -273,13 +269,8 @@ export default function MccreePortal() {
 		function render(time?: number) {
 			requestAnimationFrame(render);
 
-			portalCamera.rotation.x = camera.rotation.x;
-			portalCamera.rotation.y = camera.rotation.y;
-			portalCamera.rotation.z = camera.rotation.z;
-
-			portalCamera.position.x = camera.position.x;
-			portalCamera.position.y = camera.position.y;
-			portalCamera.position.z = camera.position.z;
+			portalCamera.position.copy(camera.position);
+			portalCamera.rotation.copy(camera.rotation);
 
 			controler.update(time);
 			stats.update();
