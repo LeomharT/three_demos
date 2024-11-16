@@ -8,6 +8,9 @@ import {
 	Box3,
 	BufferAttribute,
 	Color,
+	FloatType,
+	LinearFilter,
+	LinearMipmapLinearFilter,
 	MathUtils,
 	Mesh,
 	OrthographicCamera,
@@ -71,7 +74,12 @@ export default function MccreePortal() {
 		camera.position.set(0, 0, 1.5);
 		camera.lookAt(scene.position);
 
-		const portalRenderTarget = new WebGLRenderTarget(512, 512);
+		const portalRenderTarget = new WebGLRenderTarget(512, 512, {
+			minFilter: LinearMipmapLinearFilter,
+			magFilter: LinearFilter,
+			type: FloatType,
+			generateMipmaps: true,
+		});
 		const portalScene = new Scene();
 
 		const controler = new OrbitControls(camera, renderer.domElement);
@@ -145,6 +153,7 @@ export default function MccreePortal() {
 			0.1,
 			1000
 		);
+
 		portalCamera.position.set(0, 0, 1);
 		portalCamera.lookAt(0, 0, 0);
 
@@ -182,7 +191,7 @@ export default function MccreePortal() {
 			const mccree = data.scene;
 			mccree.position.set(0, -2, 0);
 
-			scene.add(mccree);
+			// scene.add(mccree);
 			portalScene.add(mccree.clone(true));
 		});
 

@@ -10,9 +10,10 @@ uniform sampler2D u_texture;
 
 void main()
 {
-    vec2 uv = vec2(v_uv.x * u_aspect, v_uv.y);
-
-    vec4 color = texture2D(u_texture, v_uv); 
+    vec2 uv = vec2(v_uv.x * u_aspect, v_uv.y); 
+ 
+    vec2 portalUV = v_worldPosition.xy;
+    vec4 color = pack2HalfToRGBA(portalUV * (round(texture2D(u_texture, portalUV).x)));
 
     vec2 bottomLeftCenter = vec2(u_radius,u_radius);
     vec2 topLeftCenter = vec2(u_radius, 1.0 - u_radius);
