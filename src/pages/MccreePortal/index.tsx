@@ -191,7 +191,7 @@ export default function MccreePortal() {
 			const mccree = data.scene;
 			mccree.position.set(0, -2, 0);
 
-			// scene.add(mccree);
+			scene.add(mccree);
 			portalScene.add(mccree.clone(true));
 		});
 
