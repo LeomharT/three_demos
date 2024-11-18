@@ -2,14 +2,19 @@ import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import {
-	AmbientLight,
+	ACESFilmicToneMapping,
+	AxesHelper,
 	Color,
+	IcosahedronGeometry,
 	Mesh,
 	MeshBasicMaterial,
-	MeshStandardMaterial,
+	MeshPhongMaterial,
 	PerspectiveCamera,
+	Plane,
 	PlaneGeometry,
+	PointLight,
 	Scene,
+	Vector3,
 	WebGLRenderer,
 	WebGLRenderTarget,
 } from 'three';
@@ -29,12 +34,16 @@ export default function WebGLRenderTargetDemo() {
 
 		const { innerWidth, innerHeight } = window;
 
+		const RESOLUTION = 512;
+
 		const renderer = new WebGLRenderer({
 			alpha: true,
 			antialias: true,
 		});
-
+		renderer.localClippingEnabled = true;
 		renderer.setSize(innerWidth, innerHeight);
+		renderer.setPixelRatio(window.devicePixelRatio);
+		renderer.toneMapping = ACESFilmicToneMapping;
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
@@ -45,44 +54,127 @@ export default function WebGLRenderTargetDemo() {
 			0.1,
 			1000
 		);
-		camera.position.set(0, 1, 3);
+		camera.position.set(0, 75, 160);
 		camera.lookAt(scene.position);
 
 		const controler = new OrbitControls(camera, renderer.domElement);
+		controler.target.set(0, 40, 0);
 		controler.enablePan = true;
 		controler.enableDamping = true;
 		controler.dampingFactor = 0.05;
 
 		const portalScene = new Scene();
 		portalScene.background = new Color(1, 0, 0);
+		const portalCamera = new PerspectiveCamera(45, 1.0, 0.1, 500.0);
+		scene.add(portalCamera);
 
-		const portalCamera = new PerspectiveCamera(75, 512 / 512, 0.1, 1000);
-		portalCamera.position.set(0, 0, 0.5);
-		portalCamera.lookAt(portalScene.position);
+		const axesHelper = new AxesHelper(50);
+		scene.add(axesHelper);
 
-		// Lights
-		const ambienLight = new AmbientLight();
-		ambienLight.intensity = 0.5;
-		scene.add(ambienLight);
+		const planeGeo = new PlaneGeometry(100.1, 100.1);
 
-		const renderTarget = new WebGLRenderTarget(512, 512);
+		const portalPlane = new Plane(new Vector3(0, 0, 1), 0);
 
-		const material = new MeshBasicMaterial({
-			map: renderTarget.texture,
+		const geometry = new IcosahedronGeometry(5, 0);
+		const material = new MeshPhongMaterial({
+			color: 0xffffff,
+			emissive: 0x333333,
+			flatShading: true,
+			clippingPlanes: [portalPlane],
+			clipShadows: true,
 		});
-		const geometry = new PlaneGeometry(2, 2.5);
-		const mesh = new Mesh(geometry, material);
-		scene.add(mesh);
+		const smallSphereOne = new Mesh(geometry, material);
+		scene.add(smallSphereOne);
+		const smallSphereTwo = new Mesh(geometry, material);
+		scene.add(smallSphereTwo);
+
+		const leftPortalTexture = new WebGLRenderTarget(RESOLUTION, RESOLUTION);
+		const leftPortal = new Mesh(
+			planeGeo,
+			new MeshBasicMaterial({ map: leftPortalTexture.texture })
+		);
+		leftPortal.position.x = -30;
+		leftPortal.position.y = 20;
+		leftPortal.scale.set(0.35, 0.35, 0.35);
+		scene.add(leftPortal);
+
+		const rightPortalTexture = new WebGLRenderTarget(RESOLUTION, RESOLUTION);
+		const rightPortal = new Mesh(
+			planeGeo,
+			new MeshBasicMaterial({ map: rightPortalTexture.texture })
+		);
+		rightPortal.position.x = 30;
+		rightPortal.position.y = 20;
+		rightPortal.scale.set(0.35, 0.35, 0.35);
+		scene.add(rightPortal);
 
 		// Ground
-		const groundGeometry = new PlaneGeometry(200, 200, 16, 16);
-		const groundMaterial = new MeshStandardMaterial({
-			color: theme.colors.green[5],
-		});
-		const groundMesh = new Mesh(groundGeometry, groundMaterial);
-		groundMesh.rotateX(-Math.PI / 2);
-		groundMesh.position.y = -2;
-		scene.add(groundMesh);
+		const planeTop = new Mesh(
+			planeGeo,
+			new MeshPhongMaterial({ color: 0xffffff })
+		);
+		planeTop.rotateX(Math.PI / 2);
+		planeTop.position.set(0, 100, 0);
+		scene.add(planeTop);
+
+		const planeBack = new Mesh(
+			planeGeo,
+			new MeshPhongMaterial({ color: 0xff7fff })
+		);
+		planeBack.position.z = -50;
+		planeBack.position.y = 50;
+		scene.add(planeBack);
+
+		const planeBottom = new Mesh(
+			planeGeo,
+			new MeshPhongMaterial({ color: 0xffffff })
+		);
+		planeBottom.rotateX(-Math.PI / 2);
+		scene.add(planeBottom);
+
+		const planeFront = new Mesh(
+			planeGeo,
+			new MeshPhongMaterial({ color: 0x7f7fff })
+		);
+		planeFront.position.z = 50;
+		planeFront.position.y = 50;
+		planeFront.rotateY(Math.PI);
+		scene.add(planeFront);
+
+		const planeRight = new Mesh(
+			planeGeo,
+			new MeshPhongMaterial({ color: 0x00ff00 })
+		);
+		planeRight.position.x = 50;
+		planeRight.position.y = 50;
+		planeRight.rotateY(-Math.PI / 2);
+		scene.add(planeRight);
+
+		const planeLeft = new Mesh(
+			planeGeo,
+			new MeshPhongMaterial({ color: 0xff0000 })
+		);
+		planeLeft.position.x = -50;
+		planeLeft.position.y = 50;
+		planeLeft.rotateY(Math.PI / 2);
+		scene.add(planeLeft);
+
+		// lights
+		const mainLight = new PointLight(0xe7e7e7, 2.5, 250, 0);
+		mainLight.position.y = 60;
+		scene.add(mainLight);
+
+		const greenLight = new PointLight(0x00ff00, 0.5, 1000, 0);
+		greenLight.position.set(550, 50, 0);
+		scene.add(greenLight);
+
+		const redLight = new PointLight(0xff0000, 0.5, 1000, 0);
+		redLight.position.set(-550, 50, 0);
+		scene.add(redLight);
+
+		const blueLight = new PointLight(0xbbbbfe, 0.5, 1000, 0);
+		blueLight.position.set(0, 50, 550);
+		scene.add(blueLight);
 
 		// Pane
 		const pane = new Pane({
@@ -96,19 +188,10 @@ export default function WebGLRenderTargetDemo() {
 			})
 			.on('click', () => navigate('/docs/rendertarget'));
 
-		controler.addEventListener('change', () => {
-			portalCamera.rotation.x = camera.rotation.x;
-			portalCamera.rotation.y = camera.rotation.y;
-			portalCamera.rotation.z = camera.rotation.z;
-		});
+		controler.addEventListener('change', () => {});
 
 		function render(time?: number) {
 			controler.update(time);
-
-			// rendered pixel wont render to canvas, store into this target
-			renderer.setRenderTarget(renderTarget);
-			renderer.render(portalScene, portalCamera);
-			renderer.setRenderTarget(null);
 
 			renderer.render(scene, camera);
 
