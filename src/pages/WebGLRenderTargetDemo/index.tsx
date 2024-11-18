@@ -9,7 +9,6 @@ import {
 	Mesh,
 	MeshBasicMaterial,
 	MeshPhongMaterial,
-	Object3D,
 	PerspectiveCamera,
 	Plane,
 	PlaneGeometry,
@@ -121,7 +120,6 @@ export default function WebGLRenderTargetDemo() {
 			planeGeo,
 			new MeshBasicMaterial({ map: rightPortalTexture.texture })
 		);
-		rightPortal.position.x = 30;
 		rightPortal.position.y = 20;
 		rightPortal.scale.set(0.35, 0.35, 0.35);
 		portalScene.add(rightPortal);
@@ -202,13 +200,9 @@ export default function WebGLRenderTargetDemo() {
 		const zPlane = new Plane(new Vector3(0, 0, 1));
 		const yPlane = new Plane(new Vector3(0, 1, 0), 1);
 
-		let mmm: null | Object3D = null;
-
 		mccree.then((data) => {
 			const model = data.scene;
-			mmm = model;
 			model.scale.setScalar(20);
-			model.position.x = 30;
 			model.position.y = -20;
 			model.rotateY(Math.PI);
 
