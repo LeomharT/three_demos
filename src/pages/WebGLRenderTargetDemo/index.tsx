@@ -18,7 +18,7 @@ import {
 	WebGLRenderer,
 	WebGLRenderTarget,
 } from 'three';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { CameraUtils, OrbitControls } from 'three/examples/jsm/Addons.js';
 import { Pane } from 'tweakpane';
 
 export default function WebGLRenderTargetDemo() {
@@ -40,7 +40,7 @@ export default function WebGLRenderTargetDemo() {
 			alpha: true,
 			antialias: true,
 		});
-		renderer.localClippingEnabled = true;
+		renderer.localClippingEnabled = false;
 		renderer.setSize(innerWidth, innerHeight);
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.toneMapping = ACESFilmicToneMapping;
@@ -65,6 +65,7 @@ export default function WebGLRenderTargetDemo() {
 
 		const portalScene = new Scene();
 		portalScene.background = new Color(1, 0, 0);
+
 		const portalCamera = new PerspectiveCamera(45, 1.0, 0.1, 500.0);
 		scene.add(portalCamera);
 
@@ -79,11 +80,13 @@ export default function WebGLRenderTargetDemo() {
 		const material = new MeshPhongMaterial({
 			color: 0xffffff,
 			emissive: 0x333333,
-			flatShading: true,
+			flatShading: false,
 			clippingPlanes: [portalPlane],
 			clipShadows: true,
 		});
 		const smallSphereOne = new Mesh(geometry, material);
+		smallSphereOne.position.y = 20;
+		smallSphereOne.position.x = 30;
 		scene.add(smallSphereOne);
 		const smallSphereTwo = new Mesh(geometry, material);
 		scene.add(smallSphereTwo);
@@ -176,11 +179,63 @@ export default function WebGLRenderTargetDemo() {
 		blueLight.position.set(0, 50, 550);
 		scene.add(blueLight);
 
+		const reflectedPosition = new Vector3();
+		const bottomLeftCorner = new Vector3();
+		const bottomRightCorner = new Vector3();
+		const topLeftCorner = new Vector3();
+
+		function renderPortal() {
+			leftPortal.worldToLocal(reflectedPosition.copy(camera.position));
+			reflectedPosition.x *= -1.0;
+			reflectedPosition.z *= -1.0;
+			rightPortal.localToWorld(reflectedPosition);
+			portalCamera.position.copy(reflectedPosition);
+
+			rightPortal.localToWorld(bottomLeftCorner.set(50.05, -50.05, 0.0));
+			rightPortal.localToWorld(bottomRightCorner.set(-50.05, -50.05, 0.0));
+			rightPortal.localToWorld(topLeftCorner.set(50.05, 50.05, 0.0));
+
+			CameraUtils.frameCorners(
+				portalCamera,
+				bottomLeftCorner,
+				bottomRightCorner,
+				topLeftCorner,
+				false
+			);
+
+			leftPortalTexture.texture.colorSpace = renderer.outputColorSpace;
+			renderer.setRenderTarget(leftPortalTexture);
+			renderer.state.buffers.depth.setMask(true);
+			if (renderer.autoClear === false) renderer.clear();
+			leftPortal.visible = false;
+			renderer.render(scene, portalCamera);
+			leftPortal.visible = true;
+		}
+
+		const target = {
+			angle: 0,
+		};
+
 		// Pane
 		const pane = new Pane({
 			title: 'debug params',
 		});
 		pane.element.style.display = location.hash === '#debug' ? 'block' : 'none';
+
+		pane
+			.addBinding(target, 'angle', {
+				min: 0,
+				max: Math.PI * 2,
+				step: 0.1,
+			})
+			.on('change', (val) => {
+				const x = Math.cos(val.value) * 20;
+				const z = Math.sin(val.value) * 20;
+
+				smallSphereOne.position.x = x;
+				smallSphereOne.position.z = z;
+			});
+
 		pane
 			.addButton({
 				label: 'docs',
@@ -190,8 +245,12 @@ export default function WebGLRenderTargetDemo() {
 
 		controler.addEventListener('change', () => {});
 
-		function render(time?: number) {
+		function render(time: number = 0) {
 			controler.update(time);
+
+			renderPortal();
+
+			renderer.setRenderTarget(null);
 
 			renderer.render(scene, camera);
 
