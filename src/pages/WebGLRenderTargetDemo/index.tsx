@@ -4,6 +4,7 @@ import {
 	ACESFilmicToneMapping,
 	AxesHelper,
 	Color,
+	DoubleSide,
 	IcosahedronGeometry,
 	Mesh,
 	MeshBasicMaterial,
@@ -24,7 +25,7 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Pane } from 'tweakpane';
-import MccreeModelURL from '../MccreePortal/assets/low_poly_mccree/scene.gltf?url';
+import MccreeModelURL from '../MccreePortal/assets/low_poly_mccree/low_poly_mccree-transformed.glb?url';
 
 export default function WebGLRenderTargetDemo() {
 	const navigate = useNavigate();
@@ -43,7 +44,7 @@ export default function WebGLRenderTargetDemo() {
 			alpha: true,
 			antialias: true,
 		});
-		renderer.localClippingEnabled = false;
+		renderer.localClippingEnabled = true;
 		renderer.setSize(innerWidth, innerHeight);
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.toneMapping = ACESFilmicToneMapping;
@@ -98,8 +99,8 @@ export default function WebGLRenderTargetDemo() {
 			clipShadows: true,
 		});
 		const smallSphereOne = new Mesh(geometry, material);
-		smallSphereOne.position.y = 20;
-		smallSphereOne.position.x = 30;
+		// smallSphereOne.position.y = 20;
+		// smallSphereOne.position.x = 30;
 		scene.add(smallSphereOne);
 		const smallSphereTwo = new Mesh(geometry, material);
 		scene.add(smallSphereTwo);
@@ -122,7 +123,7 @@ export default function WebGLRenderTargetDemo() {
 		rightPortal.position.x = 30;
 		rightPortal.position.y = 20;
 		rightPortal.scale.set(0.35, 0.35, 0.35);
-		scene.add(rightPortal);
+		portalScene.add(rightPortal);
 
 		// Ground
 		const planeTop = new Mesh(
@@ -197,15 +198,30 @@ export default function WebGLRenderTargetDemo() {
 		const bottomRightCorner = new Vector3();
 		const topLeftCorner = new Vector3();
 
+		const zPlane = new Plane(new Vector3(0, 0, 1));
+		const yPlane = new Plane(new Vector3(0, 1, 0), 1);
+
 		mccree.then((data) => {
 			const model = data.scene;
-
 			model.scale.setScalar(20);
 			model.position.x = 30;
 			model.position.y = -20;
 			model.rotateY(Math.PI);
-			console.log(model);
-			scene.add(data.scene);
+
+			scene.add(model);
+
+			const clone = model.clone(true);
+			clone.position.x = -30;
+			clone.rotateY(Math.PI);
+			clone.traverse((object) => {
+				if (object instanceof Mesh) {
+					if (object.material instanceof MeshBasicMaterial) {
+						object.material.side = DoubleSide;
+						// object.material.clippingPlanes = [zPlane, yPlane];
+					}
+				}
+			});
+			scene.add(clone);
 		});
 
 		function renderPortal() {
