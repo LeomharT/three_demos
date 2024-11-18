@@ -9,6 +9,7 @@ import {
 	Mesh,
 	MeshBasicMaterial,
 	MeshPhongMaterial,
+	Object3D,
 	PerspectiveCamera,
 	Plane,
 	PlaneGeometry,
@@ -78,10 +79,10 @@ export default function WebGLRenderTargetDemo() {
 		const mccree = gltfLoader.loadAsync(MccreeModelURL);
 
 		const portalScene = new Scene();
-		portalScene.background = new Color(1, 0, 0);
+		portalScene.background = new Color(1, 11, 0);
 
 		const portalCamera = new PerspectiveCamera(45, 1.0, 0.1, 500.0);
-		scene.add(portalCamera);
+		portalScene.add(portalCamera);
 
 		const axesHelper = new AxesHelper(50);
 		scene.add(axesHelper);
@@ -201,14 +202,17 @@ export default function WebGLRenderTargetDemo() {
 		const zPlane = new Plane(new Vector3(0, 0, 1));
 		const yPlane = new Plane(new Vector3(0, 1, 0), 1);
 
+		let mmm: null | Object3D = null;
+
 		mccree.then((data) => {
 			const model = data.scene;
+			mmm = model;
 			model.scale.setScalar(20);
 			model.position.x = 30;
 			model.position.y = -20;
 			model.rotateY(Math.PI);
 
-			scene.add(model);
+			portalScene.add(model);
 
 			const clone = model.clone(true);
 			clone.position.x = -30;
@@ -221,7 +225,7 @@ export default function WebGLRenderTargetDemo() {
 					}
 				}
 			});
-			scene.add(clone);
+			// scene.add(clone);
 		});
 
 		function renderPortal() {
@@ -248,7 +252,7 @@ export default function WebGLRenderTargetDemo() {
 			renderer.state.buffers.depth.setMask(true);
 			if (renderer.autoClear === false) renderer.clear();
 			leftPortal.visible = false;
-			renderer.render(scene, portalCamera);
+			renderer.render(portalScene, portalCamera);
 			leftPortal.visible = true;
 		}
 
