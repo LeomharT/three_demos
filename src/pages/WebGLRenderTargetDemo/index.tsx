@@ -1,4 +1,3 @@
-import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import {
@@ -18,12 +17,16 @@ import {
 	WebGLRenderer,
 	WebGLRenderTarget,
 } from 'three';
-import { CameraUtils, OrbitControls } from 'three/examples/jsm/Addons.js';
+import {
+	CameraUtils,
+	GLTFLoader,
+	OrbitControls,
+} from 'three/examples/jsm/Addons.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Pane } from 'tweakpane';
+import MccreeModelURL from '../MccreePortal/assets/low_poly_mccree/scene.gltf?url';
 
 export default function WebGLRenderTargetDemo() {
-	const theme = useMantineTheme();
-
 	const navigate = useNavigate();
 
 	const location = useLocation();
@@ -63,6 +66,16 @@ export default function WebGLRenderTargetDemo() {
 		controler.enableDamping = true;
 		controler.dampingFactor = 0.05;
 
+		const darcoLoader = new DRACOLoader();
+		darcoLoader.setDecoderPath('node_modules/three/examples/jsm/libs/draco/');
+		darcoLoader.setDecoderConfig({ type: 'js' });
+		darcoLoader.preload();
+
+		const gltfLoader = new GLTFLoader();
+		gltfLoader.dracoLoader = darcoLoader;
+
+		const mccree = gltfLoader.loadAsync(MccreeModelURL);
+
 		const portalScene = new Scene();
 		portalScene.background = new Color(1, 0, 0);
 
@@ -80,7 +93,7 @@ export default function WebGLRenderTargetDemo() {
 		const material = new MeshPhongMaterial({
 			color: 0xffffff,
 			emissive: 0x333333,
-			flatShading: false,
+			flatShading: true,
 			clippingPlanes: [portalPlane],
 			clipShadows: true,
 		});
@@ -183,6 +196,17 @@ export default function WebGLRenderTargetDemo() {
 		const bottomLeftCorner = new Vector3();
 		const bottomRightCorner = new Vector3();
 		const topLeftCorner = new Vector3();
+
+		mccree.then((data) => {
+			const model = data.scene;
+
+			model.scale.setScalar(20);
+			model.position.x = 30;
+			model.position.y = -20;
+			model.rotateY(Math.PI);
+			console.log(model);
+			scene.add(data.scene);
+		});
 
 		function renderPortal() {
 			leftPortal.worldToLocal(reflectedPosition.copy(camera.position));
