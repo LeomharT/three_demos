@@ -10,6 +10,7 @@ import {
 	Color,
 	FloatType,
 	LinearFilter,
+	LinearMipMapNearestFilter,
 	MathUtils,
 	Mesh,
 	PerspectiveCamera,
@@ -56,6 +57,7 @@ export default function MccreePortal() {
 		});
 		renderer.localClippingEnabled = true;
 		renderer.shadowMap.enabled = true;
+		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setClearAlpha(0);
 		renderer.setSize(innerWidth, innerHeight);
 		renderer.toneMapping = ACESFilmicToneMapping;
@@ -75,7 +77,7 @@ export default function MccreePortal() {
 		camera.lookAt(scene.position);
 
 		const portalRenderTarget = new WebGLRenderTarget(RESOLUTION, RESOLUTION, {
-			minFilter: LinearFilter,
+			minFilter: LinearMipMapNearestFilter,
 			magFilter: LinearFilter,
 			type: FloatType,
 			generateMipmaps: true,
@@ -145,16 +147,16 @@ export default function MccreePortal() {
 		scene.add(portalMesh);
 
 		const sky = new Sky();
-		sky.scale.setScalar(450000);
 		sky.material.needsUpdate = true;
 		sky.material.uniformsNeedUpdate = true;
 		const effectController = {
 			turbidity: 10,
-			rayleigh: 1,
+			rayleigh: 0.5,
 			mieCoefficient: 0.005,
-			mieDirectionalG: 0.7,
-			elevation: 45,
-			azimuth: -90,
+			mieDirectionalG: 0.8,
+			elevation: 0.6,
+			azimuth: 0.1,
+			distance: 1000,
 			exposure: renderer.toneMappingExposure,
 		};
 		function updateSky() {
@@ -169,6 +171,8 @@ export default function MccreePortal() {
 			const sunPosition = new Vector3().setFromSphericalCoords(1, phi, theta);
 			sky.material.uniforms.sunPosition.value = sunPosition;
 
+			sky.scale.setScalar(effectController.distance);
+
 			renderer.toneMappingExposure = effectController.exposure;
 		}
 		updateSky();
@@ -179,6 +183,11 @@ export default function MccreePortal() {
 			mccree.rotateY(Math.PI);
 			mccree.position.set(0, -2, 0);
 			portalScene.add(mccree);
+
+			const clone = mccree.clone();
+			clone.rotateY(-Math.PI);
+
+			scene.add(clone);
 		});
 
 		// Render Protal Scene
@@ -188,23 +197,23 @@ export default function MccreePortal() {
 		const topLeftCorner = new Vector3();
 
 		const boundingBox = new Box3().setFromBufferAttribute(
-			plane.geometry.attributes.position as BufferAttribute
+			portalMesh.geometry.attributes.position as BufferAttribute
 		);
 
 		function renderPortalScene() {
 			portalMesh.worldToLocal(reflectedPosition.copy(camera.position));
 			reflectedPosition.x *= -1.0;
 			reflectedPosition.z *= -1.0;
-			plane.localToWorld(reflectedPosition);
+			portalMesh.localToWorld(reflectedPosition);
 			portalCamera.position.copy(reflectedPosition);
 
-			plane.localToWorld(
+			portalMesh.localToWorld(
 				bottomLeftCorner.set(boundingBox.max.x, boundingBox.min.y, 0.0)
 			);
-			plane.localToWorld(
+			portalMesh.localToWorld(
 				bottomRightCorner.set(boundingBox.min.x, boundingBox.min.y, 0.0)
 			);
-			plane.localToWorld(
+			portalMesh.localToWorld(
 				topLeftCorner.set(boundingBox.max.x, boundingBox.max.y, 0.0)
 			);
 
@@ -224,9 +233,7 @@ export default function MccreePortal() {
 
 			if (renderer.autoClear === false) renderer.clear();
 			renderer.state.buffers.depth.setMask(true);
-			portalMesh.visible = false;
 			renderer.render(portalScene, portalCamera);
-			portalMesh.visible = true;
 
 			renderer.setRenderTarget(currentRenderTarget);
 		}
