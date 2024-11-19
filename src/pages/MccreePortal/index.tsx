@@ -78,8 +78,8 @@ export default function MccreePortal() {
 		camera.lookAt(scene.position);
 
 		const portalRenderTarget = new WebGLRenderTarget(
-			innerWidth * 2.0,
-			innerHeight * 2.0,
+			innerWidth * window.devicePixelRatio,
+			innerHeight * window.devicePixelRatio,
 			{
 				samples: 8,
 				minFilter: LinearFilter,
