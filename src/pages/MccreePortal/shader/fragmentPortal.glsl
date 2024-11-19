@@ -3,6 +3,7 @@ varying vec2 v_uv;
 uniform float u_radius;
 uniform float u_aspect;
 uniform sampler2D u_texture;
+uniform vec2 u_resolution;
 
 #include <packing>
 
@@ -10,7 +11,7 @@ uniform sampler2D u_texture;
 void main()
 {
     vec2 uv = vec2(v_uv.x * u_aspect, v_uv.y); 
- 
+
     vec4 color = texture2D(u_texture, v_uv);
 
     vec2 bottomLeftCenter = vec2(u_radius,u_radius);

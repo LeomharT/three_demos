@@ -18,6 +18,7 @@ import {
 	RGBAFormat,
 	Scene,
 	ShaderMaterial,
+	Vector2,
 	Vector3,
 	Vector4,
 	WebGLRenderer,
@@ -50,7 +51,6 @@ export default function MccreePortal() {
 
 		const WIDTH = 1;
 		const GOLDENRATIO = 1.61803398875;
-		const RESOLUTION = 512;
 
 		const renderer = new WebGLRenderer({
 			alpha: true,
@@ -77,16 +77,20 @@ export default function MccreePortal() {
 		camera.position.set(0, 0, 1.5);
 		camera.lookAt(scene.position);
 
-		const portalRenderTarget = new WebGLRenderTarget(RESOLUTION, RESOLUTION, {
-			samples: 8,
-			minFilter: LinearFilter,
-			magFilter: LinearFilter,
-			type: FloatType,
-			format: RGBAFormat,
-			generateMipmaps: true,
-			depthBuffer: true,
-			colorSpace: LinearSRGBColorSpace,
-		});
+		const portalRenderTarget = new WebGLRenderTarget(
+			innerWidth * 2.0,
+			innerHeight * 2.0,
+			{
+				samples: 8,
+				minFilter: LinearFilter,
+				magFilter: NearestFilter,
+				type: FloatType,
+				format: RGBAFormat,
+				generateMipmaps: true,
+				depthBuffer: true,
+				colorSpace: LinearSRGBColorSpace,
+			}
+		);
 		const portalScene = new Scene();
 		const portalCamera = new PerspectiveCamera(45, 1.0, 0.1, 500.0);
 		portalScene.add(portalCamera);
@@ -146,6 +150,12 @@ export default function MccreePortal() {
 				u_radius: { value: 0.05 },
 				u_aspect: { value: WIDTH / GOLDENRATIO },
 				u_texture: { value: portalRenderTarget.texture },
+				u_resolution: {
+					value: new Vector2(
+						innerWidth * window.devicePixelRatio,
+						innerHeight * window.devicePixelRatio
+					),
+				},
 			},
 		});
 		const portalMesh = new Mesh(portalGeometry, portalMaterial);
