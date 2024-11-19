@@ -192,11 +192,6 @@ export default function WebGLRenderTargetDemo() {
 		blueLight.position.set(0, 50, 550);
 		scene.add(blueLight);
 
-		const reflectedPosition = new Vector3();
-		const bottomLeftCorner = new Vector3();
-		const bottomRightCorner = new Vector3();
-		const topLeftCorner = new Vector3();
-
 		const zPlane = new Plane(new Vector3(0, 0, 1));
 		const yPlane = new Plane(new Vector3(0, 1, 0), 1);
 
@@ -222,6 +217,11 @@ export default function WebGLRenderTargetDemo() {
 			// scene.add(clone);
 		});
 
+		const reflectedPosition = new Vector3();
+		const bottomLeftCorner = new Vector3();
+		const bottomRightCorner = new Vector3();
+		const topLeftCorner = new Vector3();
+
 		function renderPortal() {
 			leftPortal.worldToLocal(reflectedPosition.copy(camera.position));
 			reflectedPosition.x *= -1.0;
@@ -229,6 +229,8 @@ export default function WebGLRenderTargetDemo() {
 			rightPortal.localToWorld(reflectedPosition);
 			portalCamera.position.copy(reflectedPosition);
 
+			// grab the corners of the other portal
+			// - note: the portal is viewed backwards; flip the left/right coordinates
 			rightPortal.localToWorld(bottomLeftCorner.set(50.05, -50.05, 0.0));
 			rightPortal.localToWorld(bottomRightCorner.set(-50.05, -50.05, 0.0));
 			rightPortal.localToWorld(topLeftCorner.set(50.05, 50.05, 0.0));

@@ -10,10 +10,8 @@ import {
 	Color,
 	FloatType,
 	LinearFilter,
-	LinearMipmapLinearFilter,
 	MathUtils,
 	Mesh,
-	OrthographicCamera,
 	PerspectiveCamera,
 	PlaneGeometry,
 	Scene,
@@ -25,6 +23,7 @@ import {
 } from 'three';
 import { Sky } from 'three/addons/objects/Sky.js';
 import {
+	CameraUtils,
 	DRACOLoader,
 	GLTFLoader,
 	OrbitControls,
@@ -49,6 +48,7 @@ export default function MccreePortal() {
 
 		const GOLDENRATIO = 1.61803398875;
 		const WIDTH = 1;
+		const RESOLUTION = 512;
 
 		const renderer = new WebGLRenderer({
 			alpha: true,
@@ -74,13 +74,15 @@ export default function MccreePortal() {
 		camera.position.set(0, 0, 1.5);
 		camera.lookAt(scene.position);
 
-		const portalRenderTarget = new WebGLRenderTarget(512, 512, {
-			minFilter: LinearMipmapLinearFilter,
+		const portalRenderTarget = new WebGLRenderTarget(RESOLUTION, RESOLUTION, {
+			minFilter: LinearFilter,
 			magFilter: LinearFilter,
 			type: FloatType,
 			generateMipmaps: true,
 		});
 		const portalScene = new Scene();
+		const portalCamera = new PerspectiveCamera(45, 1.0, 0.1, 500.0);
+		portalScene.add(portalCamera);
 
 		const controler = new OrbitControls(camera, renderer.domElement);
 		controler.enableDamping = true;
@@ -142,21 +144,6 @@ export default function MccreePortal() {
 		const portalMesh = new Mesh(portalGeometry, portalMaterial);
 		scene.add(portalMesh);
 
-		const boundingBox = new Box3().setFromBufferAttribute(
-			plane.geometry.attributes.position as BufferAttribute
-		);
-		const portalCamera = new OrthographicCamera(
-			boundingBox.min.x * (1 + 2 / 512),
-			boundingBox.max.x * (1 + 2 / 512),
-			boundingBox.max.y * (1 + 2 / 512),
-			boundingBox.min.y * (1 + 2 / 512),
-			0.1,
-			1000
-		);
-
-		portalCamera.position.set(0, 0, 1);
-		portalCamera.lookAt(0, 0, 0);
-
 		const sky = new Sky();
 		sky.scale.setScalar(450000);
 		sky.material.needsUpdate = true;
@@ -189,18 +176,57 @@ export default function MccreePortal() {
 
 		gltfLoader.load(MccreeModel, (data) => {
 			const mccree = data.scene;
+			mccree.rotateY(Math.PI);
 			mccree.position.set(0, -2, 0);
-
-			scene.add(mccree);
-			portalScene.add(mccree.clone(true));
+			portalScene.add(mccree);
 		});
 
+		// Render Protal Scene
+		const reflectedPosition = new Vector3();
+		const bottomLeftCorner = new Vector3();
+		const bottomRightCorner = new Vector3();
+		const topLeftCorner = new Vector3();
+
+		const boundingBox = new Box3().setFromBufferAttribute(
+			plane.geometry.attributes.position as BufferAttribute
+		);
+
 		function renderPortalScene() {
+			portalMesh.worldToLocal(reflectedPosition.copy(camera.position));
+			reflectedPosition.x *= -1.0;
+			reflectedPosition.z *= -1.0;
+			plane.localToWorld(reflectedPosition);
+			portalCamera.position.copy(reflectedPosition);
+
+			plane.localToWorld(
+				bottomLeftCorner.set(boundingBox.max.x, boundingBox.min.y, 0.0)
+			);
+			plane.localToWorld(
+				bottomRightCorner.set(boundingBox.min.x, boundingBox.min.y, 0.0)
+			);
+			plane.localToWorld(
+				topLeftCorner.set(boundingBox.max.x, boundingBox.max.y, 0.0)
+			);
+
+			CameraUtils.frameCorners(
+				portalCamera,
+				bottomLeftCorner,
+				bottomRightCorner,
+				topLeftCorner,
+				false
+			);
+
+			portalRenderTarget.texture.colorSpace = renderer.outputColorSpace;
+
 			const currentRenderTarget = renderer.getRenderTarget();
 
 			renderer.setRenderTarget(portalRenderTarget);
+
+			if (renderer.autoClear === false) renderer.clear();
 			renderer.state.buffers.depth.setMask(true);
+			portalMesh.visible = false;
 			renderer.render(portalScene, portalCamera);
+			portalMesh.visible = true;
 
 			renderer.setRenderTarget(currentRenderTarget);
 		}
@@ -278,13 +304,11 @@ export default function MccreePortal() {
 		function render(time?: number) {
 			requestAnimationFrame(render);
 
-			portalCamera.position.copy(camera.position);
-			portalCamera.rotation.copy(camera.rotation);
-
 			controler.update(time);
 			stats.update();
 
 			renderPortalScene();
+
 			renderer.render(scene, camera);
 		}
 		render();
