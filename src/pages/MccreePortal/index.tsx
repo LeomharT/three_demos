@@ -8,15 +8,15 @@ import {
 	Box3,
 	BufferAttribute,
 	Color,
-	FloatType,
-	LinearFilter,
-	LinearMipMapNearestFilter,
 	MathUtils,
 	Mesh,
+	NearestFilter,
 	PerspectiveCamera,
 	PlaneGeometry,
+	RGBAFormat,
 	Scene,
 	ShaderMaterial,
+	UnsignedByteType,
 	Vector3,
 	Vector4,
 	WebGLRenderer,
@@ -31,7 +31,7 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
-import MccreeModel from './assets/low_poly_mccree/scene.gltf?url';
+import MccreeModel from './assets/low_poly_mccree/low_poly_mccree-transformed.glb?url';
 import fragmentShader from './shader/fragment.glsl?raw';
 import fragmentPortalShader from './shader/fragmentPortal.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
@@ -77,10 +77,13 @@ export default function MccreePortal() {
 		camera.lookAt(scene.position);
 
 		const portalRenderTarget = new WebGLRenderTarget(RESOLUTION, RESOLUTION, {
-			minFilter: LinearMipMapNearestFilter,
-			magFilter: LinearFilter,
-			type: FloatType,
-			generateMipmaps: true,
+			samples: 4,
+			minFilter: NearestFilter,
+			magFilter: NearestFilter,
+			type: UnsignedByteType,
+			format: RGBAFormat,
+			generateMipmaps: false,
+			depthBuffer: true,
 		});
 		const portalScene = new Scene();
 		const portalCamera = new PerspectiveCamera(45, 1.0, 0.1, 500.0);

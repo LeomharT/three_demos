@@ -1,6 +1,5 @@
 varying vec2 v_uv;
-varying vec3 v_worldPosition;
-
+ 
 uniform float u_radius;
 uniform float u_aspect;
 uniform sampler2D u_texture;
