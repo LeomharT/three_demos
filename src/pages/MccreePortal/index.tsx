@@ -8,7 +8,6 @@ import {
 	Box3,
 	BufferAttribute,
 	Color,
-	MathUtils,
 	Mesh,
 	NearestFilter,
 	PerspectiveCamera,
@@ -47,8 +46,8 @@ export default function MccreePortal() {
 
 		const { innerWidth, innerHeight } = window;
 
-		const GOLDENRATIO = 1.61803398875;
 		const WIDTH = 1;
+		const GOLDENRATIO = 1.61803398875;
 		const RESOLUTION = 512;
 
 		const renderer = new WebGLRenderer({
@@ -169,9 +168,26 @@ export default function MccreePortal() {
 			uniforms['mieCoefficient'].value = effectController.mieCoefficient;
 			uniforms['mieDirectionalG'].value = effectController.mieDirectionalG;
 
-			const phi = MathUtils.degToRad(90 - effectController.elevation);
-			const theta = MathUtils.degToRad(effectController.azimuth);
-			const sunPosition = new Vector3().setFromSphericalCoords(1, phi, theta);
+			function calcPosFromAngles(
+				inclination: number,
+				azimuth: number,
+				vector: Vector3 = new Vector3()
+			) {
+				const theta = Math.PI * (inclination - 0.5);
+				const phi = 2 * Math.PI * (azimuth - 0.5);
+
+				vector.x = Math.cos(phi);
+				vector.y = Math.sin(theta);
+				vector.z = Math.sin(phi);
+
+				return vector;
+			}
+			// const phi = MathUtils.degToRad(90 - effectController.elevation);
+			// const theta = MathUtils.degToRad(effectController.azimuth);
+			const sunPosition = calcPosFromAngles(
+				effectController.elevation,
+				effectController.azimuth
+			);
 			sky.material.uniforms.sunPosition.value = sunPosition;
 
 			sky.scale.setScalar(effectController.distance);
