@@ -8,6 +8,9 @@ import {
 	Box3,
 	BufferAttribute,
 	Color,
+	FloatType,
+	LinearFilter,
+	LinearSRGBColorSpace,
 	Mesh,
 	NearestFilter,
 	PerspectiveCamera,
@@ -15,7 +18,6 @@ import {
 	RGBAFormat,
 	Scene,
 	ShaderMaterial,
-	UnsignedByteType,
 	Vector3,
 	Vector4,
 	WebGLRenderer,
@@ -76,13 +78,14 @@ export default function MccreePortal() {
 		camera.lookAt(scene.position);
 
 		const portalRenderTarget = new WebGLRenderTarget(RESOLUTION, RESOLUTION, {
-			samples: 4,
-			minFilter: NearestFilter,
-			magFilter: NearestFilter,
-			type: UnsignedByteType,
+			samples: 8,
+			minFilter: LinearFilter,
+			magFilter: LinearFilter,
+			type: FloatType,
 			format: RGBAFormat,
-			generateMipmaps: false,
+			generateMipmaps: true,
 			depthBuffer: true,
+			colorSpace: LinearSRGBColorSpace,
 		});
 		const portalScene = new Scene();
 		const portalCamera = new PerspectiveCamera(45, 1.0, 0.1, 500.0);
@@ -245,9 +248,9 @@ export default function MccreePortal() {
 			);
 
 			portalRenderTarget.texture.colorSpace = renderer.outputColorSpace;
+			portalRenderTarget.texture.magFilter = NearestFilter;
 
 			const currentRenderTarget = renderer.getRenderTarget();
-
 			renderer.setRenderTarget(portalRenderTarget);
 
 			if (renderer.autoClear === false) renderer.clear();
