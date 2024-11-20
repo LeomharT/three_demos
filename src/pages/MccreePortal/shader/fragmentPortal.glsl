@@ -3,7 +3,6 @@ varying vec2 v_uv;
 uniform float u_radius;
 uniform float u_aspect;
 uniform sampler2D u_texture;
-uniform vec2 u_resolution;
 
 #include <packing>
 

@@ -12,8 +12,10 @@ import {
 	LinearFilter,
 	LinearSRGBColorSpace,
 	Mesh,
+	MeshBasicMaterial,
 	NearestFilter,
 	PerspectiveCamera,
+	Plane,
 	PlaneGeometry,
 	RGBAFormat,
 	Scene,
@@ -210,6 +212,9 @@ export default function MccreePortal() {
 		updateSky();
 		portalScene.add(sky);
 
+		const zPlane = new Plane(new Vector3(0, 0, 1), 0.0);
+		const yPlane = new Plane(new Vector3(0, 1, 0), 1.0);
+
 		gltfLoader.load(MccreeModel, (data) => {
 			const mccree = data.scene;
 			mccree.rotateY(Math.PI);
@@ -218,7 +223,15 @@ export default function MccreePortal() {
 
 			const clone = mccree.clone();
 			clone.rotateY(-Math.PI);
-
+			clone.traverse((object) => {
+				if (object instanceof Mesh) {
+					if (object.material instanceof MeshBasicMaterial) {
+						const m = object.material.clone();
+						m.clippingPlanes = [zPlane, yPlane];
+						object.material = m;
+					}
+				}
+			});
 			scene.add(clone);
 		});
 
