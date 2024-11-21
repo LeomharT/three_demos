@@ -1,18 +1,28 @@
 import { Box, useMantineTheme } from '@mantine/core';
-import { CameraControls } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
-import { Color } from 'three';
+import { CameraControls, useGLTF } from '@react-three/drei';
+import { Canvas, GroupProps, extend } from '@react-three/fiber';
+import { geometry } from 'maath';
+import { Perf } from 'r3f-perf';
+import { useLocation } from 'react-router';
+import FiestaTeaURL from './assets/fiesta_tea-transformed.glb?url';
+
+extend(geometry);
 
 export default function PortalThrouth() {
 	const theme = useMantineTheme();
+
+	const location = useLocation();
 
 	return (
 		<Box w='100vw' h='100vh'>
 			<Canvas
 				gl={{ alpha: true, antialias: true }}
 				camera={{ position: [0, 0, 1] }}
-				scene={{ background: new Color(theme.colors.dark[7]) }}
 			>
+				<Perf
+					position='top-left'
+					style={{ display: location.hash === '#debug' ? 'block' : 'none' }}
+				/>
 				<axesHelper args={[1]} />
 				<CameraControls
 					makeDefault
@@ -21,13 +31,18 @@ export default function PortalThrouth() {
 					minAzimuthAngle={-Math.PI / 2}
 					maxAzimuthAngle={Math.PI / 2}
 				/>
-				<group dispose={null}>
-					<mesh>
-						<planeGeometry args={[1, 1, 64, 64]} />
-						<meshBasicMaterial wireframe color={theme.colors.blue[5]} />
-					</mesh>
-				</group>
+				<PortalScene />
 			</Canvas>
 		</Box>
+	);
+}
+
+function PortalScene(props: GroupProps) {
+	const { nodes } = useGLTF(FiestaTeaURL, true);
+
+	return (
+		<group {...props} dispose={null}>
+			<primitive object={nodes.Scene} />
+		</group>
 	);
 }

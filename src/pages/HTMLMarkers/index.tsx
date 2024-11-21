@@ -83,9 +83,10 @@ export default function HTMLMarkers() {
 			scene.environment.mapping = EquirectangularReflectionMapping;
 		});
 		rgbeLoader.load(SunsetHDR, (data) => {
-			scene.environment = data;
-			scene.backgroundBlurriness = 1;
 			scene.background = data;
+			scene.backgroundBlurriness = 1;
+
+			scene.environment = data;
 			scene.environment.mapping = EquirectangularReflectionMapping;
 		});
 
