@@ -9,7 +9,7 @@ export default function Docs() {
 	useLayoutEffect(() => {
 		if (location.hash) {
 			const root = document.querySelector(location.hash);
-			if (root) root.scrollIntoView(true);
+			if (root) root.scrollIntoView({ behavior: 'smooth' });
 		}
 	}, [location]);
 

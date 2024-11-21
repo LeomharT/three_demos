@@ -1,5 +1,10 @@
 import { Box, useMantineTheme } from '@mantine/core';
-import { CameraControls, MeshPortalMaterial, useGLTF } from '@react-three/drei';
+import {
+	CameraControls,
+	MeshPortalMaterial,
+	Text,
+	useGLTF,
+} from '@react-three/drei';
 import { Canvas, GroupProps, extend } from '@react-three/fiber';
 import { geometry } from 'maath';
 import { Perf } from 'r3f-perf';
@@ -45,6 +50,7 @@ function PortalScene(props: GroupProps) {
 
 	return (
 		<group {...props} dispose={null}>
+			<Text>01</Text>
 			<mesh>
 				<roundedPlaneGeometry args={[WIDTH, GOLDENRATIO, 0.1]} />
 				<MeshPortalMaterial>

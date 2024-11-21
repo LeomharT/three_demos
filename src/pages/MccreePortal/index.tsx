@@ -3,7 +3,6 @@ import colorNormalize from 'color-normalize';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router';
 import {
-	ACESFilmicToneMapping,
 	AxesHelper,
 	Box3,
 	BufferAttribute,
@@ -14,6 +13,7 @@ import {
 	Mesh,
 	MeshBasicMaterial,
 	NearestFilter,
+	NoToneMapping,
 	PerspectiveCamera,
 	Plane,
 	PlaneGeometry,
@@ -63,7 +63,7 @@ export default function MccreePortal() {
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setClearAlpha(0);
 		renderer.setSize(innerWidth, innerHeight);
-		renderer.toneMapping = ACESFilmicToneMapping;
+		renderer.toneMapping = NoToneMapping;
 		renderer.toneMappingExposure = 0.5;
 		el.append(renderer.domElement);
 

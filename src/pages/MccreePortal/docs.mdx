@@ -1,7 +1,7 @@
-import MDXTitle from '../../component/MDXTitle';
 import { Anchor, Center, Image } from '@mantine/core';
-import RadiusTheory from './assets/radius_theory.png?url';
 import MDXCode from '../../component/MDXCode';
+import MDXTitle from '../../component/MDXTitle';
+import RadiusTheory from './assets/radius_theory.png?url';
 
 # Mccree Portal
 
@@ -33,6 +33,17 @@ Threejs 提供的`PlaneGeometry`没有配置圆角矩形的参数, 想要实现�
 	<Image src={RadiusTheory} w={'70%'} />
 </Center>
 
+<MDXTitle order={2} id='camera-position' href='#camera-position'>
+	Fix Camera Position
+</MDXTitle>
+
 渲染目标对象输出的贴图材质会被摄像头拉伸, 这个可以看看`MeshPortalMaterial`的源码
 
 或是使用 example <Anchor href='https://threejs.org/examples/?q=portal#webgl_portal'>webgl_portal</Anchor>里的`CameraUtils`
+
+<MDXTitle order={2} id='tone-mapping' href='#tone-mapping'>
+	Tone mapping
+</MDXTitle>
+
+`renderer.toneMapping = ACESFilmicToneMapping;`是用`toneMapping`时会发现`portal`内的颜色和主场景不同, 使用默认的`NoToneMapping`
+即可, 可是什么是`ToneMapping`呢?
