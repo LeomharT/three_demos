@@ -1,5 +1,5 @@
 import { Box, useMantineTheme } from '@mantine/core';
-import { CameraControls, useGLTF } from '@react-three/drei';
+import { CameraControls, MeshPortalMaterial, useGLTF } from '@react-three/drei';
 import { Canvas, GroupProps, extend } from '@react-three/fiber';
 import { geometry } from 'maath';
 import { Perf } from 'r3f-perf';
@@ -7,6 +7,9 @@ import { useLocation } from 'react-router';
 import FiestaTeaURL from './assets/fiesta_tea-transformed.glb?url';
 
 extend(geometry);
+
+const GOLDENRATIO = 1.61803398875;
+const WIDTH = 1;
 
 export default function PortalThrouth() {
 	const theme = useMantineTheme();
@@ -16,8 +19,8 @@ export default function PortalThrouth() {
 	return (
 		<Box w='100vw' h='100vh'>
 			<Canvas
-				gl={{ alpha: true, antialias: true }}
 				camera={{ position: [0, 0, 1] }}
+				gl={{ alpha: true, antialias: true }}
 			>
 				<Perf
 					position='top-left'
@@ -42,7 +45,12 @@ function PortalScene(props: GroupProps) {
 
 	return (
 		<group {...props} dispose={null}>
-			<primitive object={nodes.Scene} />
+			<mesh>
+				<roundedPlaneGeometry args={[WIDTH, GOLDENRATIO, 0.1]} />
+				<MeshPortalMaterial>
+					<primitive object={nodes.Scene} scale={0.2} />
+				</MeshPortalMaterial>
+			</mesh>
 		</group>
 	);
 }

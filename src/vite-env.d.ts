@@ -9,3 +9,11 @@ declare module '*.gltf' {
 	const content: string;
 	export default content;
 }
+
+export declare global {
+	namespace JSX {
+		interface IntrinsicElements {
+			roundedPlaneGeometry: any;
+		}
+	}
+}
