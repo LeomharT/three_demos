@@ -24,6 +24,11 @@ const examples = [
 		description: 'Protal scene',
 		path: '/mccree',
 	},
+	{
+		title: 'Portal Through',
+		description: 'Portal Through the scene',
+		path: '/portal-through',
+	},
 ];
 
 function cover(index: number) {

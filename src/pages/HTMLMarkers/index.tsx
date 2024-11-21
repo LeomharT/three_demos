@@ -32,16 +32,22 @@ import {
 import {
 	CSS3DObject,
 	CSS3DRenderer,
+	EffectComposer,
 	GLTFLoader,
+	LUTCubeLoader,
+	LUTPass,
 	OrbitControls,
+	RenderPass,
 	RGBELoader,
 } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Tween } from 'three/examples/jsm/libs/tween.module.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Pane } from 'tweakpane';
+import LutCubeURL from './assets/cubicle-99.CUBE?url';
 import EarthModel from './assets/earth.gltf?url';
 import CityHDR from './assets/modern_european_city_street_1k.hdr?url';
+import SunsetHDR from './assets/sunset_at_rocky_desert_1k.hdr?url';
 import classes from './style.module.css';
 
 export default function HTMLMarkers() {
@@ -71,7 +77,15 @@ export default function HTMLMarkers() {
 		scene.background = new Color(theme.colors.gray[2]);
 
 		rgbeLoader.load(CityHDR, (data) => {
+			scene.background = data;
+			scene.backgroundBlurriness = 1;
 			scene.environment = data;
+			scene.environment.mapping = EquirectangularReflectionMapping;
+		});
+		rgbeLoader.load(SunsetHDR, (data) => {
+			scene.environment = data;
+			scene.backgroundBlurriness = 1;
+			scene.background = data;
 			scene.environment.mapping = EquirectangularReflectionMapping;
 		});
 
@@ -92,9 +106,22 @@ export default function HTMLMarkers() {
 		camera.position.set(0, 2, 5);
 		camera.lookAt(scene.position);
 
+		const composer = new EffectComposer(renderer);
+		composer.setSize(innerWidth, innerHeight);
+		composer.setPixelRatio(window.devicePixelRatio);
+		composer.addPass(new RenderPass(scene, camera));
+
 		const controler = new OrbitControls(camera, renderer.domElement);
 		controler.enableDamping = true;
 		controler.enablePan = true;
+
+		const lutCubeLoader = new LUTCubeLoader();
+		const lutPass = new LUTPass({});
+		lutCubeLoader.load(LutCubeURL, (data) => {
+			lutPass.lut = data.texture3D;
+			lutPass.intensity = 0.75;
+			composer.addPass(lutPass);
+		});
 
 		const axesHelper = new AxesHelper();
 		// scene.add(axesHelper);
@@ -124,7 +151,7 @@ export default function HTMLMarkers() {
 		scene.add(plane);
 
 		const ambientLight = new AmbientLight();
-		ambientLight.intensity = 0.8;
+		ambientLight.intensity = 0.1;
 		scene.add(ambientLight);
 
 		const spotLight = new SpotLight(0xffffff);
@@ -302,6 +329,7 @@ export default function HTMLMarkers() {
 			environmentIntensity: 0.5,
 			ambientIntensity: 0.5,
 			spotlightAngle: 1.1,
+			backgroundBlurriness: 1,
 		};
 		const pane = new Pane({ title: 'params' });
 		pane.element.style.position = 'relative';
@@ -339,6 +367,15 @@ export default function HTMLMarkers() {
 				spotLightHelper.update();
 			});
 		pane
+			.addBinding(params, 'backgroundBlurriness', {
+				step: 0.1,
+				min: 0,
+				max: 1,
+			})
+			.on('change', (val) => {
+				scene.backgroundBlurriness = val.value;
+			});
+		pane
 			.addButton({
 				title: 'Documentation',
 			})
@@ -351,15 +388,17 @@ export default function HTMLMarkers() {
 
 			state.update();
 			controler.update(time);
-			renderer.render(scene, camera);
 			css3DRenderer.render(scene, camera);
 			tween.update(time);
+
+			composer.render(time);
 		}
 		render();
 
 		function resize() {
 			css3DRenderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.setSize(window.innerWidth, window.innerHeight);
+			composer.setSize(window.innerWidth, window.innerHeight);
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 		}
