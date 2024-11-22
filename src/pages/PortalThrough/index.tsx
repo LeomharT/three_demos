@@ -53,8 +53,12 @@ function PortalScene(props: GroupProps) {
 			<Text>01</Text>
 			<mesh>
 				<roundedPlaneGeometry args={[WIDTH, GOLDENRATIO, 0.1]} />
-				<MeshPortalMaterial>
-					<primitive object={nodes.Scene} scale={0.2} />
+				<MeshPortalMaterial blend={0}>
+					<primitive
+						object={nodes.Scene}
+						scale={0.2}
+						position={[0, -0.2, -0.3]}
+					/>
 				</MeshPortalMaterial>
 			</mesh>
 		</group>
