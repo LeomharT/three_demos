@@ -46,7 +46,6 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Pane } from 'tweakpane';
 import LutCubeURL from './assets/cubicle-99.CUBE?url';
 import EarthModel from './assets/earth.gltf?url';
-import CityHDR from './assets/modern_european_city_street_1k.hdr?url';
 import SunsetHDR from './assets/sunset_at_rocky_desert_1k.hdr?url';
 import classes from './style.module.css';
 
@@ -76,12 +75,12 @@ export default function HTMLMarkers() {
 		const scene = new Scene();
 		scene.background = new Color(theme.colors.gray[2]);
 
-		rgbeLoader.load(CityHDR, (data) => {
-			scene.background = data;
-			scene.backgroundBlurriness = 1;
-			scene.environment = data;
-			scene.environment.mapping = EquirectangularReflectionMapping;
-		});
+		// rgbeLoader.load(CityHDR, (data) => {
+		// 	scene.background = data;
+		// 	scene.backgroundBlurriness = 1;
+		// 	scene.environment = data;
+		// 	scene.environment.mapping = EquirectangularReflectionMapping;
+		// });
 		rgbeLoader.load(SunsetHDR, (data) => {
 			scene.background = data;
 			scene.backgroundBlurriness = 1;
@@ -331,6 +330,7 @@ export default function HTMLMarkers() {
 			ambientIntensity: 0.5,
 			spotlightAngle: 1.1,
 			backgroundBlurriness: 1,
+			enableLUT: true,
 		};
 		const pane = new Pane({ title: 'params' });
 		pane.element.style.position = 'relative';
@@ -369,6 +369,7 @@ export default function HTMLMarkers() {
 			});
 		pane
 			.addBinding(params, 'backgroundBlurriness', {
+				label: 'blurriness',
 				step: 0.1,
 				min: 0,
 				max: 1,
@@ -376,6 +377,13 @@ export default function HTMLMarkers() {
 			.on('change', (val) => {
 				scene.backgroundBlurriness = val.value;
 			});
+		pane.addBinding(params, 'enableLUT').on('change', (val) => {
+			if (val.value) {
+				composer.addPass(lutPass);
+			} else {
+				composer.removePass(lutPass);
+			}
+		});
 		pane
 			.addButton({
 				title: 'Documentation',

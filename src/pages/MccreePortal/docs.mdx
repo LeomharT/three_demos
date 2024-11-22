@@ -1,7 +1,8 @@
-import { Anchor, Center, Image } from '@mantine/core';
+import { Anchor, Center, Image, Blockquote } from '@mantine/core';
 import MDXCode from '../../component/MDXCode';
 import MDXTitle from '../../component/MDXTitle';
 import RadiusTheory from './assets/radius_theory.png?url';
+import { IconInfoCircle } from '@tabler/icons-react';
 
 # Mccree Portal
 
@@ -47,3 +48,8 @@ Threejs 提供的`PlaneGeometry`没有配置圆角矩形的参数, 想要实现�
 
 `renderer.toneMapping = ACESFilmicToneMapping;`是用`toneMapping`时会发现`portal`内的颜色和主场景不同, 使用默认的`NoToneMapping`
 即可, 可是什么是`ToneMapping`呢?
+
+<Blockquote icon={<IconInfoCircle />} mb='xl'>
+	色调映射是在有限动态范围媒介上近似显示高动态范围图像的一项计算机图形学技术。打印结果、CRT
+	或者 LCD 显示器以及投影仪等都只有有限的动态范围。
+</Blockquote>

@@ -6,11 +6,13 @@ import {
 	Anchor,
 	Blockquote,
 	Card,
+	Image,
 } from '@mantine/core';
 import MDXTitle from '../../component/MDXTitle';
 import { CodeHighlight } from '@mantine/code-highlight';
 import MDXCode from '../../component/MDXCode';
 import { IconInfoCircle } from '@tabler/icons-react';
+import LUTURL from './assets/lut.png?url';
 
 # HTML CSS3DObject mixing with WebGL
 
@@ -69,3 +71,25 @@ language='tsx'
 	How to loading HDR file
 </MDXTitle>
 使用`RGBELoader`加载HDR文件
+
+<MDXTitle order={2} id='lut' href='#lut'>
+	LUT(Lookup Table)
+</MDXTitle>
+LUT是Lookup Table的缩写, 本质上LUT是一个RAM, 它把数据事先写入RAM, 输入一个RGB值后通过在LUT中查找对应的映射输出值(相当于址查询),
+然后输出映射后的RGB值
+
+<Image alt='lut' src={LUTURL} />
+
+通过 LUT, 可以将一组输入的 RGB 值映射输出为另一组 RGB 值, 从而改变曝光度和色彩饱和度
+
+<MDXCode
+	language='glsl'
+	code={`
+	// 颜色的原始值
+	vec4 color = vec4(0.0, 0.1, 0.3, 1.0);
+	// 颜色的输出值
+	vec4 color = vec4(0.5, 0.6, 0.9, 1.0);
+	`}
+/>
+
+一般情况下没有 LUT 映射表的话, 画面灰蒙蒙的, 看起来像蒙了一层雾, 通过 LUT 加载后能够明显使画面色彩对比更加丰富
