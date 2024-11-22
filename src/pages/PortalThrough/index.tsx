@@ -2,13 +2,16 @@ import { Box, useMantineTheme } from '@mantine/core';
 import {
 	CameraControls,
 	MeshPortalMaterial,
+	Preload,
 	Text,
 	useGLTF,
 } from '@react-three/drei';
 import { Canvas, GroupProps, extend } from '@react-three/fiber';
+import { useControls } from 'leva';
 import { geometry } from 'maath';
 import { Perf } from 'r3f-perf';
 import { useLocation } from 'react-router';
+import { NoToneMapping } from 'three';
 import FiestaTeaURL from './assets/fiesta_tea-transformed.glb?url';
 
 extend(geometry);
@@ -20,6 +23,10 @@ export default function PortalThrouth() {
 	const theme = useMantineTheme();
 
 	const location = useLocation();
+
+	const { monitor } = useControls({
+		monitor: 0,
+	});
 
 	return (
 		<Box w='100vw' h='100vh'>
@@ -40,6 +47,7 @@ export default function PortalThrouth() {
 					maxAzimuthAngle={Math.PI / 2}
 				/>
 				<PortalScene />
+				<Preload all />
 			</Canvas>
 		</Box>
 	);
@@ -50,14 +58,23 @@ function PortalScene(props: GroupProps) {
 
 	return (
 		<group {...props} dispose={null}>
-			<Text>01</Text>
-			<mesh>
+			<Text
+				fontSize={0.3}
+				anchorY='top'
+				anchorX='left'
+				material-toneMapped={NoToneMapping}
+				position={[-0.375, 0.715, 0.01]}
+			>
+				Tea
+			</Text>
+			<mesh onClick={console.error}>
 				<roundedPlaneGeometry args={[WIDTH, GOLDENRATIO, 0.1]} />
 				<MeshPortalMaterial blend={0}>
+					<color attach='background' args={['#e4cdac']} />
 					<primitive
 						object={nodes.Scene}
-						scale={0.2}
-						position={[0, -0.2, -0.3]}
+						scale={0.3}
+						position={[0, -0.4, -0.3]}
 					/>
 				</MeshPortalMaterial>
 			</mesh>
