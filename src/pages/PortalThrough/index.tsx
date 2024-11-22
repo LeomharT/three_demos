@@ -1,4 +1,5 @@
-import { Box, useMantineTheme } from '@mantine/core';
+import { Box } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import {
 	CameraControls,
 	MeshPortalMaterial,
@@ -6,10 +7,10 @@ import {
 	Text,
 	useGLTF,
 } from '@react-three/drei';
-import { Canvas, GroupProps, extend } from '@react-three/fiber';
-import { useControls } from 'leva';
-import { geometry } from 'maath';
+import { Canvas, GroupProps, extend, useFrame } from '@react-three/fiber';
+import { easing, geometry } from 'maath';
 import { Perf } from 'r3f-perf';
+import { useRef } from 'react';
 import { useLocation } from 'react-router';
 import { NoToneMapping } from 'three';
 import FiestaTeaURL from './assets/fiesta_tea-transformed.glb?url';
@@ -20,13 +21,7 @@ const GOLDENRATIO = 1.61803398875;
 const WIDTH = 1;
 
 export default function PortalThrouth() {
-	const theme = useMantineTheme();
-
 	const location = useLocation();
-
-	const { monitor } = useControls({
-		monitor: 0,
-	});
 
 	return (
 		<Box w='100vw' h='100vh'>
@@ -46,15 +41,23 @@ export default function PortalThrouth() {
 					minAzimuthAngle={-Math.PI / 2}
 					maxAzimuthAngle={Math.PI / 2}
 				/>
-				<PortalScene />
+				<PortalScene id={1} />
 				<Preload all />
 			</Canvas>
 		</Box>
 	);
 }
 
-function PortalScene(props: GroupProps) {
+function PortalScene({ id, ...props }: GroupProps) {
 	const { nodes } = useGLTF(FiestaTeaURL, true);
+
+	const [opened, { toggle }] = useDisclosure(false);
+
+	const portal = useRef();
+
+	useFrame((state, dt) => {
+		easing.damp(portal.current, 'blend', opened ? 1 : 0, 0.2, dt);
+	});
 
 	return (
 		<group {...props} dispose={null}>
@@ -67,14 +70,14 @@ function PortalScene(props: GroupProps) {
 			>
 				Tea
 			</Text>
-			<mesh onClick={console.error}>
+			<mesh onDoubleClick={toggle}>
 				<roundedPlaneGeometry args={[WIDTH, GOLDENRATIO, 0.1]} />
-				<MeshPortalMaterial blend={0}>
+				<MeshPortalMaterial ref={portal}>
 					<color attach='background' args={['#e4cdac']} />
 					<primitive
+						scale={0.35}
 						object={nodes.Scene}
-						scale={0.3}
-						position={[0, -0.4, -0.3]}
+						position={[0, -0.75, -0.3]}
 					/>
 				</MeshPortalMaterial>
 			</mesh>
