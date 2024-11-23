@@ -31,7 +31,7 @@ export default function PortalThrouth() {
 		<Box w='100vw' h='100vh'>
 			<Canvas
 				camera={{ position: [0, 0.7, 2.5] }}
-				gl={{ alpha: true, antialias: true }}
+				gl={{ alpha: true, antialias: true, toneMapping: NoToneMapping }}
 				scene={{ background: new Color(theme.colors.gray[2]) }}
 			>
 				<Perf
@@ -60,7 +60,7 @@ export default function PortalThrouth() {
 				</PortalScene>
 				<PortalScene
 					id={3}
-					bg='#e4cdac'
+					bg='#d1d1ca'
 					name={'still'}
 					position={[1.2, 0, 0]}
 					rotation={[0, -Math.PI / 6, 0]}
