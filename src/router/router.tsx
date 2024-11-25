@@ -23,6 +23,7 @@ const WebGLRenderTargetDemo = lazy(
 const MccreePortal = lazy(() => import('../pages/MccreePortal'));
 const MccreePortalDocs = lazy(() => import('../pages/MccreePortal/docs.mdx'));
 const PortalThrough = lazy(() => import('../pages/PortalThrough'));
+const YunGangCave = lazy(() => import('../pages/YunGangCave'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -42,6 +43,7 @@ export const router = createBrowserRouter(
 			<Route path='mccree' element={<MccreePortal />} />
 			<Route path='portal-scene' element={<PortalScene />} />
 			<Route path='portal-through' element={<PortalThrough />} />
+			<Route path='yungang-cave' element={<YunGangCave />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

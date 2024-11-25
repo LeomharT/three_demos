@@ -25,6 +25,22 @@ const examples = [
 		path: '/mccree',
 	},
 	{
+		title: 'YunGang Cave',
+		description: 'Portal scene of yungang cave',
+		path: '/yungang-cave',
+	},
+];
+
+const r3fExamples = [
+	{
+		title: 'Portal Through',
+		description: 'Portal Through the scene',
+		path: '/portal-through',
+	},
+];
+
+const threejsJourneyExapmles = [
+	{
 		title: 'Portal Through',
 		description: 'Portal Through the scene',
 		path: '/portal-through',
@@ -40,8 +56,25 @@ export default function Examples() {
 		<Container size='xl' pt='md'>
 			<Title order={2}>Basic</Title>
 			<Text c='dimmed'>Basic demo, learning how to create scene</Text>
-			<SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} pt='md'>
+			<SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} pt='md' mb='xl'>
 				{examples.map((value, index) => (
+					<Card key={value.path} withBorder component='a' href={value.path}>
+						<Card.Section>
+							<Image
+								height={160}
+								alt='Norway'
+								src={MANTINE_IMAGE_PATH + `${cover(index)}.png`}
+							/>
+						</Card.Section>
+						<Text mt='sm'>{value.title}</Text>
+						<Text c='dimmed'>{value.description}</Text>
+					</Card>
+				))}
+			</SimpleGrid>
+			<Title order={2}>r3f Exapmles</Title>
+			<Text c='dimmed'>React three fiber official exapmle</Text>
+			<SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} pt='md' mb='xl'>
+				{r3fExamples.map((value, index) => (
 					<Card key={value.path} withBorder component='a' href={value.path}>
 						<Card.Section>
 							<Image
