@@ -88,6 +88,23 @@ export default function Examples() {
 					</Card>
 				))}
 			</SimpleGrid>
+			<Title order={2}>Threejs Journey Exapmles</Title>
+			<Text c='dimmed'>Threejs Journey course examples</Text>
+			<SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} pt='md' mb='xl'>
+				{threejsJourneyExapmles.map((value, index) => (
+					<Card key={value.path} withBorder component='a' href={value.path}>
+						<Card.Section>
+							<Image
+								height={160}
+								alt='Norway'
+								src={MANTINE_IMAGE_PATH + `${cover(index)}.png`}
+							/>
+						</Card.Section>
+						<Text mt='sm'>{value.title}</Text>
+						<Text c='dimmed'>{value.description}</Text>
+					</Card>
+				))}
+			</SimpleGrid>
 		</Container>
 	);
 }
