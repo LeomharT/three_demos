@@ -1,0 +1,16 @@
+import { Anchor } from '@mantine/core';
+import MDXTitle from '../../component/MDXTitle';
+
+# 3D Text
+
+<MDXTitle order={2} id='edge' href='#edge'>
+	Edge Geometry
+</MDXTitle>
+
+<Anchor href='https://stackoverflow.com/questions/44317902/how-to-render-edges-as-cylinders'>
+	How to render edges as cylinders?
+</Anchor>
+在使用`EdgeGeometry`时, 实例化的不是一个`Mesh`, 是使用`LineSegment`相当于一个线段集合,
+这使得整个`Edge`模型看起就是2D线段组合
+
+想实现一个更加立体的`3DEdge`可以考虑使用`CylinderGeometry`去描绘边缘

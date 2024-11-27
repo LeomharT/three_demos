@@ -68,6 +68,7 @@ export default function App() {
 		{ href: '/docs/rendertarget', label: 'WebGLRenderTarget Usage' },
 		{ href: '/docs/mccree', label: 'Mccree Portal Scene' },
 		{ href: '/docs/light-basic', label: 'Light Basic' },
+		{ href: '/docs/3d-text', label: '3D Text Mesh' },
 	];
 
 	return (
