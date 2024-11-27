@@ -67,6 +67,7 @@ export default function App() {
 		{ href: '/docs/html-marker', label: 'HTML Mixing With WegGL' },
 		{ href: '/docs/rendertarget', label: 'WebGLRenderTarget Usage' },
 		{ href: '/docs/mccree', label: 'Mccree Portal Scene' },
+		{ href: '/docs/light-basic', label: 'Light Basic' },
 	];
 
 	return (

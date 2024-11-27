@@ -41,9 +41,9 @@ const r3fExamples = [
 
 const threejsJourneyExapmles = [
 	{
-		title: 'Portal Through',
-		description: 'Portal Through the scene',
-		path: '/portal-through',
+		title: 'Light Basic',
+		description: 'Light basic',
+		path: '/light-basic',
 	},
 ];
 
