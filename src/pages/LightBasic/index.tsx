@@ -1,18 +1,6 @@
 import { Box, useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
-import {
-	AxesHelper,
-	Color,
-	CylinderGeometry,
-	EdgesGeometry,
-	Mesh,
-	MeshStandardMaterial,
-	PerspectiveCamera,
-	Scene,
-	SphereGeometry,
-	Vector3,
-	WebGLRenderer,
-} from 'three';
+import { AxesHelper, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 
 export default function LightBasic() {
@@ -59,39 +47,6 @@ export default function LightBasic() {
 		/**
 		 * Models
 		 */
-
-		const spheresGeometry = new SphereGeometry(0.5, 16, 16);
-		const spheresMaterial = new MeshStandardMaterial({
-			color: new Color(theme.colors.red[5]),
-		});
-		const spheresEdge = new EdgesGeometry(spheresGeometry);
-
-		for (let i = 0; i < spheresEdge.attributes.position.count - 1; i += 2) {
-			const startPoint = new Vector3(
-				spheresEdge.attributes.position.array[i * 3 + 0],
-				spheresEdge.attributes.position.array[i * 3 + 1],
-				spheresEdge.attributes.position.array[i * 3 + 2]
-			);
-
-			const endPotion = new Vector3(
-				spheresEdge.attributes.position.array[i * 3 + 3],
-				spheresEdge.attributes.position.array[i * 3 + 4],
-				spheresEdge.attributes.position.array[i * 3 + 5]
-			);
-
-			const cylLength = new Vector3()
-				.subVectors(endPotion, startPoint)
-				.length();
-			const cylGeometry = new CylinderGeometry(0.01, 0.01, cylLength, 16, 16);
-			cylGeometry.translate(0, cylLength / 2, 0);
-			cylGeometry.rotateX(Math.PI / 2);
-
-			const cyl = new Mesh(cylGeometry, spheresMaterial);
-			cyl.position.copy(startPoint);
-			cyl.lookAt(endPotion);
-
-			scene.add(cyl);
-		}
 
 		/**
 		 * Helpers

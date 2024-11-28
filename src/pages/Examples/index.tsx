@@ -41,6 +41,11 @@ const r3fExamples = [
 
 const threejsJourneyExapmles = [
 	{
+		title: '3D Text',
+		description: '3D Text Mesh',
+		path: '/3d-text',
+	},
+	{
 		title: 'Light Basic',
 		description: 'Light basic',
 		path: '/light-basic',
