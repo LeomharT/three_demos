@@ -60,7 +60,7 @@ export default function LightBasic() {
 		 * Models
 		 */
 
-		const spheresGeometry = new SphereGeometry(0.5, 8, 8);
+		const spheresGeometry = new SphereGeometry(0.5, 16, 16);
 		const spheresMaterial = new MeshStandardMaterial({
 			color: new Color(theme.colors.red[5]),
 		});
@@ -79,9 +79,16 @@ export default function LightBasic() {
 				spheresEdge.attributes.position.array[i * 3 + 5]
 			);
 
-			const cylLengh = new Vector3().subVectors(endPotion, startPoint).length();
-			const cylGeometry = new CylinderGeometry(0.5, 0.5, cylLengh, 16, 16);
+			const cylLength = new Vector3()
+				.subVectors(endPotion, startPoint)
+				.length();
+			const cylGeometry = new CylinderGeometry(0.01, 0.01, cylLength, 16, 16);
+			cylGeometry.translate(0, cylLength / 2, 0);
+			cylGeometry.rotateX(Math.PI / 2);
+
 			const cyl = new Mesh(cylGeometry, spheresMaterial);
+			cyl.position.copy(startPoint);
+			cyl.lookAt(endPotion);
 
 			scene.add(cyl);
 		}
