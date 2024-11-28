@@ -5,6 +5,7 @@ import {
 	AmbientLight,
 	AxesHelper,
 	Box3,
+	BoxGeometry,
 	Color,
 	CylinderGeometry,
 	DirectionalLight,
@@ -26,6 +27,7 @@ import {
 	OrbitControls,
 	TextGeometry,
 } from 'three/examples/jsm/Addons.js';
+import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
 import GunURL from './assets/scifi_gun.obj?url';
 
@@ -73,6 +75,9 @@ export default function _3DText() {
 		controler.dampingFactor = 0.05;
 		controler.target.set(0, 0, 0);
 
+		const stats = new Stats();
+		el.append(stats.dom);
+
 		/**
 		 * Loaders
 		 */
@@ -89,7 +94,6 @@ export default function _3DText() {
 			const gun = data;
 			const gunColor = new Color(theme.colors.lime[5]);
 			gun.scale.setScalar(0.1);
-			gun.translateY(-0.4);
 			gun.traverse((obj) => {
 				if (obj instanceof Mesh) {
 					if (obj.material instanceof MeshPhongMaterial) {
@@ -97,14 +101,21 @@ export default function _3DText() {
 					}
 				}
 			});
+			gun.position.set(0, -0.4, -1);
 			scene.add(gun);
+
+			const gunClone = gun.clone();
+			gunClone.position.set(0, -0.4, 1);
+			scene.add(gunClone);
 
 			const box = new Box3();
 			box.setFromObject(gun, true);
 
 			const size = new Vector3().subVectors(box.min, box.max).length();
-			const spheresGeometry = new SphereGeometry(size / 2, 16, 16);
+
+			const spheresGeometry = new SphereGeometry(size / 2, 14, 14);
 			spheresGeometry.rotateX(Math.PI / 2);
+			spheresGeometry.translate(0, 0, -1);
 			const spheresMaterial = new MeshStandardMaterial({
 				color: '#f6b85b',
 			});
@@ -140,6 +151,45 @@ export default function _3DText() {
 				scene.add(cyl);
 			}
 
+			const rectGeomtry = new BoxGeometry(
+				box.max.x - box.min.x,
+				box.max.y - box.min.y,
+				box.max.z - box.min.z
+			);
+			rectGeomtry.translate(0, 0, 1);
+			const rectMaterial = new MeshStandardMaterial({
+				color: '#f6b85b',
+			});
+			const rectEdge = new EdgesGeometry(rectGeomtry);
+
+			for (let i = 0; i < rectEdge.attributes.position.count - 1; i += 2) {
+				const startPoint = new Vector3(
+					rectEdge.attributes.position.array[i * 3 + 0],
+					rectEdge.attributes.position.array[i * 3 + 1],
+					rectEdge.attributes.position.array[i * 3 + 2]
+				);
+
+				const endPotion = new Vector3(
+					rectEdge.attributes.position.array[i * 3 + 3],
+					rectEdge.attributes.position.array[i * 3 + 4],
+					rectEdge.attributes.position.array[i * 3 + 5]
+				);
+
+				const cylLength = new Vector3()
+					.subVectors(endPotion, startPoint)
+					.length();
+				const cylGeometry = new CylinderGeometry(0.01, 0.01, cylLength, 16, 16);
+				cylGeometry.translate(0, cylLength / 2, 0);
+				cylGeometry.rotateX(Math.PI / 2);
+
+				const cyl = new Mesh(cylGeometry, rectMaterial);
+				cyl.castShadow = true;
+				cyl.receiveShadow = true;
+				cyl.position.copy(startPoint);
+				cyl.lookAt(endPotion);
+				scene.add(cyl);
+			}
+
 			fontLoader.load(typefaceFont, (font) => {
 				const textGeometry = new TextGeometry('SPHERE', {
 					font,
@@ -164,7 +214,11 @@ export default function _3DText() {
 				spheresGeometry.computeBoundingBox();
 				const edgeBoundingBox = spheresGeometry.boundingBox as Box3;
 				const text = new Mesh(textGeometry, spheresMaterial);
-				text.position.set(0, edgeBoundingBox.max.y + 0.3, 0);
+				text.position.set(
+					0,
+					edgeBoundingBox.max.y + 0.3,
+					edgeBoundingBox.min.z / 2
+				);
 				scene.add(text);
 			});
 		});
@@ -174,14 +228,21 @@ export default function _3DText() {
 		 */
 
 		const ambientLight = new AmbientLight();
-		ambientLight.intensity = 1;
+		ambientLight.intensity = 2.0;
 		scene.add(ambientLight);
 
 		const directLight = new DirectionalLight(theme.white);
 		directLight.castShadow = true;
-		directLight.intensity = 1;
+		directLight.intensity = 2.0;
 		directLight.position.set(0, 2, 0);
 		scene.add(directLight);
+
+		const directLight2 = new DirectionalLight(theme.white);
+		directLight2.castShadow = true;
+		directLight2.intensity = 1.0;
+		directLight2.rotation.set(0, 0, Math.PI / 4);
+		directLight2.position.set(2, 2, 0);
+		scene.add(directLight2);
 
 		/**
 		 * Helpers
@@ -194,6 +255,9 @@ export default function _3DText() {
 		const directLightHelper = new DirectionalLightHelper(directLight, 1);
 		scene.add(directLightHelper);
 
+		const directLightHelper2 = new DirectionalLightHelper(directLight2, 1);
+		scene.add(directLightHelper2);
+
 		/**
 		 * Pane
 		 */
@@ -203,17 +267,25 @@ export default function _3DText() {
 		});
 		pane.element.style.display = location.hash === '#debug' ? 'block' : 'none';
 		const lightsPane = pane.addFolder({ title: 'Lights' });
-		lightsPane.addBinding(ambientLight, 'intensity', {
+		const ambientLightParams = lightsPane.addFolder({ title: 'Ambient Light' });
+		ambientLightParams.addBinding(ambientLight, 'intensity', {
 			label: 'AmbientLight Intensity',
 			max: 10,
 			min: 0,
 			step: 0.1,
 		});
-		lightsPane.addBinding(directLight, 'intensity', {
+		const directionalLightParams = lightsPane.addFolder({
+			title: 'Directional Light',
+		});
+		directionalLightParams.addBinding(directLight, 'intensity', {
 			label: 'DirectionLight Intensity',
 			max: 10,
 			min: 0,
 			step: 0.1,
+		});
+		directionalLightParams.addBinding(directLight, 'color', {
+			color: { type: 'float' },
+			label: 'DirectionLight Color',
 		});
 
 		/**
@@ -221,6 +293,7 @@ export default function _3DText() {
 		 */
 
 		function render(time?: number) {
+			stats.update();
 			controler.update(time);
 			renderer.render(scene, camera);
 		}
