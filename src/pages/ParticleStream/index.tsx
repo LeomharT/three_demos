@@ -7,17 +7,16 @@ import {
 	BufferAttribute,
 	BufferGeometry,
 	Mesh,
-	MeshBasicMaterial,
 	MeshPhysicalMaterial,
 	PerspectiveCamera,
+	PlaneGeometry,
 	Scene,
 	SpotLight,
 	SpotLightHelper,
 	TextureLoader,
-	Vector3,
 	WebGLRenderer,
 } from 'three';
-import { DecalGeometry, OrbitControls } from 'three/examples/jsm/Addons.js';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
 import sticjerURL from './assets/sticjer.png?url';
@@ -59,7 +58,7 @@ export default function Particle() {
 			0.1,
 			500
 		);
-		camera.position.set(0, 0, 1);
+		camera.position.set(0, 0, 0.2);
 		camera.lookAt(scene.position);
 
 		const controler = new OrbitControls(camera, renderer.domElement);
@@ -88,44 +87,49 @@ export default function Particle() {
 		bufferGeomtry.setAttribute('position', attrPosition);
 		bufferGeomtry.computeVertexNormals();
 
-		const plane = new Mesh(
-			bufferGeomtry,
-			new MeshBasicMaterial({
-				color: theme.colors.green[5],
-			})
-		);
-		scene.add(plane);
+		// const plane = new Mesh(
+		// 	bufferGeomtry,
+		// 	new MeshBasicMaterial({
+		// 		color: theme.colors.green[5],
+		// 	})
+		// );
+		// scene.add(plane);
 
 		textureLoader.load(sticjerURL, (data) => {
 			const decalMaterial = new MeshPhysicalMaterial({
 				map: data,
+				// ior: 1.5,
 				metalness: 0.8,
 				clearcoat: 0.5,
 				roughness: 0.5,
 				iridescence: 1,
 				iridescenceIOR: 1.3,
 				iridescenceThicknessRange: [1, 1400],
+				// depth value
 				polygonOffset: true,
-				polygonOffsetFactor: -10,
+				// polygonOffsetFactor: -1,
 				transparent: true,
 			});
-			const decalGeometry = new DecalGeometry(
-				plane,
-				plane.position,
-				plane.rotation,
-				new Vector3(0.1, 0.1, 0.1)
-			);
-			const decal = new Mesh(decalGeometry, decalMaterial);
-			plane.add(decal);
+			// const decalGeometry = new DecalGeometry(
+			// 	plane,
+			// 	plane.position,
+			// 	plane.rotation,
+			// 	new Vector3(0.1, 0.1, 0.1)
+			// );
+			// const decal = new Mesh(decalGeometry, decalMaterial);
+			// plane.add(decal);
+
+			const plane = new Mesh(new PlaneGeometry(1, 1), decalMaterial);
+			scene.add(plane);
 
 			const decalPane = pane.addFolder({ title: 'Decal' });
+			decalPane.addBinding(decalMaterial, 'ior', {
+				min: 1.0,
+				max: 2.333,
+			});
 			decalPane.addBinding(decalMaterial, 'iridescence', {
 				min: 0.0,
 				max: 1.0,
-			});
-			decalPane.addBinding(decalMaterial, 'iridescenceIOR', {
-				min: 1.0,
-				max: 2.333,
 			});
 			decalPane.addBinding(decalMaterial, 'iridescenceIOR', {
 				min: 1.0,
