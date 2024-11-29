@@ -28,7 +28,7 @@ const LightBasic = lazy(() => import('../pages/LightBasic'));
 const LightBasicDocs = lazy(() => import('../pages/LightBasic/docs.mdx'));
 const _3DText = lazy(() => import('../pages/3DText'));
 const _3DTextDocs = lazy(() => import('../pages/3DText/docs.mdx'));
-const ParticleStream = lazy(() => import('../pages/ParticleStream'));
+const ParticleStream = lazy(() => import('../pages/Particle/ParticleStream'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(

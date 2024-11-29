@@ -8,6 +8,7 @@ import {
 	BufferGeometry,
 	Mesh,
 	MeshPhysicalMaterial,
+	NearestFilter,
 	PerspectiveCamera,
 	PlaneGeometry,
 	Scene,
@@ -96,6 +97,8 @@ export default function Particle() {
 		// scene.add(plane);
 
 		textureLoader.load(sticjerURL, (data) => {
+			data.magFilter = NearestFilter;
+			data.minFilter = NearestFilter;
 			const decalMaterial = new MeshPhysicalMaterial({
 				map: data,
 				// ior: 1.5,
@@ -107,7 +110,7 @@ export default function Particle() {
 				iridescenceThicknessRange: [1, 1400],
 				// depth value
 				polygonOffset: true,
-				// polygonOffsetFactor: -1,
+				polygonOffsetFactor: -1,
 				transparent: true,
 			});
 			// const decalGeometry = new DecalGeometry(
