@@ -28,6 +28,7 @@ const LightBasic = lazy(() => import('../pages/LightBasic'));
 const LightBasicDocs = lazy(() => import('../pages/LightBasic/docs.mdx'));
 const _3DText = lazy(() => import('../pages/3DText'));
 const _3DTextDocs = lazy(() => import('../pages/3DText/docs.mdx'));
+const ParticleStream = lazy(() => import('../pages/ParticleStream'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -52,6 +53,7 @@ export const router = createBrowserRouter(
 			<Route path='yungang-cave' element={<YunGangCave />} />
 			<Route path='3d-text' element={<_3DText />} />
 			<Route path='light-basic' element={<LightBasic />} />
+			<Route path='particle-stream' element={<ParticleStream />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

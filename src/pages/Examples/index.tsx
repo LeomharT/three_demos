@@ -25,6 +25,11 @@ const examples = [
 		path: '/mccree',
 	},
 	{
+		title: 'Particle Stream',
+		description: 'Particle Stream from Szenia Zadvornykh',
+		path: '/particle-stream',
+	},
+	{
 		title: 'YunGang Cave',
 		description: 'Portal scene of yungang cave',
 		path: '/yungang-cave',
