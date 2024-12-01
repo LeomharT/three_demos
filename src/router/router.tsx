@@ -29,6 +29,9 @@ const LightBasicDocs = lazy(() => import('../pages/LightBasic/docs.mdx'));
 const _3DText = lazy(() => import('../pages/3DText'));
 const _3DTextDocs = lazy(() => import('../pages/3DText/docs.mdx'));
 const ParticleStream = lazy(() => import('../pages/Particle/ParticleStream'));
+const ParticleThreejsJourney = lazy(
+	() => import('../pages/Particle/ParticleThreejsJourney')
+);
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -54,6 +57,7 @@ export const router = createBrowserRouter(
 			<Route path='3d-text' element={<_3DText />} />
 			<Route path='light-basic' element={<LightBasic />} />
 			<Route path='particle-stream' element={<ParticleStream />} />
+			<Route path='particle-tj' element={<ParticleThreejsJourney />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

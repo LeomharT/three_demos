@@ -55,6 +55,11 @@ const threejsJourneyExapmles = [
 		description: 'Light basic',
 		path: '/light-basic',
 	},
+	{
+		title: 'Particle Demo',
+		description: 'Particle Demo',
+		path: '/particle-tj',
+	},
 ];
 
 function cover(index: number) {
