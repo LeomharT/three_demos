@@ -1,0 +1,46 @@
+import MDXTitle from '../../../component/MDXTitle';
+import { Image } from '@mantine/core';
+import TestURL from './assets/docs/WebGL_Test.png';
+import MDXCode from '../../../component/MDXCode';
+
+# Particle
+
+<MDXTitle order={2} id='particle' href='#particle'>
+	Particle Usage
+</MDXTitle>
+
+粒子系统实现包括火焰, 星空, 烟雾, 雨点, 灰尘, 这类效果
+
+粒子系统创建的不是`Mesh`, 通常的场景下使用`BufferGeometry`和`PointMaterials`来创建`Points`,
+`Points`总是会面向相机视角
+
+每个粒子都是一个正方形(两个三角形组成), 并且总是面对相机
+
+`Points`可以从任何`Geometry`中创建, 具体就是`position`上的坐标替换为`Points`,
+想要实现具体上述类似雨点, 火焰等特效还是需要结合`BufferGeometry`的自定义功能
+
+`Points`中使用`alphaMap`出现渲染出不透明的边缘的情况下, 可以使用`alphaTest`,
+`depthTest`取消渲染透明度阈值的像素或是取消深度测试
+
+<MDXTitle order={2} id='test' href='#test'>
+	Test
+</MDXTitle>
+
+关于测试, `WebGL`中有很多测试, 深度测试, 裁减测试, 通明通道测试等. 所谓测试就是为渲染管线设置关卡,
+只要渲染流程未通过某一测试关卡, 就放弃这个片元的渲染
+
+<Image src={TestURL} />
+
+其中透明通道测试的意思是, 片元颜色的 alpha 通道低与预设的值时抛弃这个片元的输出
+
+<MDXCode
+	language='glsl'
+	code={`
+if ( diffuseColor.a < alphaTest) discard;
+`}
+/>
+
+默认的`alphaTest`为 0, 但是 0 并不小与 0, 所以默认情况下 alpha 通道为 0 的的像素还是会显示, 这时需要给一个很小的值
+用来做 alpha 测试的阈值, 比如 0.0001
+
+如果不做深度测试, 在场景内有其他元素的情况下会出现层级错误, 所以理想的解决是禁止深度写入`depthWrite`

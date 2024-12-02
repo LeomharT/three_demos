@@ -32,6 +32,9 @@ const ParticleStream = lazy(() => import('../pages/Particle/ParticleStream'));
 const ParticleThreejsJourney = lazy(
 	() => import('../pages/Particle/ParticleThreejsJourney')
 );
+const ParticleThreejsJourneyDocs = lazy(
+	() => import('../pages/Particle/ParticleThreejsJourney/docs.mdx')
+);
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -45,6 +48,7 @@ export const router = createBrowserRouter(
 					<Route path='mccree' element={<MccreePortalDocs />} />
 					<Route path='light-basic' element={<LightBasicDocs />} />
 					<Route path='3D-text' element={<_3DTextDocs />} />
+					<Route path='particle-tj' element={<ParticleThreejsJourneyDocs />} />
 				</Route>
 			</Route>
 			<Route path='mix-color' element={<MixColor />} />

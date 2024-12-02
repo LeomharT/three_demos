@@ -69,6 +69,7 @@ export default function App() {
 		{ href: '/docs/mccree', label: 'Mccree Portal Scene' },
 		{ href: '/docs/light-basic', label: 'Light Basic' },
 		{ href: '/docs/3d-text', label: '3D Text Mesh' },
+		{ href: '/docs/particle-tj', label: 'Threejs Journey Particle' },
 	];
 
 	return (
