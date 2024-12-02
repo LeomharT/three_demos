@@ -24,7 +24,7 @@ import {
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
-import ParticleURL from './assets/particles/2.png?url';
+import ParticleURL from './assets/particles/12.png?url';
 export default function ParticleThreejsJourney() {
 	const theme = useMantineTheme();
 
@@ -99,12 +99,12 @@ export default function ParticleThreejsJourney() {
 
 		const particleMaterial = new PointsMaterial({
 			// color: theme.colors.yellow[2],
-			size: 0.1,
+			size: 0.5,
 			sizeAttenuation: true,
 			transparent: true,
 			alphaMap: particleTexture,
 			// alphaTest: 0.001,
-			// depthTest: true,
+			depthTest: false,
 			depthWrite: false,
 			blending: AdditiveBlending,
 			vertexColors: true,
@@ -140,6 +140,7 @@ export default function ParticleThreejsJourney() {
 			max: 1,
 			step: 0.01,
 		});
+		pane.addBinding(particleMaterial, 'depthTest');
 		pane.addBinding(particleMaterial, 'depthWrite');
 		pane.addBinding(particleMaterial, 'blending', {
 			options: [
@@ -171,7 +172,7 @@ export default function ParticleThreejsJourney() {
 
 				const x = particles.geometry.getAttribute('position').array[i3];
 
-				attrPosition.array[i3 + 1] = Math.cos(clock + x);
+				attrPosition.array[i3 + 1] = Math.cos(clock + x / 5.0) * 5.0;
 			}
 			attrPosition.needsUpdate = true;
 		}
