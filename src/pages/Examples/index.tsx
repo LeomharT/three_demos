@@ -48,17 +48,22 @@ const threejsJourneyExapmles = [
 	{
 		title: '3D Text',
 		description: '3D Text Mesh',
-		path: '/3d-text',
+		path: '/tj-3dtext',
 	},
 	{
 		title: 'Light Basic',
 		description: 'Light basic',
-		path: '/light-basic',
+		path: '/tj-light',
 	},
 	{
 		title: 'Particle Demo',
 		description: 'Particle Demo',
-		path: '/particle-tj',
+		path: '/tj-particle',
+	},
+	{
+		title: 'Threejs Journey Level5',
+		description: 'Threejs Journey Level5 Example',
+		path: '/tj-level5',
 	},
 ];
 

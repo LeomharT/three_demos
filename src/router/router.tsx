@@ -35,7 +35,9 @@ const ParticleThreejsJourney = lazy(
 const ParticleThreejsJourneyDocs = lazy(
 	() => import('../pages/Particle/ParticleThreejsJourney/docs.mdx')
 );
-
+const ThreejsJourneyLevel5 = lazy(
+	() => import('../pages/ThreejsJourneyLevel5')
+);
 export const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route>
@@ -58,10 +60,11 @@ export const router = createBrowserRouter(
 			<Route path='portal-scene' element={<PortalScene />} />
 			<Route path='portal-through' element={<PortalThrough />} />
 			<Route path='yungang-cave' element={<YunGangCave />} />
-			<Route path='3d-text' element={<_3DText />} />
-			<Route path='light-basic' element={<LightBasic />} />
 			<Route path='particle-stream' element={<ParticleStream />} />
-			<Route path='particle-tj' element={<ParticleThreejsJourney />} />
+			<Route path='tj-3dtext' element={<_3DText />} />
+			<Route path='tj-light' element={<LightBasic />} />
+			<Route path='tj-particle' element={<ParticleThreejsJourney />} />
+			<Route path='tj-level5' element={<ThreejsJourneyLevel5 />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

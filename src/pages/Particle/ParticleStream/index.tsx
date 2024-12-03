@@ -7,20 +7,16 @@ import {
 	BufferAttribute,
 	BufferGeometry,
 	Mesh,
-	MeshPhysicalMaterial,
-	NearestFilter,
+	MeshPhongMaterial,
 	PerspectiveCamera,
-	PlaneGeometry,
 	Scene,
 	SpotLight,
 	SpotLightHelper,
-	TextureLoader,
 	WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
-import sticjerURL from './assets/sticjer.png?url';
 export default function Particle() {
 	const location = useLocation();
 
@@ -31,12 +27,6 @@ export default function Particle() {
 
 		const el = document.querySelector('#container') as HTMLDivElement;
 		el.innerHTML = '';
-
-		/**
-		 * Variant
-		 */
-
-		const PARTICLE_COUNT = 10000;
 
 		/**
 		 * Basic
@@ -70,75 +60,47 @@ export default function Particle() {
 		el.append(stats.dom);
 
 		/**
-		 * Loaders
+		 * Variant
 		 */
 
-		const textureLoader = new TextureLoader();
+		const PARTICLE_COUNT = 10000;
 
 		/**
 		 * Models
 		 */
 
-		const vertices = new Float32Array([
-			-0.1, -0.1, 0.0, 0.1, -0.1, 0.0, 0.1, 0.1, 0.0, 0.1, 0.1, 0.0, -0.1, 0.1,
-			0.0, -0.1, -0.1, 0.0,
-		]);
 		const bufferGeomtry = new BufferGeometry();
-		const attrPosition = new BufferAttribute(vertices, 3);
-		bufferGeomtry.setAttribute('position', attrPosition);
 		bufferGeomtry.computeVertexNormals();
 
-		// const plane = new Mesh(
-		// 	bufferGeomtry,
-		// 	new MeshBasicMaterial({
-		// 		color: theme.colors.green[5],
-		// 	})
-		// );
-		// scene.add(plane);
+		const positionArr = new Float32Array([]);
+		const attrPosition = new BufferAttribute(positionArr, 3);
 
-		textureLoader.load(sticjerURL, (data) => {
-			data.magFilter = NearestFilter;
-			data.minFilter = NearestFilter;
-			const decalMaterial = new MeshPhysicalMaterial({
-				map: data,
-				// ior: 1.5,
-				metalness: 0.8,
-				clearcoat: 0.5,
-				roughness: 0.5,
-				iridescence: 1,
-				iridescenceIOR: 1.3,
-				iridescenceThicknessRange: [1, 1400],
-				// depth value
-				polygonOffset: true,
-				polygonOffsetFactor: -1,
-				transparent: true,
-			});
-			// const decalGeometry = new DecalGeometry(
-			// 	plane,
-			// 	plane.position,
-			// 	plane.rotation,
-			// 	new Vector3(0.1, 0.1, 0.1)
-			// );
-			// const decal = new Mesh(decalGeometry, decalMaterial);
-			// plane.add(decal);
+		const offsetArr = new Float32Array([]);
+		const attrOffset = new BufferAttribute(offsetArr, 1);
 
-			const plane = new Mesh(new PlaneGeometry(1, 1), decalMaterial);
-			scene.add(plane);
+		const controlerPoint1Arr = new Float32Array([]);
+		const attrControlPoint1 = new BufferAttribute(controlerPoint1Arr, 3);
 
-			const decalPane = pane.addFolder({ title: 'Decal' });
-			decalPane.addBinding(decalMaterial, 'ior', {
-				min: 1.0,
-				max: 2.333,
-			});
-			decalPane.addBinding(decalMaterial, 'iridescence', {
-				min: 0.0,
-				max: 1.0,
-			});
-			decalPane.addBinding(decalMaterial, 'iridescenceIOR', {
-				min: 1.0,
-				max: 2.333,
-			});
+		const controlerPoint2Arr = new Float32Array([]);
+		const attrControlPoint2 = new BufferAttribute(controlerPoint2Arr, 3);
+
+		const endPositionArr = new Float32Array([]);
+		const attrEndPosition = new BufferAttribute(endPositionArr, 3);
+
+		const axisAngleArr = new Float32Array([]);
+		const attrAxisAngle = new BufferAttribute(axisAngleArr, 4);
+
+		const colorArr = new Float32Array([]);
+		const attrColor = new BufferAttribute(colorArr, 3);
+
+		bufferGeomtry.setAttribute('position', attrPosition);
+
+		const particleMaterial = new MeshPhongMaterial({
+			flatShading: true,
 		});
+
+		const particleStream = new Mesh(bufferGeomtry, particleMaterial);
+		scene.add(particleStream);
 
 		/**
 		 * Lights
@@ -213,6 +175,7 @@ export default function Particle() {
 		function resize() {
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
 		}
 		window.addEventListener('resize', resize);
 	}, []);
