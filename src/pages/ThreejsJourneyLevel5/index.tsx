@@ -8,6 +8,7 @@ import {
 	PlaneGeometry,
 	Scene,
 	ShaderMaterial,
+	Vector4,
 	WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
@@ -52,16 +53,27 @@ export default function ThreejsJourneyLevel5() {
 		controler.enableDamping = true;
 		controler.dampingFactor = 0.05;
 
+		/**
+		 * Scenes
+		 */
+
+		const PARAMS = {
+			color: theme.colors.blue[5],
+		};
+
 		const planeMaterial = new PlaneGeometry(1, 1, 16, 16);
 		planeMaterial.rotateX(-Math.PI / 2);
-		console.log(rgba(theme.colors.blue[2]));
+
 		const shaderMaterial = new ShaderMaterial({
 			vertexShader,
 			fragmentShader,
-			uniforms: {},
+			transparent: true,
+			wireframe: true,
+			uniforms: {
+				u_color: { value: new Vector4(...rgba(PARAMS.color)) },
+			},
 		});
-
-		console.log();
+		shaderMaterial.uniformsNeedUpdate = true;
 
 		const planeMesh = new Mesh(planeMaterial, shaderMaterial);
 		scene.add(planeMesh);
@@ -78,6 +90,9 @@ export default function ThreejsJourneyLevel5() {
 		 */
 
 		const pane = new Pane({ title: 'Debug Params' });
+		pane.addBinding(PARAMS, 'color').on('change', (e) => {
+			shaderMaterial.uniforms.u_color.value = new Vector4(...rgba(e.value));
+		});
 
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
