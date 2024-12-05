@@ -24,7 +24,7 @@ import {
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
-import ParticleURL from './assets/particles/12.png?url';
+import ParticleURL from './assets/particles/3.png?url';
 export default function ParticleThreejsJourney() {
 	const theme = useMantineTheme();
 

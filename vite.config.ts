@@ -7,6 +7,7 @@ export default defineConfig({
 	plugins: [react({ include: /\.(jsx|js|mdx|md|tsx|ts)$/ }), mdx()],
 	server: {
 		hmr: false,
+		host: '0.0.0.0',
 	},
 	resolve: {
 		alias: {

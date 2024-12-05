@@ -5,18 +5,20 @@ import {
 	AmbientLight,
 	AxesHelper,
 	BufferAttribute,
-	BufferGeometry,
 	Mesh,
 	MeshPhongMaterial,
 	PerspectiveCamera,
+	PlaneGeometry,
 	Scene,
 	SpotLight,
 	SpotLightHelper,
 	WebGLRenderer,
 } from 'three';
+import { PrefabBufferGeometry } from 'three-bas';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
+
 export default function Particle() {
 	const location = useLocation();
 
@@ -47,9 +49,9 @@ export default function Particle() {
 			75,
 			innerWidth / innerHeight,
 			0.1,
-			500
+			5000
 		);
-		camera.position.set(0, 0, 0.2);
+		camera.position.set(0, 600, 600);
 		camera.lookAt(scene.position);
 
 		const controler = new OrbitControls(camera, renderer.domElement);
@@ -63,37 +65,66 @@ export default function Particle() {
 		 * Variant
 		 */
 
-		const PARTICLE_COUNT = 10000;
+		const PARTICLE_COUNT = 100000;
+		const DURATION = 20;
 
 		/**
 		 * Models
 		 */
 
-		const bufferGeomtry = new BufferGeometry();
+		const prefabGeometry = new PlaneGeometry(4, 4);
+		const vetrexCount = prefabGeometry.getAttribute('position').count;
+		const attrLenth = vetrexCount * PARTICLE_COUNT;
+
+		const bufferGeomtry = new PrefabBufferGeometry(
+			prefabGeometry,
+			PARTICLE_COUNT
+		);
 		bufferGeomtry.computeVertexNormals();
 
-		const positionArr = new Float32Array([]);
-		const attrPosition = new BufferAttribute(positionArr, 3);
-
-		const offsetArr = new Float32Array([]);
+		const offsetArr = new Float32Array(attrLenth * 1);
 		const attrOffset = new BufferAttribute(offsetArr, 1);
 
-		const controlerPoint1Arr = new Float32Array([]);
+		const controlerPoint1Arr = new Float32Array(attrLenth * 3);
 		const attrControlPoint1 = new BufferAttribute(controlerPoint1Arr, 3);
 
-		const controlerPoint2Arr = new Float32Array([]);
+		const controlerPoint2Arr = new Float32Array(attrLenth * 3);
 		const attrControlPoint2 = new BufferAttribute(controlerPoint2Arr, 3);
 
-		const endPositionArr = new Float32Array([]);
+		const startPositionArr = new Float32Array(attrLenth * 3);
+		const attrStartPosition = new BufferAttribute(startPositionArr, 3);
+
+		const endPositionArr = new Float32Array(attrLenth * 3);
 		const attrEndPosition = new BufferAttribute(endPositionArr, 3);
 
-		const axisAngleArr = new Float32Array([]);
+		const axisAngleArr = new Float32Array(attrLenth * 4);
 		const attrAxisAngle = new BufferAttribute(axisAngleArr, 4);
 
-		const colorArr = new Float32Array([]);
+		const colorArr = new Float32Array(attrLenth * 3);
 		const attrColor = new BufferAttribute(colorArr, 3);
 
-		bufferGeomtry.setAttribute('position', attrPosition);
+		let delay: number = 0;
+		let offset: number = 0;
+
+		for (let i = 0; i < PARTICLE_COUNT; i++) {
+			delay = (i / PARTICLE_COUNT) * DURATION;
+
+			for (let j = 0; j < prefabGeometry.getAttribute('position').count; j++) {
+				attrOffset.array[offset++] = delay;
+			}
+		}
+
+		// Begin position, where the particles start
+		for (let i = 0, offset = 0; i < PARTICLE_COUNT; i++) {
+			const x = -1000;
+			const y = 0;
+			const z = 0;
+			for (let j = 0; j < prefabGeometry.getAttribute('position').count; j++) {
+				attrStartPosition.array[offset++] = x;
+				attrStartPosition.array[offset++] = y;
+				attrStartPosition.array[offset++] = z;
+			}
+		}
 
 		const particleMaterial = new MeshPhongMaterial({
 			flatShading: true,
@@ -122,14 +153,13 @@ export default function Particle() {
 		 * Helpers
 		 */
 
-		const axesHelper = new AxesHelper();
+		const axesHelper = new AxesHelper(600);
 		scene.add(axesHelper);
 
 		const spotLightHelper = new SpotLightHelper(
 			spotLight,
 			theme.colors.yellow[5]
 		);
-		scene.add(spotLightHelper);
 
 		/**
 		 * Pane
