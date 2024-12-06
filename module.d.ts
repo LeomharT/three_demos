@@ -3,5 +3,5 @@ declare module 'color-normalize' {
 	export default content;
 }
 declare module 'three-bas' {
-	export { PrefabBufferGeometry };
+	export { PhongAnimationMaterial, PrefabBufferGeometry, ShaderChunk };
 }
