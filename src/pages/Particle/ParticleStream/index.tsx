@@ -5,10 +5,12 @@ import {
 	AmbientLight,
 	AxesHelper,
 	BufferGeometry,
+	DoubleSide,
 	Mesh,
 	PerspectiveCamera,
 	PointLight,
 	Scene,
+	ShaderMaterial,
 	WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
@@ -47,7 +49,7 @@ export default function Particle() {
 			0.1,
 			5000
 		);
-		camera.position.set(0, 600, 600);
+		camera.position.set(0, 2, 2);
 		camera.lookAt(scene.position);
 
 		const controler = new OrbitControls(camera, renderer.domElement);
@@ -70,9 +72,15 @@ export default function Particle() {
 		 * Models
 		 */
 
-		const bufferGeometry = new BufferGeometry();
+		const particleGeometry = new BufferGeometry();
+		particleGeometry.computeVertexNormals();
 
-		const particleGeometry = new Mesh(bufferGeometry);
+		const particleMaterial = new ShaderMaterial({
+			side: DoubleSide,
+		});
+
+		const particleStream = new Mesh(particleGeometry, particleMaterial);
+		scene.add(particleStream);
 
 		/**
 		 * Lights
@@ -90,7 +98,7 @@ export default function Particle() {
 		 * Helpers
 		 */
 
-		const axesHelper = new AxesHelper(600);
+		const axesHelper = new AxesHelper(1);
 		scene.add(axesHelper);
 
 		/**
