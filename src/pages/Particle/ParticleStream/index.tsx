@@ -74,8 +74,6 @@ export default function Particle() {
 
 		const particleGeometry = new Mesh(bufferGeometry);
 
-		console.log(particleMaterial.fragmentShader);
-
 		/**
 		 * Lights
 		 */
@@ -111,11 +109,6 @@ export default function Particle() {
 		function render(time: number = 0) {
 			controler.update(time);
 			stats.update();
-
-			TIME += TIME_STEP;
-			TIME %= DURATION;
-
-			particleStream.material.uniforms['uTime'].value = TIME;
 
 			renderer.render(scene, camera);
 		}
