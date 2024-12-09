@@ -38,6 +38,7 @@ const ParticleThreejsJourneyDocs = lazy(
 const ThreejsJourneyLevel5 = lazy(
 	() => import('../pages/ThreejsJourneyLevel5')
 );
+const GalaxyGenerator = lazy(() => import('../pages/Particle/GalaxyGenerator'));
 export const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route>
@@ -65,6 +66,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-light' element={<LightBasic />} />
 			<Route path='tj-particle' element={<ParticleThreejsJourney />} />
 			<Route path='tj-level5' element={<ThreejsJourneyLevel5 />} />
+			<Route path='tj-galaxy' element={<GalaxyGenerator />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

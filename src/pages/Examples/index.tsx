@@ -65,6 +65,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey Level5 Example',
 		path: '/tj-level5',
 	},
+	{
+		title: 'Threejs Journey Galaxy',
+		description: 'Threejs Journey Galaxy Generator',
+		path: '/tj-galaxy',
+	},
 ];
 
 function cover(index: number) {

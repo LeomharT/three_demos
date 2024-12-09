@@ -190,5 +190,5 @@ export default function ParticleThreejsJourney() {
 		initialScene();
 	}, []);
 
-	return <div id='container'> </div>;
+	return <div id='container'></div>;
 }
