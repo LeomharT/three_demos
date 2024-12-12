@@ -44,12 +44,7 @@ export default function GalaxyGenerator() {
 
 		const scene = new Scene();
 
-		const camera = new PerspectiveCamera(
-			75,
-			innerWidth / innerHeight,
-			0.1,
-			1000
-		);
+		const camera = new PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
 		camera.position.set(2, 2, 2);
 		camera.lookAt(scene.position);
 
@@ -66,6 +61,7 @@ export default function GalaxyGenerator() {
 			RADIUS: 5,
 			BRANCHES: 3,
 			SPIN: 1,
+			RANDOMNESS: 0.2,
 		};
 
 		/**
@@ -107,16 +103,37 @@ export default function GalaxyGenerator() {
 
 				const radius = PARTICLE_PARAMS.RADIUS * Math.random();
 
-				const spinAngle = radius * PARTICLE_PARAMS.SPIN;
-
 				const index = i % PARTICLE_PARAMS.BRANCHES;
 
-				// ?
+				/**
+				 * @description divide a circle equally according to the number of branches
+				 * `Math.PI * 2 = 360°`
+				 * `index / PARTICLE_PARAMS.BRANCHES average score`
+				 * `radius = legth`
+				 *
+				 * `Math.PI * 2`作用是平均切分360°, 如果是`Math.PI`那么就是在平均切分180°,
+				 * index / PARTICLE_PARAMS.BRANCHES计算每次随机值的角度, 就是360°的三分之一, 那么正好切割为三份
+				 */
 				const branchesAngle = (index / PARTICLE_PARAMS.BRANCHES) * Math.PI * 2;
 
-				position[i3 + 0] = Math.cos(branchesAngle + spinAngle) * radius;
-				position[i3 + 1] = 0;
-				position[i3 + 2] = Math.sin(branchesAngle + spinAngle) * radius;
+				/**
+				 * 没有radius就是在原地打转
+				 * 乘以radius作用是越远的粒子旋转的角度越大
+				 * 正负就是逆时针和顺时针的区别
+				 */
+				const spinAngle = radius * PARTICLE_PARAMS.SPIN;
+
+				/**
+				 * 减去0.5为了保证能够在正负轴均有分布
+				 * 乘以radisu都只有一个作用, 就是越远的粒子随机值越大
+				 */
+				const randomX = (Math.random() - 0.5) * PARTICLE_PARAMS.RANDOMNESS * radius;
+				const randomY = (Math.random() - 0.5) * PARTICLE_PARAMS.RANDOMNESS * radius;
+				const randomZ = (Math.random() - 0.5) * PARTICLE_PARAMS.RANDOMNESS * radius;
+
+				position[i3 + 0] = Math.cos(branchesAngle + spinAngle) * radius + randomX;
+				position[i3 + 1] = randomY;
+				position[i3 + 2] = Math.sin(branchesAngle + spinAngle) * radius + randomZ;
 			}
 
 			bufferGeometry.setAttribute('position', attrPosition);
@@ -174,6 +191,11 @@ export default function GalaxyGenerator() {
 				max: 5,
 			})
 			.on('change', generatorGalaxy);
+		particlePane.addBinding(PARTICLE_PARAMS, 'RANDOMNESS', {
+			step: 0.001,
+			min: 0,
+			max: 2,
+		});
 		/**
 		 * Events
 		 */

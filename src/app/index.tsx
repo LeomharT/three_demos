@@ -20,12 +20,7 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { Spotlight, spotlight, SpotlightActionData } from '@mantine/spotlight';
-import {
-	IconBrandGithub,
-	IconMoon,
-	IconSearch,
-	IconSun,
-} from '@tabler/icons-react';
+import { IconBrandGithub, IconMoon, IconSearch, IconSun } from '@tabler/icons-react';
 import { Suspense } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import Hiddent from '../component/Hiddent';
@@ -69,7 +64,7 @@ export default function App() {
 		{ href: '/docs/mccree', label: 'Mccree Portal Scene' },
 		{ href: '/docs/light-basic', label: 'Light Basic' },
 		{ href: '/docs/3d-text', label: '3D Text Mesh' },
-		{ href: '/docs/particle-tj', label: 'Threejs Journey Particle' },
+		{ href: '/docs/tj-particle', label: 'Threejs Journey Particle' },
 	];
 
 	return (
@@ -106,11 +101,7 @@ export default function App() {
 						</Tabs>
 						<Hiddent hidden={!matches}>
 							<Group gap='xs' ml='auto'>
-								<Button
-									unstyled
-									className={classes.search}
-									onClick={spotlight.toggle}
-								>
+								<Button unstyled className={classes.search} onClick={spotlight.toggle}>
 									<Group>
 										<IconSearch />
 										<Text size='sm'>Search</Text>
@@ -135,11 +126,7 @@ export default function App() {
 			</AppShellHeader>
 			<AppShellNavbar>
 				{docs.map((value, index) => (
-					<NavLink
-						key={index}
-						{...value}
-						active={location.pathname === value.href}
-					/>
+					<NavLink key={index} {...value} active={location.pathname === value.href} />
 				))}
 			</AppShellNavbar>
 			<AppShellMain className={classes.main}>
@@ -153,10 +140,7 @@ export default function App() {
 				highlightQuery
 				searchProps={{
 					leftSection: (
-						<IconSearch
-							stroke={1.5}
-							style={{ width: rem(20), height: rem(20) }}
-						/>
+						<IconSearch stroke={1.5} style={{ width: rem(20), height: rem(20) }} />
 					),
 					placeholder: 'Search...',
 				}}

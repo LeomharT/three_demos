@@ -17,9 +17,7 @@ const Docs = lazy(() => import('../pages/Docs'));
 const WebGLRenderTargetDemoDcos = lazy(
 	() => import('../pages/WebGLRenderTargetDemo/docs.mdx')
 );
-const WebGLRenderTargetDemo = lazy(
-	() => import('../pages/WebGLRenderTargetDemo')
-);
+const WebGLRenderTargetDemo = lazy(() => import('../pages/WebGLRenderTargetDemo'));
 const MccreePortal = lazy(() => import('../pages/MccreePortal'));
 const MccreePortalDocs = lazy(() => import('../pages/MccreePortal/docs.mdx'));
 const PortalThrough = lazy(() => import('../pages/PortalThrough'));
@@ -35,10 +33,9 @@ const ParticleThreejsJourney = lazy(
 const ParticleThreejsJourneyDocs = lazy(
 	() => import('../pages/Particle/ParticleThreejsJourney/docs.mdx')
 );
-const ThreejsJourneyLevel5 = lazy(
-	() => import('../pages/ThreejsJourneyLevel5')
-);
+const ThreejsJourneyLevel5 = lazy(() => import('../pages/ThreejsJourneyLevel5'));
 const GalaxyGenerator = lazy(() => import('../pages/Particle/GalaxyGenerator'));
+
 export const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route>
@@ -51,7 +48,7 @@ export const router = createBrowserRouter(
 					<Route path='mccree' element={<MccreePortalDocs />} />
 					<Route path='light-basic' element={<LightBasicDocs />} />
 					<Route path='3D-text' element={<_3DTextDocs />} />
-					<Route path='particle-tj' element={<ParticleThreejsJourneyDocs />} />
+					<Route path='tj-particle' element={<ParticleThreejsJourneyDocs />} />
 				</Route>
 			</Route>
 			<Route path='mix-color' element={<MixColor />} />
