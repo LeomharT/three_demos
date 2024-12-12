@@ -6,10 +6,19 @@ import {
 	AxesHelper,
 	BufferAttribute,
 	BufferGeometry,
+	Color,
+	CustomBlending,
+	LinearSRGBColorSpace,
+	MultiplyBlending,
+	NoBlending,
+	NoColorSpace,
+	NormalBlending,
 	PerspectiveCamera,
 	Points,
 	PointsMaterial,
 	Scene,
+	SRGBColorSpace,
+	SubtractiveBlending,
 	WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
@@ -38,7 +47,7 @@ export default function GalaxyGenerator() {
 			antialias: true,
 		});
 		renderer.setSize(innerWidth, innerHeight);
-		renderer.setClearColor(theme.colors.dark[7]);
+		renderer.setClearColor(theme.colors.dark[9]);
 		renderer.setClearAlpha(1.0);
 		el.append(renderer.domElement);
 
@@ -62,6 +71,10 @@ export default function GalaxyGenerator() {
 			BRANCHES: 3,
 			SPIN: 1,
 			RANDOMNESS: 0.2,
+			RANDOMNESS_POWER: 3,
+			INSIDECOLOR: '#ff6030',
+			OUTSIDECOLOR: '#1b3984',
+			BLENDING: AdditiveBlending,
 		};
 
 		/**
@@ -69,13 +82,7 @@ export default function GalaxyGenerator() {
 		 */
 
 		let bufferGeometry = new BufferGeometry();
-		let pointsMaterial = new PointsMaterial({
-			size: PARTICLE_PARAMS.SIZE,
-			// perspective
-			sizeAttenuation: true,
-			depthWrite: false,
-			blending: AdditiveBlending,
-		});
+		let pointsMaterial = new PointsMaterial();
 		let points: null | Points = null;
 
 		function generatorGalaxy() {
@@ -92,11 +99,15 @@ export default function GalaxyGenerator() {
 				// perspective
 				sizeAttenuation: true,
 				depthWrite: false,
-				blending: AdditiveBlending,
+				blending: PARTICLE_PARAMS.BLENDING,
+				vertexColors: true,
 			});
 
 			const position = new Float32Array(PARTICLE_PARAMS.COUNT * 3);
 			const attrPosition = new BufferAttribute(position, 3);
+
+			const colors = new Float32Array(PARTICLE_PARAMS.COUNT * 3);
+			const attrColor = new BufferAttribute(colors, 3);
 
 			for (let i = 0; i < PARTICLE_PARAMS.COUNT; i++) {
 				const i3 = i * 3;
@@ -127,16 +138,42 @@ export default function GalaxyGenerator() {
 				 * 减去0.5为了保证能够在正负轴均有分布
 				 * 乘以radisu都只有一个作用, 就是越远的粒子随机值越大
 				 */
-				const randomX = (Math.random() - 0.5) * PARTICLE_PARAMS.RANDOMNESS * radius;
-				const randomY = (Math.random() - 0.5) * PARTICLE_PARAMS.RANDOMNESS * radius;
-				const randomZ = (Math.random() - 0.5) * PARTICLE_PARAMS.RANDOMNESS * radius;
+				const randomX =
+					Math.pow(Math.random(), PARTICLE_PARAMS.RANDOMNESS_POWER) *
+					(Math.random() < 0.5 ? 1 : -1) *
+					PARTICLE_PARAMS.RANDOMNESS *
+					radius;
+				const randomY =
+					Math.pow(Math.random(), PARTICLE_PARAMS.RANDOMNESS_POWER) *
+					(Math.random() < 0.5 ? 1 : -1) *
+					PARTICLE_PARAMS.RANDOMNESS *
+					radius;
+				const randomZ =
+					Math.pow(Math.random(), PARTICLE_PARAMS.RANDOMNESS_POWER) *
+					(Math.random() < 0.5 ? 1 : -1) *
+					PARTICLE_PARAMS.RANDOMNESS *
+					radius;
 
 				position[i3 + 0] = Math.cos(branchesAngle + spinAngle) * radius + randomX;
 				position[i3 + 1] = randomY;
 				position[i3 + 2] = Math.sin(branchesAngle + spinAngle) * radius + randomZ;
+
+				const colorInside = new Color(PARTICLE_PARAMS.INSIDECOLOR);
+				const colorOutSide = new Color(PARTICLE_PARAMS.OUTSIDECOLOR);
+
+				const mixColor = new Color().lerpColors(
+					colorInside,
+					colorOutSide,
+					radius / PARTICLE_PARAMS.RADIUS
+				);
+
+				colors[i3] = mixColor.r;
+				colors[i3 + 1] = mixColor.g;
+				colors[i3 + 2] = mixColor.b;
 			}
 
 			bufferGeometry.setAttribute('position', attrPosition);
+			bufferGeometry.setAttribute('color', attrColor);
 			points = new Points(bufferGeometry, pointsMaterial);
 
 			scene.add(points);
@@ -155,6 +192,14 @@ export default function GalaxyGenerator() {
 		 */
 
 		const pane = new Pane({ title: 'Debug Params' });
+		pane.addBinding(renderer, 'outputColorSpace', {
+			options: [
+				{ text: 'NoColorSpace', value: NoColorSpace },
+				{ text: 'SRGBColorSpace', value: SRGBColorSpace },
+				{ text: 'LinearSRGBColorSpace', value: LinearSRGBColorSpace },
+			],
+		});
+
 		const particlePane = pane.addFolder({ title: 'particle' });
 		particlePane
 			.addBinding(PARTICLE_PARAMS, 'SIZE', {
@@ -191,11 +236,36 @@ export default function GalaxyGenerator() {
 				max: 5,
 			})
 			.on('change', generatorGalaxy);
-		particlePane.addBinding(PARTICLE_PARAMS, 'RANDOMNESS', {
-			step: 0.001,
-			min: 0,
-			max: 2,
-		});
+		particlePane
+			.addBinding(PARTICLE_PARAMS, 'RANDOMNESS', {
+				step: 0.001,
+				min: 0,
+				max: 2,
+			})
+			.on('change', generatorGalaxy);
+		particlePane
+			.addBinding(PARTICLE_PARAMS, 'INSIDECOLOR', {
+				color: { type: 'int' },
+			})
+			.on('change', generatorGalaxy);
+		particlePane
+			.addBinding(PARTICLE_PARAMS, 'OUTSIDECOLOR', {
+				color: { type: 'int' },
+			})
+			.on('change', generatorGalaxy);
+		particlePane
+			.addBinding(PARTICLE_PARAMS, 'BLENDING', {
+				options: [
+					{ text: 'NoBlending', value: NoBlending },
+					{ text: 'CustomBlending', value: CustomBlending },
+					{ text: 'NormalBlending', value: NormalBlending },
+					{ text: 'AdditiveBlending', value: AdditiveBlending },
+					{ text: 'MultiplyBlending', value: MultiplyBlending },
+					{ text: 'SubtractiveBlending', value: SubtractiveBlending },
+				],
+			})
+			.on('change', generatorGalaxy);
+
 		/**
 		 * Events
 		 */
@@ -215,6 +285,8 @@ export default function GalaxyGenerator() {
 			camera.updateProjectionMatrix();
 		}
 		window.addEventListener('resize', resize);
+
+		console.log([<div>123</div>, <span>456</span>]);
 	};
 
 	useEffect(() => {
