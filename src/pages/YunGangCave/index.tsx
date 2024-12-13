@@ -1,12 +1,17 @@
 import { Box } from '@mantine/core';
-import { Text, useGLTF } from '@react-three/drei';
-import { Canvas, GroupProps, useThree } from '@react-three/fiber';
+import { CameraControls, MeshPortalMaterial, Text, useGLTF } from '@react-three/drei';
+import { Canvas, extend, GroupProps, useThree } from '@react-three/fiber';
 import { Leva, useControls } from 'leva';
+import { geometry } from 'maath';
 import { Perf } from 'r3f-perf';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useLocation } from 'react-router';
 import { Object3D } from 'three';
 import YunGangCaveURL from './assets/yungang_cave_20.glb?url';
+extend(geometry);
+
+const GOLDENRATIO = 1.61803398875;
+const WIDTH = 1;
 
 export default function YunGangCave() {
 	const location = useLocation();
@@ -19,9 +24,14 @@ export default function YunGangCave() {
 			<Canvas>
 				<Perf position='top-left' />
 				<axesHelper />
-				{/* <CameraControls makeDefault /> */}
-				<ambientLight intensity={0.6} />
-				<YunGangModel ref={model} />
+				<CameraControls makeDefault />
+				<mesh>
+					<roundedPlaneGeometry args={[WIDTH, GOLDENRATIO, 0.1]} />
+					<MeshPortalMaterial>
+						<ambientLight intensity={0.6} />
+						<YunGangModel ref={model} />
+					</MeshPortalMaterial>
+				</mesh>
 			</Canvas>
 		</Box>
 	);
@@ -30,7 +40,7 @@ export default function YunGangCave() {
 const YunGangModel = forwardRef((props: GroupProps, ref: any) => {
 	const { nodes } = useGLTF(YunGangCaveURL, true);
 
-	const { camera, scene } = useThree();
+	const { camera } = useThree();
 
 	const params = useControls({
 		rotationX: 0,
@@ -77,9 +87,9 @@ const YunGangModel = forwardRef((props: GroupProps, ref: any) => {
 	return (
 		<group
 			{...props}
-			scale={0.3}
+			scale={0.1}
 			dispose={null}
-			position={[0, -2, 0]}
+			position={[0, -1, 0]}
 			rotation={[0, Math.PI * 1.2, Math.PI]}
 		>
 			<Text position={[0, -1.0, 0]}>{devicemotion.beta}</Text>
