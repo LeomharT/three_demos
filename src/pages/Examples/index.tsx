@@ -26,13 +26,18 @@ const examples = [
 	},
 	{
 		title: 'Particle Stream',
-		description: 'Particle Stream from Szenia Zadvornykh',
+		description: 'From Szenia Zadvornykh',
 		path: '/particle-stream',
 	},
 	{
 		title: 'YunGang Cave',
 		description: 'Portal scene of yungang cave',
 		path: '/yungang-cave',
+	},
+	{
+		title: 'Digital Rain',
+		description: 'Shader Practice of Matrix Rain',
+		path: '/digital-rain',
 	},
 ];
 
