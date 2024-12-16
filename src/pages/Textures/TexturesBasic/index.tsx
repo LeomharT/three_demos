@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import {
 	AmbientLight,
 	AxesHelper,
+	LoadingManager,
 	Mesh,
 	MeshStandardMaterial,
 	PerspectiveCamera,
@@ -10,6 +11,7 @@ import {
 	Scene,
 	SpotLight,
 	SpotLightHelper,
+	SRGBColorSpace,
 	TextureLoader,
 	WebGLRenderer,
 } from 'three';
@@ -58,24 +60,37 @@ export default function TexturesBasic() {
 		 * Loaders
 		 */
 
-		const textureLoader = new TextureLoader();
+		const loadingManager = new LoadingManager();
+		loadingManager.onStart = () => {
+			console.log('Loading is started');
+		};
+		loadingManager.onLoad = () => {
+			console.log('Load finished');
+		};
+		loadingManager.onProgress = () => {
+			console.log('Loading...');
+		};
+		loadingManager.onError = () => {
+			console.log('Loading error');
+		};
+
+		const textureLoader = new TextureLoader(loadingManager);
 		textureLoader.setPath('/src/pages/Textures/TexturesBasic/assets/');
 
 		/**
 		 * Scenes
 		 */
 
-		const geometry = new PlaneGeometry(1, 1, 32, 32);
+		const geometry = new PlaneGeometry(WIDTH, GOLDENRATIO, 32, 32);
 
-		const colorTexture = await textureLoader.loadAsync('Door_Wood_001_basecolor.jpg');
-		const alphaTexture = await textureLoader.loadAsync('Door_Wood_001_opacity.jpg');
-		const normalTexture = await textureLoader.loadAsync('Door_Wood_001_normal.jpg');
-		const heightTexture = await textureLoader.loadAsync('Door_Wood_001_height.png');
-		const ambientTexture = await textureLoader.loadAsync(
-			'Door_Wood_001_ambientOcclusion.jpg'
-		);
-		const roughnessMap = await textureLoader.loadAsync('Door_Wood_001_roughness.jpg');
-		const metalnessMap = await textureLoader.loadAsync('Door_Wood_001_metallic.jpg');
+		const colorTexture = textureLoader.load('Door_Wood_001_basecolor.jpg');
+		colorTexture.colorSpace = SRGBColorSpace;
+		const alphaTexture = textureLoader.load('Door_Wood_001_opacity.jpg');
+		const normalTexture = textureLoader.load('Door_Wood_001_normal.jpg');
+		const heightTexture = textureLoader.load('Door_Wood_001_height.png');
+		const ambientTexture = textureLoader.load('Door_Wood_001_ambientOcclusion.jpg');
+		const roughnessMap = textureLoader.load('Door_Wood_001_roughness.jpg');
+		const metalnessMap = textureLoader.load('Door_Wood_001_metallic.jpg');
 
 		const material = new MeshStandardMaterial({
 			map: colorTexture,
@@ -92,8 +107,7 @@ export default function TexturesBasic() {
 		});
 		material.needsUpdate = true;
 
-		const mesh = new Mesh(geometry, material);
-
+		let mesh = new Mesh(geometry, material);
 		scene.add(mesh);
 
 		/**
@@ -106,7 +120,7 @@ export default function TexturesBasic() {
 
 		const spotLight = new SpotLight();
 		spotLight.intensity = 5.0;
-		spotLight.position.set(0, 1.8, 0.3);
+		spotLight.position.set(0, 0.5, 2.5);
 		scene.add(spotLight);
 
 		/**
