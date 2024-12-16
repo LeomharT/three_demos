@@ -36,6 +36,7 @@ const ParticleThreejsJourneyDocs = lazy(
 const ThreejsJourneyLevel5 = lazy(() => import('../pages/ThreejsJourneyLevel5'));
 const GalaxyGenerator = lazy(() => import('../pages/Particle/GalaxyGenerator'));
 const DigitalRain = lazy(() => import('../pages/DigitalRain'));
+const TexturesBasic = lazy(() => import('../pages/Textures/TexturesBasic'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -59,13 +60,14 @@ export const router = createBrowserRouter(
 			<Route path='portal-scene' element={<PortalScene />} />
 			<Route path='portal-through' element={<PortalThrough />} />
 			<Route path='yungang-cave' element={<YunGangCave />} />
+			<Route path='digital-rain' element={<DigitalRain />} />
 			<Route path='particle-stream' element={<ParticleStream />} />
 			<Route path='tj-3dtext' element={<_3DText />} />
 			<Route path='tj-light' element={<LightBasic />} />
 			<Route path='tj-particle' element={<ParticleThreejsJourney />} />
 			<Route path='tj-level5' element={<ThreejsJourneyLevel5 />} />
 			<Route path='tj-galaxy' element={<GalaxyGenerator />} />
-			<Route path='digital-rain' element={<DigitalRain />} />
+			<Route path='tj-textures' element={<TexturesBasic />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

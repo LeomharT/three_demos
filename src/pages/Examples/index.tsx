@@ -75,6 +75,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey Galaxy Generator',
 		path: '/tj-galaxy',
 	},
+	{
+		title: 'Threejs Journey Textures',
+		description: 'Threejs Journey Textures',
+		path: '/tj-textures',
+	},
 ];
 
 function cover(index: number) {
