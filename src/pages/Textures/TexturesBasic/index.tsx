@@ -94,7 +94,6 @@ export default function TexturesBasic() {
 		const normalTexture = textureLoader.load('Door_Wood_001_normal.jpg');
 		const heightTexture = textureLoader.load('Door_Wood_001_height.png');
 		const ambientTexture = textureLoader.load('Door_Wood_001_ambientOcclusion.jpg');
-
 		const roughnessMap = textureLoader.load('Door_Wood_001_roughness.jpg');
 		const metalnessMap = textureLoader.load('Door_Wood_001_metallic.jpg');
 
@@ -180,6 +179,11 @@ export default function TexturesBasic() {
 			max: 10,
 			step: 0.001,
 		});
+		materialPane.addBinding(material, 'displacementBias', {
+			min: 0,
+			max: 10,
+			step: 0.001,
+		});
 		materialPane.addBinding(material, 'roughness', {
 			min: 0,
 			max: 1,
@@ -190,6 +194,7 @@ export default function TexturesBasic() {
 			max: 1,
 			step: 0.1,
 		});
+
 		/**
 		 * Events
 		 */

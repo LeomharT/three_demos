@@ -37,6 +37,8 @@ const ThreejsJourneyLevel5 = lazy(() => import('../pages/ThreejsJourneyLevel5'))
 const GalaxyGenerator = lazy(() => import('../pages/Particle/GalaxyGenerator'));
 const DigitalRain = lazy(() => import('../pages/DigitalRain'));
 const TexturesBasic = lazy(() => import('../pages/Textures/TexturesBasic'));
+const HauntedHouse = lazy(() => import('../pages/HauntedHouse'));
+const HauntedHouseDocs = lazy(() => import('../pages/HauntedHouse/docs.mdx'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -51,6 +53,7 @@ export const router = createBrowserRouter(
 					<Route path='light-basic' element={<LightBasicDocs />} />
 					<Route path='3D-text' element={<_3DTextDocs />} />
 					<Route path='tj-particle' element={<ParticleThreejsJourneyDocs />} />
+					<Route path='tj-hauntedhouse' element={<HauntedHouseDocs />} />
 				</Route>
 			</Route>
 			<Route path='mix-color' element={<MixColor />} />
@@ -68,6 +71,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-level5' element={<ThreejsJourneyLevel5 />} />
 			<Route path='tj-galaxy' element={<GalaxyGenerator />} />
 			<Route path='tj-textures' element={<TexturesBasic />} />
+			<Route path='tj-hauntedhouse' element={<HauntedHouse />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),
