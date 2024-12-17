@@ -8,6 +8,7 @@ import {
 	MeshStandardMaterial,
 	PerspectiveCamera,
 	PlaneGeometry,
+	RepeatWrapping,
 	Scene,
 	SpotLight,
 	SpotLightHelper,
@@ -85,10 +86,15 @@ export default function TexturesBasic() {
 
 		const colorTexture = textureLoader.load('Door_Wood_001_basecolor.jpg');
 		colorTexture.colorSpace = SRGBColorSpace;
+		colorTexture.wrapS = RepeatWrapping;
+		colorTexture.wrapT = RepeatWrapping;
+		colorTexture.repeat.x = 1;
+		colorTexture.repeat.y = 1;
 		const alphaTexture = textureLoader.load('Door_Wood_001_opacity.jpg');
 		const normalTexture = textureLoader.load('Door_Wood_001_normal.jpg');
 		const heightTexture = textureLoader.load('Door_Wood_001_height.png');
 		const ambientTexture = textureLoader.load('Door_Wood_001_ambientOcclusion.jpg');
+
 		const roughnessMap = textureLoader.load('Door_Wood_001_roughness.jpg');
 		const metalnessMap = textureLoader.load('Door_Wood_001_metallic.jpg');
 
