@@ -82,7 +82,7 @@ export default function TexturesBasic() {
 		 * Scenes
 		 */
 
-		const geometry = new PlaneGeometry(WIDTH, GOLDENRATIO, 32, 32);
+		const geometry = new PlaneGeometry(WIDTH, GOLDENRATIO, 100, 100);
 
 		const colorTexture = textureLoader.load('Door_Wood_001_basecolor.jpg');
 		colorTexture.colorSpace = SRGBColorSpace;
@@ -176,7 +176,7 @@ export default function TexturesBasic() {
 		});
 		materialPane.addBinding(material, 'displacementScale', {
 			min: 0,
-			max: 10,
+			max: 1,
 			step: 0.001,
 		});
 		materialPane.addBinding(material, 'displacementBias', {

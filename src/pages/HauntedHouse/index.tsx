@@ -4,15 +4,20 @@ import {
 	AmbientLight,
 	AxesHelper,
 	BoxGeometry,
+	Color,
 	ConeGeometry,
 	DirectionalLight,
 	DirectionalLightHelper,
+	FogExp2,
 	Group,
 	LoadingManager,
 	Mesh,
 	MeshStandardMaterial,
+	PCFShadowMap,
 	PerspectiveCamera,
 	PlaneGeometry,
+	PointLight,
+	PointLightHelper,
 	RepeatWrapping,
 	Scene,
 	SphereGeometry,
@@ -39,6 +44,8 @@ export default function HauntedHouse() {
 		const renderer = new WebGLRenderer({ alpha: true, antialias: true });
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		renderer.setClearColor(theme.colors.dark[7]);
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMap.type = PCFShadowMap;
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
@@ -55,6 +62,8 @@ export default function HauntedHouse() {
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.enableDamping = true;
 		controls.dampingFactor = 0.05;
+		controls.maxPolarAngle = Math.PI;
+		controls.minPolarAngle = 0;
 
 		const stats = new Stats();
 		el.append(stats.dom);
@@ -122,6 +131,74 @@ export default function HauntedHouse() {
 			'walls/castle_brick_broken_06_arm_1k.jpg'
 		);
 
+		// Roof
+		const roofColorTexture = await textureLoader.loadAsync(
+			'roof/roof_slates_02_diff_1k.jpg'
+		);
+		roofColorTexture.colorSpace = SRGBColorSpace;
+		const roofARMTexture = await textureLoader.loadAsync(
+			'roof/roof_slates_02_arm_1k.jpg'
+		);
+		const roofNormalTexture = await textureLoader.loadAsync(
+			'roof/roof_slates_02_nor_gl_1k.jpg'
+		);
+		for (const texture of [roofColorTexture, roofARMTexture, roofNormalTexture]) {
+			texture.wrapS = texture.wrapT = RepeatWrapping;
+			texture.repeat.x = 3;
+			texture.repeat.y = 1;
+		}
+
+		// Bushes
+		const bushesColorTexture = await textureLoader.loadAsync(
+			'bushes/leaves_forest_ground_diff_1k.jpg'
+		);
+		bushesColorTexture.colorSpace = SRGBColorSpace;
+		const bushesNormalTexture = await textureLoader.loadAsync(
+			'bushes/leaves_forest_ground_nor_gl_1k.jpg'
+		);
+		const bushesARMTexture = await textureLoader.loadAsync(
+			'bushes/leaves_forest_ground_arm_1k.jpg'
+		);
+
+		// Grave
+		const graveColorTexture = await textureLoader.loadAsync(
+			'grave/plastered_stone_wall_diff_1k.jpg'
+		);
+		graveColorTexture.colorSpace = SRGBColorSpace;
+		const graveARMTexture = await textureLoader.loadAsync(
+			'grave/plastered_stone_wall_arm_1k.jpg'
+		);
+		const graveNormalTexture = await textureLoader.loadAsync(
+			'grave/plastered_stone_wall_nor_gl_1k.jpg'
+		);
+		for (const texture of [graveColorTexture, graveARMTexture, graveNormalTexture]) {
+			texture.repeat.set(0.3, 0.4);
+		}
+
+		// Door
+		const doorColorTexture = await textureLoader.loadAsync(
+			'door/Door_Wood_001_basecolor.jpg'
+		);
+		doorColorTexture.colorSpace = SRGBColorSpace;
+		const doorAmbientOcclusionTexture = await textureLoader.loadAsync(
+			'door/Door_Wood_001_ambientOcclusion.jpg'
+		);
+		const doorDisplacementTexture = await textureLoader.loadAsync(
+			'door/Door_Wood_001_height.png'
+		);
+		const doorAlphaTexture = await textureLoader.loadAsync(
+			'door/Door_Wood_001_opacity.jpg'
+		);
+		const doorMetalnessTexture = await textureLoader.loadAsync(
+			'door/Door_Wood_001_metallic.jpg'
+		);
+		const doorRoughnessTexture = await textureLoader.loadAsync(
+			'door/Door_Wood_001_roughness.jpg'
+		);
+		const doorNormalTexture = await textureLoader.loadAsync(
+			'door/Door_Wood_001_normal.jpg'
+		);
+
 		/**
 		 * Scene
 		 */
@@ -159,22 +236,48 @@ export default function HauntedHouse() {
 		const walls = new Mesh(wallsGeometry, wallsMaterial);
 		// Roof
 		const roofGeometry = new ConeGeometry(3.5, 1.5, 4, 1);
-		const roofMaterial = new MeshStandardMaterial({});
+		const roofMaterial = new MeshStandardMaterial({
+			map: roofColorTexture,
+			aoMap: roofARMTexture,
+			roughnessMap: roofARMTexture,
+			metalnessMap: roofARMTexture,
+			normalMap: roofNormalTexture,
+		});
 		const roof = new Mesh(roofGeometry, roofMaterial);
 		roof.position.y = 2.5 + 1.5 / 2;
 		roof.rotation.y = Math.PI / 4;
 		// Door
-		const doorGeometry = new PlaneGeometry(2.2, 2.2);
-		const doorMaterial = new MeshStandardMaterial({ color: 'red' });
+		const doorGeometry = new PlaneGeometry(2.2, 2.2, 100, 100);
+		const doorMaterial = new MeshStandardMaterial({
+			transparent: true,
+			map: doorColorTexture,
+			aoMap: doorAmbientOcclusionTexture,
+			alphaMap: doorAlphaTexture,
+			displacementMap: doorDisplacementTexture,
+			roughnessMap: doorRoughnessTexture,
+			metalnessMap: doorMetalnessTexture,
+			normalMap: doorNormalTexture,
+			displacementScale: 0.15,
+			displacementBias: -0.04,
+		});
 		const door = new Mesh(doorGeometry, doorMaterial);
 		door.position.y = 2.2 / 2;
 		door.position.z = 4 / 2 + 0.01;
 		// Bushes
 		const bushGeometry = new SphereGeometry(1, 16, 16);
-		const bushMaterial = new MeshStandardMaterial({});
+		const bushMaterial = new MeshStandardMaterial({
+			color: '#ccffcc',
+			map: bushesColorTexture,
+			aoMap: bushesARMTexture,
+			roughnessMap: bushesARMTexture,
+			metalnessMap: bushesARMTexture,
+			normalMap: bushesNormalTexture,
+		});
 		const bush1 = new Mesh(bushGeometry, bushMaterial);
 		bush1.scale.setScalar(0.5);
 		bush1.position.set(0.8, 0.2, 2.2);
+		// Clone need only once
+		bush1.rotation.x = -0.75;
 
 		const bush2 = bush1.clone();
 		bush2.scale.setScalar(0.25);
@@ -191,7 +294,11 @@ export default function HauntedHouse() {
 		// Garves
 		const garveGeometry = new BoxGeometry(0.6, 0.8, 0.2);
 		const graveMaterial = new MeshStandardMaterial({
-			color: 'yellow',
+			map: graveColorTexture,
+			aoMap: graveARMTexture,
+			roughnessMap: graveARMTexture,
+			metalnessMap: graveARMTexture,
+			normalMap: graveNormalTexture,
 		});
 		const garves = new Group();
 
@@ -224,18 +331,34 @@ export default function HauntedHouse() {
 		scene.add(house);
 
 		/**
+		 * Shadows
+		 */
+
+		walls.castShadow = true;
+		walls.receiveShadow = true;
+
+		roof.castShadow = true;
+		floor.receiveShadow = true;
+		door.receiveShadow = true;
+
+		garves.traverse((grave) => {
+			grave.castShadow = true;
+			garves.receiveShadow = true;
+		});
+
+		/**
 		 * Sky
 		 */
 
 		const effectController = {
 			radius: 1,
-			phi: 0,
-			theta: 0,
-			scale: 20,
-			turbidity: 10,
-			rayleigh: 0.5,
-			mieCoefficient: 0.005,
-			mieDirectionalG: 0.8,
+			phi: -1.6,
+			theta: -0.4,
+			scale: 100,
+			turbidity: 20,
+			rayleigh: 3,
+			mieCoefficient: 0.1,
+			mieDirectionalG: 0.95,
 		};
 		const sky = new Sky();
 		function updateSky() {
@@ -252,21 +375,62 @@ export default function HauntedHouse() {
 			sky.material.uniforms['mieDirectionalG'].value = effectController.mieDirectionalG;
 		}
 		updateSky();
-		// scene.add(sky);
+		scene.add(sky);
+
+		// Fog
+		const fog = new FogExp2('#04343f', 0.1);
+		scene.fog = fog;
 
 		/**
 		 * Lights
 		 */
 
 		const ambientLight = new AmbientLight();
+		ambientLight.color = new Color('#86cdff');
+		ambientLight.intensity = 0.275;
 		scene.add(ambientLight);
 
 		const directionalLight = new DirectionalLight();
+		directionalLight.castShadow = true;
+		directionalLight.color = new Color('#86cdff');
 		directionalLight.scale.setScalar(1);
 		directionalLight.position.x = 5.0;
 		directionalLight.position.z = -5.0;
+		directionalLight.shadow.mapSize.width = 512;
+		directionalLight.shadow.mapSize.height = 512;
+		directionalLight.shadow.camera.top = 8;
+		directionalLight.shadow.camera.right = 8;
+		directionalLight.shadow.camera.bottom = -8;
+		directionalLight.shadow.camera.left = -8;
+		directionalLight.shadow.camera.near = 1;
+		directionalLight.shadow.camera.far = 20;
 		scene.add(directionalLight);
 		scene.add(directionalLight.target);
+
+		// Door light
+		const pointLight = new PointLight();
+		pointLight.position.set(0, 2.2, 2.5);
+		pointLight.color = new Color('#ff7d46');
+		pointLight.intensity = 5;
+		scene.add(pointLight);
+
+		// Ghosts Light
+		const ghost1 = new PointLight('#8800ff', 6);
+		ghost1.castShadow = true;
+		ghost1.shadow.camera.far = 10;
+		ghost1.shadow.mapSize.set(256, 256);
+
+		const ghost2 = new PointLight('#ff0088', 6);
+		ghost2.castShadow = true;
+		ghost2.shadow.camera.far = 10;
+		ghost2.shadow.mapSize.set(256, 256);
+
+		const ghost3 = new PointLight('#ff0000', 6);
+		ghost3.castShadow = true;
+		ghost3.shadow.camera.far = 10;
+		ghost3.shadow.mapSize.set(256, 256);
+
+		scene.add(ghost1, ghost2, ghost3);
 
 		/**
 		 * Helpers
@@ -276,8 +440,20 @@ export default function HauntedHouse() {
 		scene.add(axesHelper);
 
 		const directionalLightHelper = new DirectionalLightHelper(directionalLight);
-		directionalLightHelper.visible = true;
+		directionalLightHelper.visible = false;
 		scene.add(directionalLightHelper);
+
+		const pointLightHelper = new PointLightHelper(pointLight);
+		pointLightHelper.visible = false;
+		scene.add(pointLightHelper);
+
+		const ghost1LightHelper = new PointLightHelper(ghost1);
+		ghost1LightHelper.visible = false;
+		const ghost2LightHelper = new PointLightHelper(ghost2);
+		ghost2LightHelper.visible = false;
+		const ghost3LightHelper = new PointLightHelper(ghost3);
+		ghost3LightHelper.visible = false;
+		scene.add(ghost1LightHelper, ghost2LightHelper, ghost3LightHelper);
 
 		/**
 		 * Pane
@@ -291,6 +467,56 @@ export default function HauntedHouse() {
 				min: 0,
 				max: 10,
 				step: 0.1,
+			});
+			ambientPane.addBinding(ambientLight, 'color', {
+				color: {
+					type: 'float',
+				},
+			});
+		}
+		// DirectionalLight
+		{
+			const directionalLightPane = pane.addFolder({ title: 'Directional Light' });
+			directionalLightPane.addBinding(directionalLightHelper, 'visible', {
+				label: 'helper visible',
+			});
+			directionalLightPane.addBinding(directionalLight, 'color', {
+				color: { type: 'float' },
+			});
+			directionalLightPane.addBinding(directionalLight, 'intensity', {
+				min: 0,
+				max: 10,
+				step: 0.1,
+			});
+			directionalLightPane
+				.addBinding(directionalLight, 'position')
+				.on('change', () => directionalLightHelper.update());
+		}
+		// Point Light
+		{
+			const pointLightPane = pane.addFolder({ title: 'Point Light' });
+			pointLightPane.addBinding(pointLightHelper, 'visible', {
+				label: 'helper visible',
+			});
+			pointLightPane.addBinding(pointLight, 'color', {
+				color: { type: 'float' },
+			});
+			pointLightPane.addBinding(pointLight, 'intensity', {
+				min: 0,
+				max: 10,
+				step: 0.1,
+			});
+			pointLightPane
+				.addBinding(pointLight, 'position')
+				.on('change', () => pointLightHelper.update());
+		}
+		// Ghost Light
+		{
+			const ghostPane = pane.addFolder({ title: 'Ghost Light' });
+			ghostPane.addBinding(ghost1LightHelper, 'visible').on('change', (val) => {
+				ghost1LightHelper.visible = val.value;
+				ghost2LightHelper.visible = val.value;
+				ghost3LightHelper.visible = val.value;
 			});
 		}
 		// Floor Material
@@ -317,24 +543,6 @@ export default function HauntedHouse() {
 				step: 0.01,
 			});
 		}
-		// DirectionalLight
-		{
-			const directionalLightPane = pane.addFolder({ title: 'Directional Light' });
-			directionalLightPane.addBinding(directionalLightHelper, 'visible', {
-				label: 'helper visible',
-			});
-			directionalLightPane.addBinding(directionalLight, 'color', {
-				color: { type: 'float' },
-			});
-			directionalLightPane.addBinding(directionalLight, 'intensity', {
-				min: 0,
-				max: 10,
-				step: 0.1,
-			});
-			directionalLightPane
-				.addBinding(directionalLight, 'position')
-				.on('change', () => directionalLightHelper.update());
-		}
 		// Sky
 		{
 			const skyPane = pane.addFolder({ title: 'Sky' });
@@ -347,8 +555,8 @@ export default function HauntedHouse() {
 				.on('change', updateSky);
 			skyPane
 				.addBinding(effectController, 'phi', {
-					min: -Math.PI / 2,
-					max: Math.PI / 2,
+					min: -Math.PI,
+					max: Math.PI,
 					step: 0.1,
 				})
 				.on('change', updateSky);
@@ -392,12 +600,37 @@ export default function HauntedHouse() {
 		 * Events
 		 */
 
-		function render(time?: number) {
+		function render(time: number = 0) {
 			requestAnimationFrame(render);
 
 			stats.update();
 			controls.update(time);
 			renderer.render(scene, camera);
+
+			const ghost1Angle = time * 0.0005;
+			const ghost2Angle = -time * 0.00038;
+			const ghost3Angle = -time * 0.00023;
+
+			ghost1.position.x = Math.cos(ghost1Angle) * 4;
+			ghost1.position.y =
+				Math.sin(ghost1Angle) *
+				Math.sin(ghost1Angle + 2.34) *
+				Math.sin(ghost1Angle + 3.45);
+			ghost1.position.z = Math.sin(ghost1Angle) * 4;
+
+			ghost2.position.x = Math.cos(ghost2Angle) * 5;
+			ghost2.position.y =
+				Math.sin(ghost2Angle) *
+				Math.sin(ghost2Angle + 2.34) *
+				Math.sin(ghost2Angle + 3.45);
+			ghost2.position.z = Math.sin(ghost2Angle) * 5;
+
+			ghost3.position.x = Math.cos(ghost3Angle) * 6;
+			ghost3.position.y =
+				Math.sin(ghost3Angle) *
+				Math.sin(ghost3Angle + 2.34) *
+				Math.sin(ghost3Angle + 3.45);
+			ghost3.position.z = Math.sin(ghost3Angle) * 6;
 		}
 		render();
 
