@@ -39,6 +39,7 @@ const DigitalRain = lazy(() => import('../pages/DigitalRain'));
 const TexturesBasic = lazy(() => import('../pages/Textures/TexturesBasic'));
 const HauntedHouse = lazy(() => import('../pages/HauntedHouse'));
 const HauntedHouseDocs = lazy(() => import('../pages/HauntedHouse/docs.mdx'));
+const ThreejsJourneyShadow = lazy(() => import('../pages/Shadow/ThreejsJourneyShadow'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -72,6 +73,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-galaxy' element={<GalaxyGenerator />} />
 			<Route path='tj-textures' element={<TexturesBasic />} />
 			<Route path='tj-hauntedhouse' element={<HauntedHouse />} />
+			<Route path='tj-shadow' element={<ThreejsJourneyShadow />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

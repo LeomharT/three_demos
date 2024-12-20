@@ -85,6 +85,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey HauntedHouse',
 		path: '/tj-hauntedhouse',
 	},
+	{
+		title: 'Threejs Journey Shadow',
+		description: 'Threejs Journey Shadow',
+		path: '/tj-shadow',
+	},
 ];
 
 function cover(index: number) {
