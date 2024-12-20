@@ -136,14 +136,16 @@ export default function ThreejsJourneyShadow() {
 		scene.add(ambientLight);
 
 		const directionalLight = new DirectionalLight();
-		directionalLight.position.set(0, 3, 0);
+		directionalLight.position.set(0, 10, 0);
 		directionalLight.intensity = 1;
 		directionalLight.castShadow = true;
 		directionalLight.shadow.mapSize.set(256, 256);
-		directionalLight.shadow.camera.top = 8;
-		directionalLight.shadow.camera.right = 8;
-		directionalLight.shadow.camera.bottom = -8;
-		directionalLight.shadow.camera.left = -8;
+		directionalLight.shadow.camera.top = 5;
+		directionalLight.shadow.camera.right = 5;
+		directionalLight.shadow.camera.bottom = -5;
+		directionalLight.shadow.camera.left = -5;
+		directionalLight.shadow.camera.near = 0.01;
+		directionalLight.shadow.camera.far = 10.1;
 		scene.add(directionalLight);
 
 		/**
