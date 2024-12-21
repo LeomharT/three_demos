@@ -1,0 +1,237 @@
+import { useMantineTheme } from '@mantine/core';
+import { easing } from 'maath';
+import { useEffect } from 'react';
+import {
+	AmbientLight,
+	AxesHelper,
+	ConeGeometry,
+	DirectionalLight,
+	Group,
+	Mesh,
+	MeshToonMaterial,
+	NearestFilter,
+	PerspectiveCamera,
+	Scene,
+	TextureLoader,
+	TorusGeometry,
+	TorusKnotGeometry,
+	WebGLRenderer,
+} from 'three';
+import Stats from 'three/examples/jsm/libs/stats.module.js';
+import { Pane } from 'tweakpane';
+import classes from './style.module.css';
+
+console.log(easing);
+export default function ScrollAnimate() {
+	const theme = useMantineTheme();
+
+	async function initialScene() {
+		const el = document.querySelector('#container') as HTMLDivElement;
+
+		/**
+		 * Basic
+		 */
+
+		const renderer = new WebGLRenderer({
+			alpha: true,
+			antialias: true,
+		});
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setClearColor(theme.colors.dark[9]);
+		renderer.setClearAlpha(0);
+		renderer.setPixelRatio(window.devicePixelRatio);
+		renderer.domElement.className = classes['webgl'];
+		el.append(renderer.domElement);
+
+		const scene = new Scene();
+
+		const camera = new PerspectiveCamera(
+			75,
+			window.innerWidth / window.innerHeight,
+			0.1,
+			1000
+		);
+		camera.position.set(0, 0, 3);
+
+		const cameraGroup = new Group();
+		cameraGroup.add(camera);
+		scene.add(cameraGroup);
+
+		const stats = new Stats();
+		el.append(stats.dom);
+
+		/**
+		 * Loader
+		 */
+
+		const textureLoader = new TextureLoader();
+		textureLoader.setPath('/src/pages/ScrollAnimate/assets/');
+
+		/**
+		 * Texture
+		 */
+
+		const gradientTexture = await textureLoader.loadAsync('3.jpg');
+		gradientTexture.minFilter = NearestFilter;
+		gradientTexture.magFilter = NearestFilter;
+
+		/**
+		 * Scene
+		 */
+
+		const material = new MeshToonMaterial({
+			color: '#ffeded',
+			wireframe: false,
+			gradientMap: gradientTexture,
+		});
+
+		const distance = 4;
+
+		const torusGeometry = new TorusGeometry(1, 0.4, 16, 60, Math.PI * 2);
+		const torus = new Mesh(torusGeometry, material);
+		torus.receiveShadow = true;
+		torus.castShadow = true;
+		torus.position.x = 2;
+		torus.position.y = -distance * 0;
+		scene.add(torus);
+
+		const coneGeometry = new ConeGeometry(1, 2, 32);
+		const cone = new Mesh(coneGeometry, material);
+		cone.receiveShadow = true;
+		cone.castShadow = true;
+		cone.position.x = -2;
+		cone.position.y = -distance * 1;
+		scene.add(cone);
+
+		const torusKnotGeometry = new TorusKnotGeometry(0.8, 0.35, 100, 16);
+		const torusKnot = new Mesh(torusKnotGeometry, material);
+		torusKnot.receiveShadow = true;
+		torusKnot.castShadow = true;
+		torusKnot.position.x = 2;
+		torusKnot.position.y = -distance * 2;
+		scene.add(torusKnot);
+
+		const sectionMeshs = [torus, cone, torusKnot];
+
+		/**
+		 * Light
+		 */
+
+		const ambientLight = new AmbientLight();
+		ambientLight.intensity = 0;
+		scene.add(ambientLight);
+
+		const directionalLight = new DirectionalLight('#ffffff');
+		directionalLight.intensity = 3;
+		directionalLight.position.set(1, 1, 0);
+		scene.add(directionalLight);
+
+		/**
+		 * Helpers
+		 */
+
+		const axexHelper = new AxesHelper();
+		scene.add(axexHelper);
+
+		/**
+		 * Pane
+		 */
+
+		const pane = new Pane({ title: 'Debug Params' });
+		pane.addBinding(material, 'color', {
+			color: { type: 'float' },
+		});
+		// Camera
+		const cameraPane = pane.addFolder({ title: 'Camera' });
+		cameraPane
+			.addBinding(camera, 'fov')
+			.on('change', () => camera.updateProjectionMatrix());
+		// Ambient Light
+		const ambientLightPane = pane.addFolder({ title: 'Ambient Light' });
+		ambientLightPane.addBinding(ambientLight, 'intensity', {
+			step: 0.01,
+			min: 0,
+			max: 10,
+		});
+		// Directional Light
+		const directionalLightPane = pane.addFolder({ title: 'Directional Light' });
+		directionalLightPane.addBinding(directionalLight, 'intensity', {
+			step: 0.01,
+			min: 0,
+			max: 10,
+		});
+		directionalLightPane.addBinding(directionalLight, 'color', {
+			color: { type: 'float' },
+		});
+
+		/**
+		 * Events
+		 */
+
+		const cursor = {
+			x: 0,
+			y: 0,
+		};
+
+		let previousTime = 0;
+
+		function render(time: number = 0) {
+			requestAnimationFrame(render);
+
+			for (const mesh of sectionMeshs) {
+				mesh.rotation.x = time * 0.0001;
+				mesh.rotation.y = time * 0.00012;
+			}
+
+			const deltaTime = time - previousTime;
+			previousTime = time;
+
+			// ?
+			cameraGroup.position.x += (-cursor.x - cameraGroup.position.x) * 0.002 * deltaTime;
+			cameraGroup.position.y += (cursor.y - cameraGroup.position.y) * 0.002 * deltaTime;
+
+			stats.update();
+			renderer.render(scene, camera);
+		}
+		render();
+
+		function resize() {
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+		}
+		window.addEventListener('resize', resize);
+
+		function scroll(e: Event) {
+			if (e.target instanceof HTMLDivElement) {
+				const scrollY = e.target.scrollTop;
+				camera.position.y = -(scrollY / window.innerHeight) * distance;
+				camera.updateProjectionMatrix();
+			}
+		}
+		el.addEventListener('scroll', scroll);
+
+		function move(e: MouseEvent) {
+			const x = window.innerWidth / 2 - e.clientX;
+			const y = window.innerHeight / 2 - e.clientY;
+
+			cursor.x = x / window.innerWidth;
+			cursor.y = y / window.innerHeight;
+		}
+		el.addEventListener('mousemove', move);
+	}
+
+	useEffect(() => {
+		initialScene();
+	}, []);
+
+	return (
+		<div id='container' className={classes['container']}>
+			<section className={classes['section']}>
+				<h1>MY PORTFOLIO</h1>
+				<h1>MY PROJECTS</h1>
+				<h1>CONTACT ME</h1>
+			</section>
+		</div>
+	);
+}

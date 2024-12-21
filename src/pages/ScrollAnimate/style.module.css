@@ -1,0 +1,36 @@
+body {
+	background-color: #1e1a20;
+}
+
+.container {
+	position: relative;
+	height: 100vh;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.webgl {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: -1;
+}
+
+.section {
+	width: 100%;
+	height: 300vh;
+	padding-inline: 10%;
+	color: var(--mantine-color-pink-1);
+
+	& > h1 {
+		margin: 0;
+		font-size: 4rem;
+		height: 100vh;
+		display: flex;
+		align-items: center;
+
+		&:nth-of-type(2) {
+			justify-content: end;
+		}
+	}
+}

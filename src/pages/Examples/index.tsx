@@ -90,6 +90,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey Shadow',
 		path: '/tj-shadow',
 	},
+	{
+		title: 'Threejs Journey Scroll Animate',
+		description: 'Threejs Journey Scroll Animate',
+		path: '/tj-scrollanimate',
+	},
 ];
 
 function cover(index: number) {
