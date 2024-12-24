@@ -1,9 +1,10 @@
 import { useMantineTheme } from '@mantine/core';
-import { easing } from 'maath';
 import { useEffect } from 'react';
 import {
 	AmbientLight,
 	AxesHelper,
+	BufferAttribute,
+	BufferGeometry,
 	ConeGeometry,
 	DirectionalLight,
 	Group,
@@ -11,6 +12,8 @@ import {
 	MeshToonMaterial,
 	NearestFilter,
 	PerspectiveCamera,
+	Points,
+	PointsMaterial,
 	Scene,
 	TextureLoader,
 	TorusGeometry,
@@ -21,7 +24,6 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
 import classes from './style.module.css';
 
-console.log(easing);
 export default function ScrollAnimate() {
 	const theme = useMantineTheme();
 
@@ -112,6 +114,29 @@ export default function ScrollAnimate() {
 		scene.add(torusKnot);
 
 		const sectionMeshs = [torus, cone, torusKnot];
+
+		const PARTICLE_COUNT = 500;
+
+		const particlesGeometry = new BufferGeometry();
+		const position = new Float32Array(PARTICLE_COUNT * 3);
+		const attrPosition = new BufferAttribute(position, 3);
+		for (let i = 0; i < PARTICLE_COUNT; i++) {
+			const i3 = i * 3;
+
+			position[i3 + 0] = (Math.random() - 0.5) * 10;
+			position[i3 + 1] = distance * 0.5 - Math.random() * distance * sectionMeshs.length;
+			position[i3 + 2] = (Math.random() - 0.5) * 10;
+		}
+		particlesGeometry.setAttribute('position', attrPosition);
+
+		const particlesMaterial = new PointsMaterial({
+			sizeAttenuation: true,
+			size: 0.03,
+			color: '#ffeded',
+		});
+
+		const particles = new Points(particlesGeometry, particlesMaterial);
+		scene.add(particles);
 
 		/**
 		 * Light
