@@ -1,4 +1,5 @@
 import { useMantineTheme } from '@mantine/core';
+import { Easing, Tween } from '@tweenjs/tween.js';
 import { useEffect } from 'react';
 import {
 	AmbientLight,
@@ -200,21 +201,39 @@ export default function ScrollAnimate() {
 
 		let previousTime = 0;
 
+		const rotations = {
+			x: 0,
+			y: 0,
+			z: 0,
+		};
+
+		const tween = new Tween(rotations)
+			.to({
+				x: (rotations.x += 6),
+				y: (rotations.y += 3),
+				z: (rotations.z += 1.5),
+			})
+			.duration(2000)
+			.easing(Easing.Quadratic.InOut)
+			.onUpdate(console.log)
+			.onComplete(() => console.log(rotations));
+
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
 
-			for (const mesh of sectionMeshs) {
-				mesh.rotation.x = time * 0.0001;
-				mesh.rotation.y = time * 0.00012;
-			}
-
 			const deltaTime = time - previousTime;
 			previousTime = time;
+
+			for (const mesh of sectionMeshs) {
+				mesh.rotation.x += deltaTime * 0.0001;
+				mesh.rotation.y += deltaTime * 0.00012;
+			}
 
 			// ?
 			cameraGroup.position.x += (-cursor.x - cameraGroup.position.x) * 0.002 * deltaTime;
 			cameraGroup.position.y += (cursor.y - cameraGroup.position.y) * 0.002 * deltaTime;
 
+			tween.update(time);
 			stats.update();
 			renderer.render(scene, camera);
 		}
@@ -230,6 +249,15 @@ export default function ScrollAnimate() {
 		function scroll(e: Event) {
 			if (e.target instanceof HTMLDivElement) {
 				const scrollY = e.target.scrollTop;
+
+				const nextSection = Math.round(scrollY / window.innerHeight);
+
+				if (nextSection === 1 && !tween.isPlaying()) {
+					tween.start();
+				} else {
+					tween.stop();
+				}
+
 				camera.position.y = -(scrollY / window.innerHeight) * distance;
 				camera.updateProjectionMatrix();
 			}
