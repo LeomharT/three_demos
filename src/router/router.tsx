@@ -27,6 +27,7 @@ const LightBasicDocs = lazy(() => import('../pages/LightBasic/docs.mdx'));
 const _3DText = lazy(() => import('../pages/3DText'));
 const _3DTextDocs = lazy(() => import('../pages/3DText/docs.mdx'));
 const ParticleStream = lazy(() => import('../pages/Particle/ParticleStream'));
+const Spaceship = lazy(() => import('../pages/Spaceship'));
 const ParticleThreejsJourney = lazy(
 	() => import('../pages/Particle/ParticleThreejsJourney')
 );
@@ -41,6 +42,9 @@ const HauntedHouse = lazy(() => import('../pages/HauntedHouse'));
 const HauntedHouseDocs = lazy(() => import('../pages/HauntedHouse/docs.mdx'));
 const ThreejsJourneyShadow = lazy(() => import('../pages/Shadow/ThreejsJourneyShadow'));
 const ScrollAnimate = lazy(() => import('../pages/ScrollAnimate'));
+const ThreejsJourneyPhysics = lazy(
+	() => import('../pages/Physics/ThreejsJourneyPhysics')
+);
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -67,6 +71,7 @@ export const router = createBrowserRouter(
 			<Route path='yungang-cave' element={<YunGangCave />} />
 			<Route path='digital-rain' element={<DigitalRain />} />
 			<Route path='particle-stream' element={<ParticleStream />} />
+			<Route path='spaceship' element={<Spaceship />} />
 			<Route path='tj-3dtext' element={<_3DText />} />
 			<Route path='tj-light' element={<LightBasic />} />
 			<Route path='tj-particle' element={<ParticleThreejsJourney />} />
@@ -76,6 +81,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-hauntedhouse' element={<HauntedHouse />} />
 			<Route path='tj-shadow' element={<ThreejsJourneyShadow />} />
 			<Route path='tj-scrollanimate' element={<ScrollAnimate />} />
+			<Route path='tj-physics' element={<ThreejsJourneyPhysics />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

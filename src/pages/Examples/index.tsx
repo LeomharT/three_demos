@@ -39,6 +39,11 @@ const examples = [
 		description: 'Shader Practice of Matrix Rain',
 		path: '/digital-rain',
 	},
+	{
+		title: 'Spaceship',
+		description: 'Spaceship',
+		path: '/spaceship',
+	},
 ];
 
 const r3fExamples = [
@@ -94,6 +99,11 @@ const threejsJourneyExapmles = [
 		title: 'Threejs Journey Scroll Animate',
 		description: 'Threejs Journey Scroll Animate',
 		path: '/tj-scrollanimate',
+	},
+	{
+		title: 'Threejs Journey Physics',
+		description: 'Threejs Journey Physics',
+		path: '/tj-physics',
 	},
 ];
 
