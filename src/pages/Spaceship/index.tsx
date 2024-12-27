@@ -202,11 +202,9 @@ export default function Spaceship() {
 				// Compute for rotation
 				const angle = Math.acos(dirCos) - Math.PI / 2;
 
-				angleAcceleration += (angle - angleZ) * 0.1;
+				angleAcceleration += (angle - angleZ) * 0.05;
 				angleAcceleration *= 0.85;
 				angleZ = angleAcceleration;
-
-				console.log(angle);
 			}
 
 			spaceship.position.y = translY;
