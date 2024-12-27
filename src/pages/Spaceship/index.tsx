@@ -5,7 +5,6 @@ import {
 	AxesHelper,
 	Color,
 	DirectionalLight,
-	DirectionalLightHelper,
 	GridHelper,
 	LoadingManager,
 	Mesh,
@@ -13,9 +12,13 @@ import {
 	MeshStandardMaterial,
 	PerspectiveCamera,
 	PlaneGeometry,
+	Raycaster,
 	Scene,
+	SphereGeometry,
 	SRGBColorSpace,
 	Texture,
+	Vector2,
+	Vector3,
 	WebGLRenderer,
 } from 'three';
 import { DRACOLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
@@ -115,6 +118,14 @@ export default function Spaceship() {
 		plane.rotation.y = Math.PI / 2;
 		scene.add(plane);
 
+		const sphereGeometry = new SphereGeometry(0.1, 20, 20);
+		const sphereMaterial = new MeshBasicMaterial({
+			color: new Color(1, 0, 0),
+		});
+		const sphere = new Mesh(sphereGeometry, sphereMaterial);
+		sphere.position.set(0, 2, 0);
+		scene.add(sphere);
+
 		/**
 		 * Lights
 		 */
@@ -141,9 +152,6 @@ export default function Spaceship() {
 		const gridHelper = new GridHelper(100, 35);
 		scene.add(gridHelper);
 
-		const directionalLightHelper = new DirectionalLightHelper(directionalLight);
-		scene.add(directionalLightHelper);
-
 		/**
 		 * Pane
 		 */
@@ -164,12 +172,31 @@ export default function Spaceship() {
 		 * Events
 		 */
 
+		const raycaster = new Raycaster();
+		const point = new Vector2();
+		const rect = el.getBoundingClientRect();
+
+		let intersectPoint: Vector3 | undefined;
+		let translY = 0;
+		let translAccelleration = 0;
+
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
 
 			stats.update();
 			controls.update(time);
 			renderer.render(scene, camera);
+
+			if (intersectPoint) {
+				const targetY = intersectPoint.y;
+				translAccelleration += (targetY - translY) * 0.002;
+				translAccelleration *= 0.95;
+				translY += translAccelleration;
+			}
+
+			console.log(translY);
+
+			spaceship.position.y = translY;
 		}
 		render();
 
@@ -180,13 +207,18 @@ export default function Spaceship() {
 		}
 		window.addEventListener('resize', resize);
 
-		const rect = el.getBoundingClientRect();
-
 		function move(e: MouseEvent) {
-			const x = e.clientX / rect.width - 0.5;
-			const y = e.clientY / rect.height - 0.5;
+			const x = (e.clientX / rect.width) * 2 - 1;
+			const y = -(e.clientY / rect.height) * 2 + 1;
+			point.set(x, y);
 
-			console.log(x, -y);
+			raycaster.setFromCamera(point, camera);
+			const intersects = raycaster.intersectObjects(scene.children, true);
+
+			intersectPoint = intersects[0]?.point;
+			if (intersectPoint) {
+				sphere.position.copy(intersectPoint);
+			}
 		}
 		el.addEventListener('mousemove', move);
 	};
