@@ -202,13 +202,13 @@ export default function Spaceship() {
 				// Compute for rotation
 				const angle = Math.acos(dirCos) - Math.PI / 2;
 
-				angleAcceleration += (angle - angleZ) * 0.05;
+				angleAcceleration += (angle - angleZ) * 0.06;
 				angleAcceleration *= 0.85;
 				angleZ = angleAcceleration;
 			}
 
 			spaceship.position.y = translY;
-			spaceship.rotation.x = angleZ;
+			spaceship.rotation.setFromVector3(new Vector3(angleZ, 0, angleZ), 'XYZ');
 		}
 		render();
 
@@ -225,10 +225,11 @@ export default function Spaceship() {
 			point.set(x, y);
 
 			raycaster.setFromCamera(point, camera);
-			const intersects = raycaster.intersectObjects(scene.children, true);
+			const intersects = raycaster.intersectObjects([plane], true);
 
 			intersectPoint = intersects[0]?.point;
 			if (intersectPoint) {
+				intersectPoint.x = -3;
 				sphere.position.copy(intersectPoint);
 			}
 		}
