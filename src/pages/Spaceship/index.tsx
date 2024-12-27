@@ -177,8 +177,12 @@ export default function Spaceship() {
 		const rect = el.getBoundingClientRect();
 
 		let intersectPoint: Vector3 | undefined;
+
 		let translY = 0;
-		let translAccelleration = 0;
+		let translAcceleration = 0;
+
+		let angleZ = 0;
+		let angleAcceleration = 0;
 
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
@@ -189,14 +193,24 @@ export default function Spaceship() {
 
 			if (intersectPoint) {
 				const targetY = intersectPoint.y;
-				translAccelleration += (targetY - translY) * 0.002;
-				translAccelleration *= 0.95;
-				translY += translAccelleration;
+				translAcceleration += (targetY - translY) * 0.002;
+				translAcceleration *= 0.95;
+				translY += translAcceleration;
+
+				const dir = intersectPoint.clone().sub(new Vector3(0, translY, 0)).normalize();
+				const dirCos = dir.dot(new Vector3(0, 1, 0));
+				// Compute for rotation
+				const angle = Math.acos(dirCos) - Math.PI / 2;
+
+				angleAcceleration += (angle - angleZ) * 0.1;
+				angleAcceleration *= 0.85;
+				angleZ = angleAcceleration;
+
+				console.log(angle);
 			}
 
-			console.log(translY);
-
 			spaceship.position.y = translY;
+			spaceship.rotation.x = angleZ;
 		}
 		render();
 
