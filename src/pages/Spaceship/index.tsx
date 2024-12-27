@@ -17,6 +17,7 @@ import {
 	SphereGeometry,
 	SRGBColorSpace,
 	Texture,
+	TextureLoader,
 	Vector2,
 	Vector3,
 	WebGLRenderer,
@@ -83,6 +84,15 @@ export default function Spaceship() {
 		gltfLoader.dracoLoader = dracoLoader;
 		gltfLoader.setPath('/src/pages/Spaceship/assets/');
 
+		const textureLoader = new TextureLoader(loadingManager);
+		textureLoader.setPath('/src/pages/Spaceship/assets/');
+
+		/**
+		 * Textures
+		 */
+
+		const starAlphaTexture = await textureLoader.loadAsync('starAlpha.png');
+
 		/**
 		 * Scenes
 		 */
@@ -116,6 +126,7 @@ export default function Spaceship() {
 		});
 		const plane = new Mesh(planeGeometry, planeMaterial);
 		plane.rotation.y = Math.PI / 2;
+		plane.visible = false;
 		scene.add(plane);
 
 		const sphereGeometry = new SphereGeometry(0.1, 20, 20);
@@ -124,7 +135,18 @@ export default function Spaceship() {
 		});
 		const sphere = new Mesh(sphereGeometry, sphereMaterial);
 		sphere.position.set(0, 2, 0);
+		sphere.visible = false;
 		scene.add(sphere);
+
+		const starGeometry = new PlaneGeometry(1, 0.05);
+		const starMaterial = new MeshBasicMaterial({
+			transparent: true,
+			alphaMap: starAlphaTexture,
+		});
+		const star = new Mesh(starGeometry, starMaterial);
+		star.rotation.y = Math.PI / 2;
+		star.position.y = 2;
+		scene.add(star);
 
 		/**
 		 * Lights
@@ -150,6 +172,7 @@ export default function Spaceship() {
 		scene.add(axesHelper);
 
 		const gridHelper = new GridHelper(100, 35);
+		gridHelper.visible = false;
 		scene.add(gridHelper);
 
 		/**
