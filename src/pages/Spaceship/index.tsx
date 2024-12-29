@@ -169,8 +169,17 @@ export default function Spaceship() {
 		}
 
 		function resetStar() {
-			const len = r(1.5, 5);
-			const pos = new Vector3(r(-15, 15), r(-10, 10), r(-15, 15));
+			let len = 0;
+			let pos;
+
+			if (Math.random() > 0.8) {
+				len = r(1.5, 15);
+				pos = new Vector3(r(-15, 15), r(-10, 10), r(-15, 15));
+			} else {
+				len = r(2.5, 20);
+				pos = new Vector3(r(-15, 15), r(-10, 10), r(-15, 15));
+			}
+
 			const color = new Color(COLORS[Math.floor(Math.random() * COLORS.length)])
 				.convertSRGBToLinear()
 				.multiplyScalar(1.3);
@@ -216,7 +225,6 @@ export default function Spaceship() {
 			star.setColorAt(i, STARS[i].color);
 			star.setMatrixAt(i, object3D.matrix);
 		}
-		star.instanceMatrix.needsUpdate = true;
 
 		scene.add(star);
 
@@ -315,19 +323,25 @@ export default function Spaceship() {
 			spaceship.position.y = translY;
 			spaceship.rotation.setFromVector3(new Vector3(angleZ, 0, angleZ), 'XYZ');
 
-			// for (let i = 0; i < STARS.length; i++) {
-			// 	if (STARS[i].pos.z >= 40) {
-			// 		STARS[i] = resetStar();
-			// 	}
-			// 	STARS[i].pos.z += STARS[i].speed * deltaTime;
-			// 	updateObject.position.copy(STARS[i].pos);
-			// 	updateObject.scale.x = STARS[i].len;
+			/**
+			 * This is very important
+			 *
+			 * InstancedMesh.instanceMatrix will only check before render
+			 */
+			star.instanceMatrix.needsUpdate = true;
+			for (let i = 0; i < STARS.length; i++) {
+				if (STARS[i].pos.x >= 40) {
+					STARS[i] = resetStar();
+				}
+				STARS[i].pos.x += STARS[i].speed * deltaTime;
+				updateObject.position.copy(STARS[i].pos);
+				updateObject.scale.x = STARS[i].len;
 
-			// 	updateObject.updateMatrix();
+				updateObject.updateMatrix();
 
-			// 	star.setMatrixAt(i, updateObject.matrix);
-			// 	star.setColorAt(i, STARS[i].color);
-			// }
+				star.setMatrixAt(i, updateObject.matrix);
+				star.setColorAt(i, STARS[i].color);
+			}
 		}
 		render();
 
