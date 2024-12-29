@@ -3,13 +3,17 @@ import { useEffect } from 'react';
 import {
 	AmbientLight,
 	AxesHelper,
+	Clock,
 	Color,
 	DirectionalLight,
+	DoubleSide,
 	GridHelper,
+	InstancedMesh,
 	LoadingManager,
 	Mesh,
 	MeshBasicMaterial,
 	MeshStandardMaterial,
+	Object3D,
 	PerspectiveCamera,
 	PlaneGeometry,
 	Raycaster,
@@ -22,7 +26,13 @@ import {
 	Vector3,
 	WebGLRenderer,
 } from 'three';
-import { DRACOLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
+import {
+	DRACOLoader,
+	EffectComposer,
+	GLTFLoader,
+	RenderPass,
+	UnrealBloomPass,
+} from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
@@ -54,7 +64,7 @@ export default function Spaceship() {
 			0.1,
 			1000
 		);
-		camera.position.set(10, 10, 10);
+		camera.position.set(5, 5, 5);
 		camera.lookAt(scene.position);
 
 		const controls = new OrbitControls(camera, renderer.domElement);
@@ -62,6 +72,12 @@ export default function Spaceship() {
 
 		const stats = new Stats();
 		el.append(stats.dom);
+
+		const composer = new EffectComposer(renderer);
+		composer.setSize(window.innerWidth, window.innerHeight);
+		composer.setPixelRatio(window.devicePixelRatio);
+
+		composer.addPass(new RenderPass(scene, camera));
 
 		/**
 		 * Loaders
@@ -138,14 +154,70 @@ export default function Spaceship() {
 		sphere.visible = false;
 		scene.add(sphere);
 
+		const STAR_COUNT = 350;
+		const STARS: {
+			len: number;
+			pos: Vector3;
+			color: Color;
+			speed: number;
+		}[] = [];
+		const COLORS = ['#fcaa67', '#c75d59', '#ffffc7', '#8cc5c6', '#a5898c'];
+
+		function r(min: number, max: number) {
+			const diff = Math.random() * (max - min);
+			return min + diff;
+		}
+
+		function resetStar() {
+			const len = r(1.5, 5);
+			const pos = new Vector3(r(-15, 15), r(-10, 10), r(-15, 15));
+			const color = new Color(COLORS[Math.floor(Math.random() * COLORS.length)])
+				.convertSRGBToLinear()
+				.multiplyScalar(1.3);
+			const speed = r(19.5, 42);
+
+			return {
+				len,
+				pos,
+				color,
+				speed,
+			};
+		}
+
+		for (let i = 0; i < STAR_COUNT; i++) {
+			STARS.push(resetStar());
+		}
+
+		const bloom = new UnrealBloomPass(
+			new Vector2(window.innerWidth, window.innerHeight),
+			1.5,
+			0.4,
+			0.85
+		);
+
 		const starGeometry = new PlaneGeometry(1, 0.05);
 		const starMaterial = new MeshBasicMaterial({
 			transparent: true,
 			alphaMap: starAlphaTexture,
+			side: DoubleSide,
 		});
-		const star = new Mesh(starGeometry, starMaterial);
+
+		const star = new InstancedMesh(starGeometry, starMaterial, STAR_COUNT);
 		star.rotation.y = Math.PI / 2;
 		star.position.y = 2;
+
+		const object3D = new Object3D();
+
+		for (let i = 0; i < STARS.length; i++) {
+			object3D.position.copy(STARS[i].pos);
+			object3D.scale.x = STARS[i].len;
+			object3D.updateMatrix();
+
+			star.setColorAt(i, STARS[i].color);
+			star.setMatrixAt(i, object3D.matrix);
+		}
+		star.instanceMatrix.needsUpdate = true;
+
 		scene.add(star);
 
 		/**
@@ -207,12 +279,22 @@ export default function Spaceship() {
 		let angleZ = 0;
 		let angleAcceleration = 0;
 
+		const clock = new Clock();
+		let previourTime = 0;
+
+		const updateObject = new Object3D();
+
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
 
+			const elapsedTime = clock.getElapsedTime();
+			const deltaTime = elapsedTime - previourTime;
+			previourTime = elapsedTime;
+
 			stats.update();
 			controls.update(time);
-			renderer.render(scene, camera);
+
+			composer.render(time);
 
 			if (intersectPoint) {
 				const targetY = intersectPoint.y;
@@ -232,11 +314,27 @@ export default function Spaceship() {
 
 			spaceship.position.y = translY;
 			spaceship.rotation.setFromVector3(new Vector3(angleZ, 0, angleZ), 'XYZ');
+
+			// for (let i = 0; i < STARS.length; i++) {
+			// 	if (STARS[i].pos.z >= 40) {
+			// 		STARS[i] = resetStar();
+			// 	}
+			// 	STARS[i].pos.z += STARS[i].speed * deltaTime;
+			// 	updateObject.position.copy(STARS[i].pos);
+			// 	updateObject.scale.x = STARS[i].len;
+
+			// 	updateObject.updateMatrix();
+
+			// 	star.setMatrixAt(i, updateObject.matrix);
+			// 	star.setColorAt(i, STARS[i].color);
+			// }
 		}
 		render();
 
 		function resize() {
 			renderer.setSize(window.innerWidth, window.innerHeight);
+			composer.setSize(window.innerWidth, window.innerHeight);
+
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 		}
