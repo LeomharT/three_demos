@@ -1,10 +1,12 @@
 import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
 import {
+	AddEquation,
 	AmbientLight,
 	AxesHelper,
 	Clock,
 	Color,
+	CylinderGeometry,
 	DirectionalLight,
 	DoubleSide,
 	GridHelper,
@@ -13,9 +15,12 @@ import {
 	Mesh,
 	MeshBasicMaterial,
 	MeshStandardMaterial,
+	NormalBlending,
 	Object3D,
+	OneFactor,
 	PerspectiveCamera,
 	PlaneGeometry,
+	PMREMGenerator,
 	Raycaster,
 	Scene,
 	SphereGeometry,
@@ -25,11 +30,13 @@ import {
 	Vector2,
 	Vector3,
 	WebGLRenderer,
+	WebGLRenderTarget,
 } from 'three';
 import {
 	DRACOLoader,
 	EffectComposer,
 	GLTFLoader,
+	OutputPass,
 	RenderPass,
 	UnrealBloomPass,
 } from 'three/examples/jsm/Addons.js';
@@ -52,7 +59,6 @@ export default function Spaceship() {
 			antialias: true,
 		});
 		renderer.setSize(window.innerWidth, window.innerHeight);
-		renderer.setClearColor(theme.colors.dark[9]);
 		renderer.shadowMap.enabled = true;
 		el.append(renderer.domElement);
 
@@ -73,11 +79,35 @@ export default function Spaceship() {
 		const stats = new Stats();
 		el.append(stats.dom);
 
+		/**
+		 * PMREM => Pre-Filterd Mipmapped Environment Map
+		 *
+		 * Generator hight light texture
+		 */
+		const pmrem = new PMREMGenerator(renderer);
+		// For environment map
+		let envMap: WebGLRenderTarget | null = null;
+
+		/**
+		 * Effects
+		 */
+
 		const composer = new EffectComposer(renderer);
 		composer.setSize(window.innerWidth, window.innerHeight);
 		composer.setPixelRatio(window.devicePixelRatio);
 
+		const bloomEffect = new UnrealBloomPass(
+			new Vector2(window.innerWidth, window.innerHeight),
+			0.35,
+			1,
+			0.5
+		);
+
+		const outputPass = new OutputPass();
+
 		composer.addPass(new RenderPass(scene, camera));
+		composer.addPass(bloomEffect);
+		composer.addPass(outputPass);
 
 		/**
 		 * Loaders
@@ -108,6 +138,7 @@ export default function Spaceship() {
 		 */
 
 		const starAlphaTexture = await textureLoader.loadAsync('starAlpha.png');
+		const energyAlphaTexture = await textureLoader.loadAsync('energy-beam-opacity.png');
 
 		/**
 		 * Scenes
@@ -154,6 +185,23 @@ export default function Spaceship() {
 		sphere.visible = false;
 		scene.add(sphere);
 
+		const energyGeometry = new CylinderGeometry(0.7, 0.3, 20, 32, 32, true);
+		const energyMaterial = new MeshBasicMaterial({
+			color: new Color(1, 0.4, 0.02),
+			transparent: true,
+			blending: NormalBlending,
+			blendDst: OneFactor,
+			blendEquation: AddEquation,
+			alphaMap: energyAlphaTexture,
+		});
+		const energy = new Mesh(energyGeometry, energyMaterial);
+		energy.rotation.x = Math.PI / 2;
+		energy.position.x = 7.46;
+		energy.position.y = -0.67;
+		energy.position.z = -11.0;
+
+		spaceship.add(energy);
+
 		const STAR_COUNT = 350;
 		const STARS: {
 			len: number;
@@ -174,10 +222,10 @@ export default function Spaceship() {
 
 			if (Math.random() > 0.8) {
 				len = r(1.5, 15);
-				pos = new Vector3(r(-15, 15), r(-10, 10), r(-15, 15));
+				pos = new Vector3(r(-15, 15), r(-15, 15), r(-15, 15));
 			} else {
 				len = r(2.5, 20);
-				pos = new Vector3(r(-45, 15), r(-10, 10), r(-15, 15));
+				pos = new Vector3(r(-45, 15), r(-15, 15), r(-15, 15));
 			}
 
 			const color = new Color(COLORS[Math.floor(Math.random() * COLORS.length)])
@@ -196,13 +244,6 @@ export default function Spaceship() {
 		for (let i = 0; i < STAR_COUNT; i++) {
 			STARS.push(resetStar());
 		}
-
-		const bloom = new UnrealBloomPass(
-			new Vector2(window.innerWidth, window.innerHeight),
-			1.5,
-			0.4,
-			0.85
-		);
 
 		const starGeometry = new PlaneGeometry(1, 0.05);
 		const starMaterial = new MeshBasicMaterial({
@@ -269,6 +310,18 @@ export default function Spaceship() {
 		{
 			const directionalLightPane = pane.addFolder({ title: 'Directional Light' });
 			directionalLightPane.addBinding(directionalLight, 'intensity');
+		}
+		/** Bloom Effect */
+		{
+			const bloomPane = pane.addFolder({ title: 'Bloom Effect' });
+			bloomPane.addBinding(bloomEffect, 'strength');
+			bloomPane.addBinding(bloomEffect, 'radius');
+			bloomPane.addBinding(bloomEffect, 'threshold');
+		}
+		/** Energy */
+		{
+			const energyPan = pane.addFolder({ title: 'Energy' });
+			energyPan.addBinding(energy, 'position');
 		}
 
 		/**
@@ -342,6 +395,26 @@ export default function Spaceship() {
 				star.setMatrixAt(i, updateObject.matrix);
 				star.setColorAt(i, STARS[i].color);
 			}
+
+			if (envMap) envMap.dispose();
+
+			spaceship.visible = false;
+			scene.background = null;
+			envMap = pmrem.fromScene(scene, 0, 0.1, 1000);
+			scene.background = new Color('#598889').multiplyScalar(0.05);
+			spaceship.visible = true;
+
+			spaceship.traverse((mesh) => {
+				if (mesh instanceof Mesh) {
+					if (mesh.material instanceof MeshStandardMaterial) {
+						if (envMap) {
+							mesh.material.envMap = envMap.texture;
+							mesh.material.envMapIntensity = 80;
+							mesh.material.normalScale.setScalar(0.1);
+						}
+					}
+				}
+			});
 		}
 		render();
 
