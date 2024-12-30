@@ -1,0 +1,13 @@
+import MDXTitle from '../../component/MDXTitle';
+
+# Spaceship
+
+Youtube 博主 Irradiance 的[视频教程](https://www.youtube.com/watch?v=soa_KP8QfjM&ab_channel=Irradiance)
+实现了一个加速飞船的效果
+
+<MDXTitle id='instancedmesh' href='#instancedmesh'>
+	InstancedMesh
+</MDXTitle>
+`InstancedMesh`和`Mesh`的区别是如果需要渲染大量材质和几何形状相同的对象时减少`draw call` 和视频中用到的框架和`r3f`不同的是,
+`threejs`原生的`InstancedMesh`需要使用`.setMatrixAt()`来设置每个对象的位置, 并且如果需要更新的话,
+`instancedmesh.instanceMatrix.needsUpdate = true;`需要在每次更新前设置, 因为GPU只会在每次渲染前检查是否需要更新矩阵

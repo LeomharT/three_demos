@@ -66,6 +66,7 @@ export default function App() {
 		{ href: '/docs/3d-text', label: '3D Text Mesh' },
 		{ href: '/docs/tj-particle', label: 'Threejs Journey Particle' },
 		{ href: '/docs/tj-hauntedhouse', label: 'Threejs Journey Haunted House' },
+		{ href: '/docs/spaceship', label: 'Study of a spaceship example' },
 	];
 
 	return (

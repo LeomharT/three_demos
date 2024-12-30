@@ -28,6 +28,7 @@ const _3DText = lazy(() => import('../pages/3DText'));
 const _3DTextDocs = lazy(() => import('../pages/3DText/docs.mdx'));
 const ParticleStream = lazy(() => import('../pages/Particle/ParticleStream'));
 const Spaceship = lazy(() => import('../pages/Spaceship'));
+const SpaceshipDocs = lazy(() => import('../pages/Spaceship/docs.mdx'));
 const ParticleThreejsJourney = lazy(
 	() => import('../pages/Particle/ParticleThreejsJourney')
 );
@@ -60,6 +61,7 @@ export const router = createBrowserRouter(
 					<Route path='3D-text' element={<_3DTextDocs />} />
 					<Route path='tj-particle' element={<ParticleThreejsJourneyDocs />} />
 					<Route path='tj-hauntedhouse' element={<HauntedHouseDocs />} />
+					<Route path='spaceship' element={<SpaceshipDocs />} />
 				</Route>
 			</Route>
 			<Route path='mix-color' element={<MixColor />} />

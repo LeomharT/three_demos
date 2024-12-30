@@ -177,7 +177,7 @@ export default function Spaceship() {
 				pos = new Vector3(r(-15, 15), r(-10, 10), r(-15, 15));
 			} else {
 				len = r(2.5, 20);
-				pos = new Vector3(r(-15, 15), r(-10, 10), r(-15, 15));
+				pos = new Vector3(r(-45, 15), r(-10, 10), r(-15, 15));
 			}
 
 			const color = new Color(COLORS[Math.floor(Math.random() * COLORS.length)])
