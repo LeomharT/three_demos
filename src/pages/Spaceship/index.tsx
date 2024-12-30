@@ -15,7 +15,6 @@ import {
 	Mesh,
 	MeshBasicMaterial,
 	MeshStandardMaterial,
-	NormalBlending,
 	Object3D,
 	OneFactor,
 	PerspectiveCamera,
@@ -23,6 +22,7 @@ import {
 	PMREMGenerator,
 	Raycaster,
 	Scene,
+	ShaderMaterial,
 	SphereGeometry,
 	SRGBColorSpace,
 	Texture,
@@ -43,6 +43,8 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
+import fragmentShader from './shader/fragment.glsl?raw';
+import vertexShader from './shader/vertex.glsl?raw';
 
 export default function Spaceship() {
 	const theme = useMantineTheme();
@@ -186,14 +188,18 @@ export default function Spaceship() {
 		scene.add(sphere);
 
 		const energyGeometry = new CylinderGeometry(0.7, 0.3, 20, 32, 32, true);
-		const energyMaterial = new MeshBasicMaterial({
-			color: new Color(1, 0.4, 0.02),
+		const energyMaterial = new ShaderMaterial({
+			vertexShader,
+			fragmentShader,
 			transparent: true,
-			blending: NormalBlending,
+			uniforms: {
+				u_color: { value: new Color(1.0, 0.4, 0.02) },
+				u_height: { value: 20 },
+			},
 			blendDst: OneFactor,
 			blendEquation: AddEquation,
-			alphaMap: energyAlphaTexture,
 		});
+
 		const energy = new Mesh(energyGeometry, energyMaterial);
 		energy.rotation.x = Math.PI / 2;
 		energy.position.x = 7.46;
