@@ -44,6 +44,11 @@ const examples = [
 		description: 'Spaceship',
 		path: '/spaceship',
 	},
+	{
+		title: 'CarShow',
+		description: 'CarShow',
+		path: '/carshow',
+	},
 ];
 
 const r3fExamples = [

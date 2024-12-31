@@ -29,6 +29,7 @@ const _3DTextDocs = lazy(() => import('../pages/3DText/docs.mdx'));
 const ParticleStream = lazy(() => import('../pages/Particle/ParticleStream'));
 const Spaceship = lazy(() => import('../pages/Spaceship'));
 const SpaceshipDocs = lazy(() => import('../pages/Spaceship/docs.mdx'));
+const CarShow = lazy(() => import('../pages/CarShow'));
 const ParticleThreejsJourney = lazy(
 	() => import('../pages/Particle/ParticleThreejsJourney')
 );
@@ -74,6 +75,7 @@ export const router = createBrowserRouter(
 			<Route path='digital-rain' element={<DigitalRain />} />
 			<Route path='particle-stream' element={<ParticleStream />} />
 			<Route path='spaceship' element={<Spaceship />} />
+			<Route path='carshow' element={<CarShow />} />
 			<Route path='tj-3dtext' element={<_3DText />} />
 			<Route path='tj-light' element={<LightBasic />} />
 			<Route path='tj-particle' element={<ParticleThreejsJourney />} />

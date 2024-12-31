@@ -22,7 +22,6 @@ import {
 	PMREMGenerator,
 	Raycaster,
 	Scene,
-	ShaderMaterial,
 	SphereGeometry,
 	SRGBColorSpace,
 	Texture,
@@ -43,8 +42,6 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
-import fragmentShader from './shader/fragment.glsl?raw';
-import vertexShader from './shader/vertex.glsl?raw';
 
 export default function Spaceship() {
 	const theme = useMantineTheme();
@@ -98,6 +95,17 @@ export default function Spaceship() {
 		composer.setSize(window.innerWidth, window.innerHeight);
 		composer.setPixelRatio(window.devicePixelRatio);
 
+		/**
+		 * Bloom threshold
+		 *
+		 * bloomPass.threshold = 0.1;  // 大量区域泛光
+		 * bloomPass.threshold = 0.9;  // 只有最亮的区域泛光
+		 *
+		 * threshold 是一个用来控制亮度阈值的参数，它决定了场景中哪些部分会产生泛光（bloom）效果
+		 * threshold 代表亮度的最低值，只有亮度高于这个值的像素才会触发泛光效果
+		 *
+		 * 例如: 如果threshold = 0.99 那么只有接近白色的物体会发光,
+		 */
 		const bloomEffect = new UnrealBloomPass(
 			new Vector2(window.innerWidth, window.innerHeight),
 			0.35,
@@ -188,16 +196,13 @@ export default function Spaceship() {
 		scene.add(sphere);
 
 		const energyGeometry = new CylinderGeometry(0.7, 0.3, 20, 32, 32, true);
-		const energyMaterial = new ShaderMaterial({
-			vertexShader,
-			fragmentShader,
+		const energyMaterial = new MeshBasicMaterial({
+			color: new Color(1.0, 0.25, 0.03),
 			transparent: true,
-			uniforms: {
-				u_color: { value: new Color(1.0, 0.4, 0.02) },
-				u_height: { value: 20 },
-			},
 			blendDst: OneFactor,
 			blendEquation: AddEquation,
+			alphaTest: 0.03,
+			alphaMap: energyAlphaTexture,
 		});
 
 		const energy = new Mesh(energyGeometry, energyMaterial);
@@ -296,6 +301,7 @@ export default function Spaceship() {
 
 		const axesHelper = new AxesHelper();
 		axesHelper.scale.setScalar(10);
+		axesHelper.visible = false;
 		scene.add(axesHelper);
 
 		const gridHelper = new GridHelper(100, 35);
