@@ -2,8 +2,12 @@ import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
 import {
 	AxesHelper,
+	BoxGeometry,
 	Color,
+	Mesh,
+	MeshBasicMaterial,
 	PerspectiveCamera,
+	PlaneGeometry,
 	Scene,
 	TextureLoader,
 	WebGLRenderer,
@@ -12,10 +16,13 @@ import {
 	EffectComposer,
 	OrbitControls,
 	OutputPass,
+	Reflector,
 	RenderPass,
 } from 'three/examples/jsm/Addons.js';
+import { uv } from 'three/tsl';
 import { Pane } from 'tweakpane';
 
+console.log(uv);
 export default function CarShow() {
 	const theme = useMantineTheme();
 
@@ -77,6 +84,24 @@ export default function CarShow() {
 		/**
 		 * Scene
 		 */
+
+		const floorGeometry = new PlaneGeometry(20, 20, 32, 32);
+
+		const reflector = new Reflector(floorGeometry, {
+			textureWidth: window.innerWidth * window.devicePixelRatio,
+			textureHeight: window.innerHeight * window.devicePixelRatio,
+			color: 0xb5b5b5,
+		});
+		reflector.rotation.x = -Math.PI / 2;
+		console.log(reflector.material);
+		scene.add(reflector);
+
+		const box = new Mesh(
+			new BoxGeometry(1, 1, 1),
+			new MeshBasicMaterial({ color: 'red' })
+		);
+		box.position.set(0, 2, 0);
+		scene.add(box);
 
 		/**
 		 * Helpers
