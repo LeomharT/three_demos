@@ -45,6 +45,11 @@ const examples = [
 		path: '/spaceship',
 	},
 	{
+		title: 'SpaceStation',
+		description: 'SpaceStation',
+		path: '/spacestation',
+	},
+	{
 		title: 'CarShow',
 		description: 'CarShow',
 		path: '/carshow',
