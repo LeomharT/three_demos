@@ -83,7 +83,7 @@ export default function HTMLMarkers() {
 		// });
 		rgbeLoader.load(SunsetHDR, (data) => {
 			scene.background = data;
-			scene.backgroundBlurriness = 1;
+			scene.backgroundBlurriness = 1.0;
 
 			scene.environment = data;
 			scene.environment.mapping = EquirectangularReflectionMapping;
@@ -97,12 +97,7 @@ export default function HTMLMarkers() {
 		css3DRenderer.domElement.style.pointerEvents = 'none';
 		el.append(css3DRenderer.domElement);
 
-		const camera = new PerspectiveCamera(
-			75,
-			innerWidth / innerHeight,
-			0.1,
-			1000
-		);
+		const camera = new PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
 		camera.position.set(0, 2, 5);
 		camera.lookAt(scene.position);
 
@@ -165,10 +160,7 @@ export default function HTMLMarkers() {
 		spotLight.position.set(0, 40, 0);
 		scene.add(spotLight);
 
-		const spotLightHelper = new SpotLightHelper(
-			spotLight,
-			theme.colors.blue[5]
-		);
+		const spotLightHelper = new SpotLightHelper(spotLight, theme.colors.blue[5]);
 		spotLightHelper.visible = false;
 		// scene.add(spotLightHelper);
 

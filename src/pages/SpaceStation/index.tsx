@@ -20,9 +20,12 @@ import {
 	OrbitControls,
 	OutputPass,
 	RenderPass,
+	ShaderPass,
 	UnrealBloomPass,
 } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
+import fragmentShader from './shader/fragment.glsl?raw';
+import vertexShader from './shader/vertex.glsl?raw';
 
 export default function SpaceStation() {
 	const theme = useMantineTheme();
@@ -85,7 +88,18 @@ export default function SpaceStation() {
 			0.5,
 			0
 		);
-		composer.addPass(boolmPass);
+		// composer.addPass(boolmPass);
+
+		const shitPass = new ShaderPass({
+			name: 'CopyShader',
+			uniforms: {
+				tDiffuse: { value: null },
+				opacity: { value: 1.0 },
+			},
+			vertexShader,
+			fragmentShader,
+		});
+		// composer.addPass(shitPass);
 
 		const outPass = new OutputPass();
 		composer.addPass(outPass);
@@ -117,17 +131,11 @@ export default function SpaceStation() {
 		 * Scene
 		 */
 
-		gltfLoader.load('/sci-fi_space_station/scene.gltf', (data) => {
-			const spacestation = data.scene;
-			console.log(spacestation);
-			scene.add(spacestation);
-		});
-
 		const starGeometry = new SphereGeometry(0.3, 32, 32);
 		const starMaterial = new MeshPhysicalMaterial({
 			transparent: true,
 			color: 'white',
-			iridescence: 1,
+			iridescence: 0,
 			iridescenceIOR: 1,
 			roughness: 0.8,
 			metalness: 0.2,
