@@ -45,8 +45,7 @@ Threejs journey 教程中使用第二种方法, 区别在与是否需要手动�
 <MDXTitle order={2} id='raycaster' href='#raycaster'>
 	Raycaster
 </MDXTitle>
-Raycaster射线检测(光线投射), 在3D中主要用与鼠标拾取, 理解为从鼠标坐标处发射一条射线,
-按照距离从近到远的顺序返回与之向交的3D物体.
+Raycaster射线检测(光线投射), 在3D中主要用与鼠标拾取, 理解为从鼠标坐标处发射一条射线, 按照距离从近到远的顺序返回与之向交的3D物体.
 
 <MDXCode
 	code={`
@@ -66,6 +65,9 @@ language='tsx'
 
 `Helper`类会影响`Raycaster`的检测, 举例:
 `AxesHelper`的线段同样会遮挡`CSS3DObject`
+
+`Raycaster`获取鼠标坐标需要进行归一化, 必须量化鼠标坐标-1, 1 之间
+切 Y 轴的正负必须和 Threejs 的正负轴一致
 
 <MDXTitle order={2} id='rgbeloader' href='#rgbeloader'>
 	How to loading HDR file

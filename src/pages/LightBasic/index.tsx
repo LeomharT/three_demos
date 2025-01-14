@@ -69,7 +69,7 @@ export default function LightBasic() {
 		const textureLoader = new TextureLoader();
 		textureLoader.setPath('/src/pages/LightBasic/assets/');
 
-		const spotLightMap = textureLoader.load('leaves_forest_ground_diff_1k.jpg');
+		const spotLightMap = textureLoader.load('sticjer.png');
 
 		/**
 		 * Scene
@@ -217,9 +217,6 @@ export default function LightBasic() {
 		}
 		window.addEventListener('resize', resize);
 	}, []);
-	return (
-		<Box w='100vw' h='100vh' id='container'>
-			LightBasic
-		</Box>
-	);
+
+	return <Box w='100vw' h='100vh' id='container'></Box>;
 }
