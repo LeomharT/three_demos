@@ -8,7 +8,7 @@ import {
 import { Canvas, GroupProps, useFrame, useLoader } from '@react-three/fiber';
 import { Bloom, ChromaticAberration, EffectComposer } from '@react-three/postprocessing';
 import { useControls } from 'leva';
-import { BlendFunction } from 'postprocessing';
+import { BlendFunction, KernelSize } from 'postprocessing';
 import { Perf } from 'r3f-perf';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -64,11 +64,13 @@ function CarShowScene() {
 					intensity={1.3}
 					width={300}
 					height={300}
-					// kernelSize={0}
+					kernelSize={KernelSize.VERY_SMALL}
 					luminanceThreshold={0.15}
 					luminanceSmoothing={0.025}
 				/>
 				<ChromaticAberration
+					radialModulation={false}
+					modulationOffset={0}
 					blendFunction={BlendFunction.NORMAL}
 					offset={new Vector2(0.0005, 0.0012)}
 				/>
