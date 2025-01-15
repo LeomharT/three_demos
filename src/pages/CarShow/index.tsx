@@ -1,5 +1,7 @@
 import { useMantineTheme } from '@mantine/core';
 import {
+	CubeCamera,
+	Environment,
 	MeshReflectorMaterial,
 	OrbitControls,
 	PerspectiveCamera,
@@ -55,7 +57,16 @@ function CarShowScene() {
 			<OrbitControls target={[0, 0.35, 0]} dampingFactor={0.05} />
 			{/* Scene */}
 			<color attach='background' args={[0, 0, 0]} />
-			<Car />
+			<CubeCamera resolution={256} frames={Infinity}>
+				{(texture) => {
+					return (
+						<>
+							<Environment map={texture} />
+							<Car />
+						</>
+					);
+				}}
+			</CubeCamera>
 			<Rings />
 			<Ground />
 			{/* Lights */}
@@ -84,7 +95,7 @@ function CarShowScene() {
 }
 
 function Ground() {
-	const [roughnessTexute, normalTexture] = useLoader(TextureLoader, [
+	const [roughnessTexute, normalTexture, girdTexture] = useLoader(TextureLoader, [
 		'/src/pages/CarShow/assets/texture/terrain-roughness.jpg',
 		'/src/pages/CarShow/assets/texture/terrain-normal.jpg',
 		'/src/pages/CarShow/assets/texture/grid-texture.png',
@@ -95,7 +106,7 @@ function Ground() {
 			t.wrapS = t.wrapT = RepeatWrapping;
 			t.repeat.set(5, 5);
 		});
-	}, []);
+	}, [normalTexture, roughnessTexute]);
 
 	return (
 		<mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
@@ -165,10 +176,17 @@ function Rings() {
 			mesh.position.set(0, 0, z);
 			mesh.scale.setScalar(1 - distance * 0.04);
 
+			let colorScale = 1.0;
+
+			if (distance > 2) {
+				colorScale = 1 - (Math.min(distance, 12) - 2) / 10;
+			}
+			colorScale *= 0.5;
+
 			if (i % 2 === 1) {
-				mesh.material.color = new Color(6, 0.15, 0.7);
+				mesh.material.emissive = new Color(6, 0.15, 0.7).multiplyScalar(colorScale);
 			} else {
-				mesh.material.color = new Color(0.1, 0.7, 3);
+				mesh.material.emissive = new Color(0.1, 0.7, 3).multiplyScalar(colorScale);
 			}
 		}
 	});

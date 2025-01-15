@@ -6,7 +6,9 @@ import {
 	CameraHelper,
 	DirectionalLight,
 	DirectionalLightHelper,
+	EquirectangularRefractionMapping,
 	Mesh,
+	MeshPhysicalMaterial,
 	MeshStandardMaterial,
 	PCFSoftShadowMap,
 	PerspectiveCamera,
@@ -18,7 +20,15 @@ import {
 	TextureLoader,
 	WebGLRenderer,
 } from 'three';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import {
+	EffectComposer,
+	LUTCubeLoader,
+	LUTPass,
+	OrbitControls,
+	OutputPass,
+	RenderPass,
+	RGBELoader,
+} from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
 
@@ -62,40 +72,50 @@ export default function ThreejsJourneyShadow() {
 		el.append(stats.dom);
 
 		/**
+		 * Effect
+		 */
+
+		const composer = new EffectComposer(renderer);
+
+		const renderPass = new RenderPass(scene, camera);
+		composer.addPass(renderPass);
+
+		const lutPass = new LUTPass({});
+		const lutLoader = new LUTCubeLoader();
+		lutLoader.setPath('/src/pages/Shadow/ThreejsJourneyShadow/assets/texture/');
+		lutLoader.load('cubicle-99.CUBE', (data) => {
+			lutPass.lut = data.texture3D;
+			lutPass.intensity = 0.75;
+			composer.addPass(lutPass);
+		});
+
+		const outputPass = new OutputPass();
+		composer.addPass(outputPass);
+
+		/**
 		 * Loaders
 		 */
 
 		const textureLoader = new TextureLoader();
-		textureLoader.setPath('/src/pages/Shadow/ThreejsJourneyShadow/assets/');
+		textureLoader.setPath('/src/pages/Shadow/ThreejsJourneyShadow/assets/texture/');
+
+		const rgbeLoader = new RGBELoader();
+		rgbeLoader.setPath('/src/pages/Shadow/ThreejsJourneyShadow/assets/texture/');
 
 		/**
 		 * Textures
 		 */
 
-		const sphereColorTexture = await textureLoader.loadAsync(
-			'metal_grate_rusty_diff_1k.jpg'
-		);
+		const sphereColorTexture = textureLoader.load('terrazo.png');
 		sphereColorTexture.colorSpace = SRGBColorSpace;
-		const sphereARMTexture = await textureLoader.loadAsync(
-			'metal_grate_rusty_arm_1k.jpg'
-		);
-		const sphereNormalTexture = await textureLoader.loadAsync(
-			'metal_grate_rusty_nor_gl_1k.jpg'
-		);
-		const sphereDisplacementTexture = await textureLoader.loadAsync(
-			'metal_grate_rusty_disp_1k.jpg'
-		);
-		for (const texture of [
-			sphereColorTexture,
-			sphereARMTexture,
-			sphereDisplacementTexture,
-			sphereNormalTexture,
-		]) {
-			texture.repeat.x = 6;
-			texture.repeat.y = 3;
+		sphereColorTexture.wrapS = sphereColorTexture.wrapT = RepeatWrapping;
+		sphereColorTexture.repeat.set(1.5, 1.5);
 
-			texture.wrapS = texture.wrapT = RepeatWrapping;
-		}
+		const environmentMap = rgbeLoader.load('kiara_1_dawn_1k.hdr', (texture) => {
+			scene.background = texture;
+			scene.backgroundBlurriness = 0.6;
+			scene.background.mapping = EquirectangularRefractionMapping;
+		});
 
 		/**
 		 * Scenes
@@ -109,16 +129,13 @@ export default function ThreejsJourneyShadow() {
 		scene.add(floor);
 
 		const sphereGeometry = new SphereGeometry(1, 512, 512);
-		const sphereMateral = new MeshStandardMaterial({
+		const sphereMateral = new MeshPhysicalMaterial({
 			map: sphereColorTexture,
-			normalMap: sphereNormalTexture,
-			displacementMap: sphereDisplacementTexture,
-			displacementScale: 0.2,
-			aoMap: sphereARMTexture,
-			metalnessMap: sphereARMTexture,
 			metalness: 0.5,
-			roughness: 0.5,
-			roughnessMap: sphereARMTexture,
+			roughness: 0,
+			clearcoat: 1,
+			clearcoatRoughness: 0,
+			envMap: environmentMap,
 		});
 		sphereMateral.flatShading = true;
 		const sphere = new Mesh(sphereGeometry, sphereMateral);
@@ -223,12 +240,14 @@ export default function ThreejsJourneyShadow() {
 			stats.update();
 			controls.update(time);
 
-			renderer.render(scene, camera);
+			composer.render();
 		}
 		render();
 
 		function resize() {
 			renderer.setSize(window.innerWidth, window.innerHeight);
+			composer.setSize(window.innerWidth, window.innerHeight);
+
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 		}
