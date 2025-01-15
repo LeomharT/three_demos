@@ -4,16 +4,23 @@ import {
 	AxesHelper,
 	Mesh,
 	MeshBasicMaterial,
+	MeshStandardMaterial,
 	PerspectiveCamera,
 	PlaneGeometry,
 	Raycaster,
 	Scene,
 	SphereGeometry,
+	TextureLoader,
 	Vector2,
 	Vector3,
 	WebGLRenderer,
 } from 'three';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import {
+	EffectComposer,
+	OrbitControls,
+	OutputPass,
+	RenderPass,
+} from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 
 export default function ContactShadowSource() {
@@ -54,11 +61,32 @@ export default function ContactShadowSource() {
 		el.append(stats.dom);
 
 		/**
+		 * Effect
+		 */
+
+		const composer = new EffectComposer(renderer);
+
+		const renderPass = new RenderPass(scene, camera);
+		composer.addPass(renderPass);
+
+		const outputPass = new OutputPass();
+		composer.addPass(outputPass);
+
+		/**
+		 * Loaders
+		 */
+
+		const textureLoader = new TextureLoader();
+		textureLoader.setPath('/src/pages/Shadow/ContactShadow/assets/texture/');
+
+		const alphaTexture = textureLoader.load('alpha.png');
+
+		/**
 		 * Raycaster
 		 */
 
 		const raycaster = new Raycaster();
-		const rect = renderer.domElement.getBoundingClientRect();
+		let rect = renderer.domElement.getBoundingClientRect();
 		const pointer = new Vector2();
 		let intersectPoint: undefined | Vector3;
 
@@ -69,14 +97,18 @@ export default function ContactShadowSource() {
 		const floorGeometry = new PlaneGeometry(1, 1, 32, 32);
 		const floorMaterial = new MeshBasicMaterial({
 			wireframe: true,
+			transparent: true,
+			opacity: 0.1,
 			color: 0xffee312,
 		});
 		const floor = new Mesh(floorGeometry, floorMaterial);
 		scene.add(floor);
 
 		const sphereGeometry = new SphereGeometry(0.01, 32, 32);
-		const sphereMaterial = new MeshBasicMaterial({
-			color: theme.colors.blue[8],
+		const sphereMaterial = new MeshStandardMaterial({
+			emissive: theme.colors.blue[4],
+			// emissiveMap: alphaTexture,
+			emissiveIntensity: 3.0,
 		});
 		const sphere = new Mesh(sphereGeometry, sphereMaterial);
 		scene.add(sphere);
@@ -104,6 +136,7 @@ export default function ContactShadowSource() {
 
 		function resize() {
 			renderer.setSize(window.innerWidth, window.innerHeight);
+			rect = renderer.domElement.getBoundingClientRect();
 
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();

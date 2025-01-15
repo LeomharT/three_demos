@@ -4,10 +4,18 @@ import {
 	OrbitControls,
 	PerspectiveCamera,
 } from '@react-three/drei';
-import { Canvas, GroupProps, useLoader } from '@react-three/fiber';
+import { Canvas, GroupProps, useFrame, useLoader } from '@react-three/fiber';
 import { useControls } from 'leva';
-import { Suspense, useEffect } from 'react';
-import { Mesh, MeshStandardMaterial, RepeatWrapping, TextureLoader } from 'three';
+import { Perf } from 'r3f-perf';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
+import {
+	Color,
+	Mesh,
+	MeshStandardMaterial,
+	RepeatWrapping,
+	TextureLoader,
+	TorusGeometry,
+} from 'three';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import classes from './style.module.css';
 
@@ -18,6 +26,7 @@ export default function CarShow() {
 		<div className={classes.container}>
 			<Suspense fallback={'Loading...'}>
 				<Canvas shadows>
+					<Perf position='top-left' />
 					<CarShowScene />
 				</Canvas>
 			</Suspense>
@@ -47,6 +56,7 @@ function CarShowScene() {
 			{/* Scene */}
 			<color attach='background' args={[0, 0, 0]} />
 			<Car />
+			<Rings />
 			<Ground />
 			{/* Lights */}
 			<spotLight
@@ -91,19 +101,20 @@ function Ground() {
 		<mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
 			<planeGeometry args={[30, 30, 32, 32]} />
 			<MeshReflectorMaterial
-				mirror={0}
-				dithering
 				envMapIntensity={0}
+				dithering={true}
+				color={[0.015, 0.015, 0.015]}
 				roughness={0.7}
 				blur={[1000, 400]}
-				resolution={1024}
-				mixContrast={1}
+				mixBlur={30}
 				mixStrength={80}
+				mixContrast={1}
+				resolution={1024}
+				mirror={0}
 				depthScale={0.01}
 				minDepthThreshold={0.9}
 				maxDepthThreshold={1}
 				depthToBlurRatioBias={0.25}
-				color={[0.015, 0.015, 0.015]}
 				reflectorOffset={0.2}
 				roughnessMap={roughnessTexute}
 				normalMap={normalTexture}
@@ -126,7 +137,7 @@ function Car(props: GroupProps) {
 				mesh.castShadow = true;
 				mesh.receiveShadow = true;
 				if (mesh.material instanceof MeshStandardMaterial) {
-					mesh.material.envMapIntensity = 50;
+					mesh.material.envMapIntensity = 20;
 				}
 			}
 		});
@@ -137,4 +148,49 @@ function Car(props: GroupProps) {
 			<primitive object={gltf.scene} />
 		</group>
 	);
+}
+
+function Rings() {
+	const refs = useRef<Mesh<TorusGeometry, MeshStandardMaterial>[]>([]);
+
+	useFrame(() => {
+		for (let i = 0; i < refs.current.length; i++) {
+			const mesh = refs.current[i];
+
+			const z = (i - refs.current.length / 2) * 3.5;
+
+			// [-7, 7]
+			const distance = Math.abs(z);
+
+			mesh.position.set(0, 0, z);
+			mesh.scale.setScalar(1 - distance * 0.04);
+
+			if (i % 2 === 1) {
+				mesh.material.color = new Color(6, 0.15, 0.7);
+			} else {
+				mesh.material.color = new Color(0.1, 0.7, 3);
+			}
+		}
+	});
+
+	const rings = useMemo(() => {
+		return new Array(14).fill(0).map((_, index) => {
+			return (
+				<mesh
+					key={index}
+					ref={(el: Mesh<TorusGeometry, MeshStandardMaterial>) =>
+						(refs.current[index] = el)
+					}
+					position={[0, 0, 0]}
+					castShadow
+					receiveShadow
+				>
+					<torusGeometry args={[3.35, 0.05, 10, 100]} />
+					<meshStandardMaterial emissive={[0.5, 0.5, 0.5]} color={[0, 0, 0]} />
+				</mesh>
+			);
+		});
+	}, []);
+
+	return rings;
 }
