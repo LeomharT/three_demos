@@ -194,7 +194,7 @@ function FloatGrid() {
 
 	useEffect(() => {
 		girdTexture.wrapS = girdTexture.wrapT = RepeatWrapping;
-		girdTexture.repeat.setScalar(30);
+		girdTexture.repeat.setScalar(25);
 		girdTexture.anisotropy = 16;
 	}, [girdTexture]);
 
@@ -204,7 +204,7 @@ function FloatGrid() {
 
 	return (
 		<mesh rotation-x={-Math.PI / 2} position-y={0.0425}>
-			<planeGeometry args={[30, 30, 32, 32]} />
+			<planeGeometry args={[35, 35, 32, 32]} />
 			<meshBasicMaterial
 				transparent={true}
 				color={[1, 1, 1]}
