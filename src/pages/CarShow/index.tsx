@@ -1,4 +1,3 @@
-import { useMantineTheme } from '@mantine/core';
 import {
 	CubeCamera,
 	Environment,
@@ -7,23 +6,26 @@ import {
 	PerspectiveCamera,
 } from '@react-three/drei';
 import { Canvas, GroupProps, useFrame, useLoader } from '@react-three/fiber';
+import { Bloom, ChromaticAberration, EffectComposer } from '@react-three/postprocessing';
 import { useControls } from 'leva';
+import { BlendFunction } from 'postprocessing';
 import { Perf } from 'r3f-perf';
-import { Suspense, useEffect, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
+	BoxGeometry,
 	Color,
 	Mesh,
 	MeshStandardMaterial,
 	RepeatWrapping,
 	TextureLoader,
 	TorusGeometry,
+	Vector2,
+	Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import classes from './style.module.css';
 
 export default function CarShow() {
-	const theme = useMantineTheme();
-
 	return (
 		<div className={classes.container}>
 			<Suspense fallback={'Loading...'}>
@@ -55,6 +57,22 @@ function CarShowScene() {
 			{/* Basics */}
 			<PerspectiveCamera makeDefault fov={50} position={[3, 2, 5]} />
 			<OrbitControls target={[0, 0.35, 0]} dampingFactor={0.05} />
+			{/* Effect */}
+			<EffectComposer>
+				<Bloom
+					blendFunction={BlendFunction.ADD}
+					intensity={1.3}
+					width={300}
+					height={300}
+					// kernelSize={0}
+					luminanceThreshold={0.15}
+					luminanceSmoothing={0.025}
+				/>
+				<ChromaticAberration
+					blendFunction={BlendFunction.NORMAL}
+					offset={new Vector2(0.0005, 0.0012)}
+				/>
+			</EffectComposer>
 			{/* Scene */}
 			<color attach='background' args={[0, 0, 0]} />
 			<CubeCamera resolution={256} frames={Infinity}>
@@ -67,6 +85,7 @@ function CarShowScene() {
 					);
 				}}
 			</CubeCamera>
+			<Boxes />
 			<Rings />
 			<Ground />
 			{/* Lights */}
@@ -211,4 +230,59 @@ function Rings() {
 	}, []);
 
 	return rings;
+}
+
+function Box({ color }: { color: Color | [r: number, g: number, b: number] }) {
+	const box = useRef<Mesh<BoxGeometry, MeshStandardMaterial>>();
+
+	const [xRotateSpeed] = useState(() => Math.random());
+	const [yRotateSpeed] = useState(() => Math.random());
+
+	const [scale] = useState(() => Math.pow(Math.random(), 2.0) * 0.5 + 0.05);
+	const [position] = useState(resetPosition());
+
+	function resetPosition() {
+		const position = new Vector3(
+			(Math.random() * 2 - 1) * 3,
+			Math.random() * 2.5 + 0.1,
+			(Math.random() * 2 - 1) * 15
+		);
+
+		/**
+		 * For the space station also!!
+		 */
+		if (position.x < 0) position.x -= 1.75;
+		if (position.x > 0) position.x += 1.75;
+
+		return position;
+	}
+
+	useFrame((_, delta) => {
+		if (box.current) {
+			box.current.position.copy(position);
+			box.current.rotation.x += delta * xRotateSpeed;
+			box.current.rotation.y += delta * yRotateSpeed;
+		}
+	});
+
+	return (
+		<mesh
+			scale={scale}
+			ref={(el: Mesh<BoxGeometry, MeshStandardMaterial>) => (box.current = el)}
+		>
+			<boxGeometry args={[1, 1, 1]} />
+			<meshStandardMaterial color={color} envMapIntensity={0.15} />
+		</mesh>
+	);
+}
+
+function Boxes() {
+	const boxes = useMemo(() => {
+		return new Array(100).fill(0).map((_, index) => {
+			return (
+				<Box key={index} color={index % 2 === 0 ? [0.4, 0.1, 0.1] : [0.05, 0.15, 0.4]} />
+			);
+		});
+	}, []);
+	return boxes;
 }
