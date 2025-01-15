@@ -6,7 +6,12 @@ import {
 	PerspectiveCamera,
 } from '@react-three/drei';
 import { Canvas, GroupProps, useFrame, useLoader } from '@react-three/fiber';
-import { Bloom, ChromaticAberration, EffectComposer } from '@react-three/postprocessing';
+import {
+	Bloom,
+	ChromaticAberration,
+	DepthOfField,
+	EffectComposer,
+} from '@react-three/postprocessing';
 import { useControls } from 'leva';
 import { BlendFunction, KernelSize } from 'postprocessing';
 import { Perf } from 'r3f-perf';
@@ -52,13 +57,35 @@ function CarShowScene() {
 		},
 	});
 
+	const { focusRange, focalLength, bokehScale, height } = useControls({
+		focusRange: 0.0035,
+		focalLength: 0.01,
+		bokehScale: 1,
+		height: {
+			value: 480,
+			step: 1,
+			min: 0,
+			max: 1024,
+		},
+	});
+
 	return (
 		<>
 			{/* Basics */}
 			<PerspectiveCamera makeDefault fov={50} position={[3, 2, 5]} />
-			<OrbitControls target={[0, 0.35, 0]} dampingFactor={0.05} />
+			<OrbitControls
+				target={[0, 0.35, 0]}
+				dampingFactor={0.05}
+				maxPolarAngle={Math.PI / 2}
+			/>
 			{/* Effect */}
 			<EffectComposer>
+				<DepthOfField
+					focusRange={focusRange}
+					focalLength={focalLength}
+					bokehScale={bokehScale}
+					height={height}
+				/>
 				<Bloom
 					blendFunction={BlendFunction.ADD}
 					intensity={1.3}
@@ -89,6 +116,7 @@ function CarShowScene() {
 			</CubeCamera>
 			<Boxes />
 			<Rings />
+			<FloatGrid />
 			<Ground />
 			{/* Lights */}
 			<spotLight
@@ -116,10 +144,10 @@ function CarShowScene() {
 }
 
 function Ground() {
-	const [roughnessTexute, normalTexture, girdTexture] = useLoader(TextureLoader, [
+	const [roughnessTexute, normalTexture, alphaTexture] = useLoader(TextureLoader, [
 		'/src/pages/CarShow/assets/texture/terrain-roughness.jpg',
 		'/src/pages/CarShow/assets/texture/terrain-normal.jpg',
-		'/src/pages/CarShow/assets/texture/grid-texture.png',
+		'/src/pages/CarShow/assets/texture/alpha.jpg',
 	]);
 
 	useEffect(() => {
@@ -133,6 +161,9 @@ function Ground() {
 		<mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
 			<planeGeometry args={[30, 30, 32, 32]} />
 			<MeshReflectorMaterial
+				transparent
+				alphaMap={alphaTexture}
+				alphaTest={0.0001}
 				envMapIntensity={0}
 				dithering={true}
 				color={[0.015, 0.015, 0.015]}
@@ -150,6 +181,37 @@ function Ground() {
 				reflectorOffset={0.2}
 				roughnessMap={roughnessTexute}
 				normalMap={normalTexture}
+			/>
+		</mesh>
+	);
+}
+
+function FloatGrid() {
+	const [girdTexture, alphaTexture] = useLoader(TextureLoader, [
+		'/src/pages/CarShow/assets/texture/grid-texture.png',
+		'/src/pages/CarShow/assets/texture/alpha.jpg',
+	]);
+
+	useEffect(() => {
+		girdTexture.wrapS = girdTexture.wrapT = RepeatWrapping;
+		girdTexture.repeat.setScalar(30);
+		girdTexture.anisotropy = 16;
+	}, [girdTexture]);
+
+	useFrame((_, delta) => {
+		girdTexture.offset.y -= delta * 0.68;
+	});
+
+	return (
+		<mesh rotation-x={-Math.PI / 2} position-y={0.0425}>
+			<planeGeometry args={[30, 30, 32, 32]} />
+			<meshBasicMaterial
+				transparent={true}
+				color={[1, 1, 1]}
+				opacity={0.15}
+				map={girdTexture}
+				alphaMap={alphaTexture}
+				alphaTest={0.0001}
 			/>
 		</mesh>
 	);
