@@ -6,7 +6,7 @@ import {
 	CameraHelper,
 	DirectionalLight,
 	DirectionalLightHelper,
-	EquirectangularRefractionMapping,
+	EquirectangularReflectionMapping,
 	Mesh,
 	MeshPhysicalMaterial,
 	MeshStandardMaterial,
@@ -40,6 +40,16 @@ export default function ThreejsJourneyShadow() {
 		el.innerHTML = '';
 
 		/**
+		 * Loaders
+		 */
+
+		const textureLoader = new TextureLoader();
+		textureLoader.setPath('/src/pages/Shadow/ThreejsJourneyShadow/assets/texture/');
+
+		const rgbeLoader = new RGBELoader();
+		rgbeLoader.setPath('/src/pages/Shadow/ThreejsJourneyShadow/assets/texture/');
+
+		/**
 		 * Basic
 		 */
 
@@ -54,6 +64,14 @@ export default function ThreejsJourneyShadow() {
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
+		rgbeLoader.load('sunset_at_rocky_desert_1k.hdr', (data) => {
+			scene.background = data;
+			scene.background.mapping = EquirectangularReflectionMapping;
+			scene.backgroundBlurriness = 1.0;
+
+			scene.environment = data;
+			scene.environment.mapping = EquirectangularReflectionMapping;
+		});
 
 		const camera = new PerspectiveCamera(
 			75,
@@ -76,31 +94,24 @@ export default function ThreejsJourneyShadow() {
 		 */
 
 		const composer = new EffectComposer(renderer);
+		composer.setSize(window.innerWidth, window.innerHeight);
+		composer.setPixelRatio(window.devicePixelRatio);
 
 		const renderPass = new RenderPass(scene, camera);
 		composer.addPass(renderPass);
 
-		const lutPass = new LUTPass({});
 		const lutLoader = new LUTCubeLoader();
 		lutLoader.setPath('/src/pages/Shadow/ThreejsJourneyShadow/assets/texture/');
-		lutLoader.load('cubicle-99.CUBE', (data) => {
-			lutPass.lut = data.texture3D;
-			lutPass.intensity = 0.75;
-			composer.addPass(lutPass);
-		});
 
 		const outputPass = new OutputPass();
-		composer.addPass(outputPass);
+		// composer.addPass(outputPass);
 
-		/**
-		 * Loaders
-		 */
-
-		const textureLoader = new TextureLoader();
-		textureLoader.setPath('/src/pages/Shadow/ThreejsJourneyShadow/assets/texture/');
-
-		const rgbeLoader = new RGBELoader();
-		rgbeLoader.setPath('/src/pages/Shadow/ThreejsJourneyShadow/assets/texture/');
+		const lut = await lutLoader.loadAsync('cubicle-99.CUBE');
+		const lutPass = new LUTPass({
+			lut: lut.texture3D,
+			intensity: 0.75,
+		});
+		composer.addPass(lutPass);
 
 		/**
 		 * Textures
@@ -110,12 +121,6 @@ export default function ThreejsJourneyShadow() {
 		sphereColorTexture.colorSpace = SRGBColorSpace;
 		sphereColorTexture.wrapS = sphereColorTexture.wrapT = RepeatWrapping;
 		sphereColorTexture.repeat.set(1.5, 1.5);
-
-		const environmentMap = rgbeLoader.load('kiara_1_dawn_1k.hdr', (texture) => {
-			scene.background = texture;
-			scene.backgroundBlurriness = 0.6;
-			scene.background.mapping = EquirectangularRefractionMapping;
-		});
 
 		/**
 		 * Scenes
@@ -135,7 +140,6 @@ export default function ThreejsJourneyShadow() {
 			roughness: 0,
 			clearcoat: 1,
 			clearcoatRoughness: 0,
-			envMap: environmentMap,
 		});
 		sphereMateral.flatShading = true;
 		const sphere = new Mesh(sphereGeometry, sphereMateral);
@@ -197,6 +201,7 @@ export default function ThreejsJourneyShadow() {
 				max: 1,
 			});
 		}
+		pane.addBinding(lutPass, 'enabled');
 		// Ambient Light
 		{
 			const ambientLightPane = pane.addFolder({ title: 'Ambient Light' });

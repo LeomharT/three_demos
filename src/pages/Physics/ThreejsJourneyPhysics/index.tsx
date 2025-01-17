@@ -56,28 +56,6 @@ export default function ThreejsJourneyPhysics() {
 		el.append(stats.dom);
 
 		/**
-		 * Physics
-		 */
-		const world = new Cannon.World();
-		world.gravity.set(0, -9.82, 0);
-
-		const sphereShape = new Cannon.Sphere(0.5);
-		const sphereBody = new Cannon.Body({
-			mass: 1,
-			position: new Cannon.Vec3(0, 3, 0),
-			shape: sphereShape,
-		});
-		world.addBody(sphereBody);
-
-		const floorShape = new Cannon.Plane();
-		const floorBody = new Cannon.Body({
-			mass: 0,
-			shape: floorShape,
-		});
-		floorBody.quaternion.setFromAxisAngle(new Cannon.Vec3(1, 0, 0), -Math.PI / 2);
-		world.addBody(floorBody);
-
-		/**
 		 * Loaders
 		 */
 
@@ -119,7 +97,7 @@ export default function ThreejsJourneyPhysics() {
 		floor.receiveShadow = true;
 		scene.add(floor);
 
-		const sphereGeometry = new SphereGeometry(0.5, 16, 16);
+		const sphereGeometry = new SphereGeometry(0.5, 32, 32);
 		const sphereMaterial = new MeshStandardMaterial({
 			metalness: 0.4,
 			roughness: 0.3,
@@ -131,6 +109,47 @@ export default function ThreejsJourneyPhysics() {
 		sphere.receiveShadow = true;
 		sphere.position.y = 0.5;
 		scene.add(sphere);
+
+		/**
+		 * Physics
+		 */
+
+		const world = new Cannon.World();
+		world.gravity.set(0, -9.82, 0);
+
+		// Material
+		// const concreteMaterial = new Cannon.Material('Concrete Material');
+		// const plasticMaterial = new Cannon.Material('Plastic Material');
+
+		const defaultMaterial = new Cannon.Material('Default Material');
+		const defaultContactMaterial = new Cannon.ContactMaterial(
+			defaultMaterial,
+			defaultMaterial,
+			{
+				friction: 1.0,
+				restitution: 0.7,
+			}
+		);
+		world.addContactMaterial(defaultContactMaterial);
+		world.defaultContactMaterial = defaultContactMaterial;
+
+		const sphereShape = new Cannon.Sphere(0.5);
+		const sphereBody = new Cannon.Body({
+			mass: 1,
+			position: new Cannon.Vec3(0, 3, 0),
+			shape: sphereShape,
+			material: defaultMaterial,
+		});
+		world.addBody(sphereBody);
+
+		const floorShape = new Cannon.Plane();
+		const floorBody = new Cannon.Body({
+			mass: 0,
+			shape: floorShape,
+			material: defaultMaterial,
+		});
+		floorBody.quaternion.setFromAxisAngle(new Cannon.Vec3(1, 0, 0), -Math.PI / 2);
+		world.addBody(floorBody);
 
 		/**
 		 * Lights
@@ -155,6 +174,7 @@ export default function ThreejsJourneyPhysics() {
 		scene.add(axesHelper);
 
 		const directionalLightHelp = new DirectionalLightHelper(directionalLight);
+		directionalLightHelp.visible = false;
 		scene.add(directionalLightHelp);
 
 		/**
@@ -185,10 +205,12 @@ export default function ThreejsJourneyPhysics() {
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
 
-			const deltaTime = time - previousTime;
+			let deltaTime = time - previousTime;
 			previousTime = time;
+			deltaTime /= 1000;
 
-			world.step(1 / 60, deltaTime / 1000, 3);
+			// Update Phtsics World
+			world.step(1 / 60, deltaTime, 3);
 			sphere.position.copy(sphereBody.position);
 
 			stats.update();

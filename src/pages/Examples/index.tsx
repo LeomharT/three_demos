@@ -50,11 +50,6 @@ const examples = [
 		path: '/spacestation',
 	},
 	{
-		title: 'CarShow',
-		description: 'CarShow',
-		path: '/carshow',
-	},
-	{
 		title: 'Contact Shadow',
 		description: 'Contact Shadow',
 		path: '/contact-shadow',
@@ -66,6 +61,11 @@ const r3fExamples = [
 		title: 'Portal Through',
 		description: 'Portal Through the scene',
 		path: '/portal-through',
+	},
+	{
+		title: 'CarShow',
+		description: 'CarShow',
+		path: '/carshow',
 	},
 ];
 

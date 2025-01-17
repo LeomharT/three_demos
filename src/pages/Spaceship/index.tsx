@@ -301,7 +301,6 @@ export default function Spaceship() {
 
 		const axesHelper = new AxesHelper();
 		axesHelper.scale.setScalar(10);
-		axesHelper.visible = false;
 		scene.add(axesHelper);
 
 		const gridHelper = new GridHelper(100, 35);
@@ -386,6 +385,7 @@ export default function Spaceship() {
 			}
 
 			spaceship.position.y = translY;
+			// If rotation on Y change the order to ZXY
 			spaceship.rotation.setFromVector3(new Vector3(angleZ, 0, angleZ), 'XYZ');
 
 			/**

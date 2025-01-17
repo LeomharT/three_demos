@@ -49,6 +49,7 @@ const ThreejsJourneyPhysics = lazy(
 	() => import('../pages/Physics/ThreejsJourneyPhysics')
 );
 const ContactShadowSource = lazy(() => import('../pages/Shadow/ContactShadowSource'));
+const Test = lazy(() => import('../pages/Test'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -80,6 +81,7 @@ export const router = createBrowserRouter(
 			<Route path='spacestation' element={<SpaceStation />} />
 			<Route path='carshow' element={<CarShow />} />
 			<Route path='contact-shadow' element={<ContactShadowSource />} />
+			<Route path='test' element={<Test />} />
 			<Route path='tj-3dtext' element={<_3DText />} />
 			<Route path='tj-light' element={<LightBasic />} />
 			<Route path='tj-particle' element={<ParticleThreejsJourney />} />
