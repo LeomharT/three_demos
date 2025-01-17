@@ -133,23 +133,22 @@ export default function ThreejsJourneyPhysics() {
 		world.addContactMaterial(defaultContactMaterial);
 		world.defaultContactMaterial = defaultContactMaterial;
 
+		const floorShape = new Cannon.Plane();
+		const floorBody = new Cannon.Body({
+			mass: 0,
+			shape: floorShape,
+		});
+		floorBody.quaternion.setFromAxisAngle(new Cannon.Vec3(1, 0, 0), -Math.PI / 2);
+		world.addBody(floorBody);
+
 		const sphereShape = new Cannon.Sphere(0.5);
 		const sphereBody = new Cannon.Body({
 			mass: 1,
 			position: new Cannon.Vec3(0, 3, 0),
 			shape: sphereShape,
-			material: defaultMaterial,
 		});
+		sphereBody.applyLocalForce(new Cannon.Vec3(23, 0, 50), new Cannon.Vec3(0, 0, 0));
 		world.addBody(sphereBody);
-
-		const floorShape = new Cannon.Plane();
-		const floorBody = new Cannon.Body({
-			mass: 0,
-			shape: floorShape,
-			material: defaultMaterial,
-		});
-		floorBody.quaternion.setFromAxisAngle(new Cannon.Vec3(1, 0, 0), -Math.PI / 2);
-		world.addBody(floorBody);
 
 		/**
 		 * Lights
