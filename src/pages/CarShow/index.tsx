@@ -157,6 +157,12 @@ function Ground() {
 		});
 	}, [normalTexture, roughnessTexute]);
 
+	useFrame((_, delta) => {
+		[normalTexture, roughnessTexute].forEach((t) => {
+			t.offset.y -= delta * 0.128;
+		});
+	});
+
 	return (
 		<mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
 			<planeGeometry args={[30, 30, 32, 32]} />

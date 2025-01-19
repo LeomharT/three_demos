@@ -2,13 +2,18 @@ import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
 import {
 	AmbientLight,
+	AxesHelper,
+	BufferAttribute,
+	BufferGeometry,
 	Color,
 	DirectionalLight,
-	DirectionalLightHelper,
 	InstancedMesh,
 	MeshPhysicalMaterial,
 	PerspectiveCamera,
+	Points,
 	Scene,
+	ShaderLib,
+	ShaderMaterial,
 	SphereGeometry,
 	TextureLoader,
 	Vector2,
@@ -24,9 +29,10 @@ import {
 	UnrealBloomPass,
 } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
+import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
+import pointsVertexShader from './shader/points/vertex.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
-
 export default function SpaceStation() {
 	const theme = useMantineTheme();
 
@@ -60,7 +66,7 @@ export default function SpaceStation() {
 			0.1,
 			1000
 		);
-		camera.position.set(0, 0, 1);
+		camera.position.setScalar(1);
 		camera.lookAt(scene.position);
 
 		const controls = new OrbitControls(camera, renderer.domElement);
@@ -99,7 +105,7 @@ export default function SpaceStation() {
 			vertexShader,
 			fragmentShader,
 		});
-		// composer.addPass(shitPass);
+		composer.addPass(shitPass);
 
 		const outPass = new OutputPass();
 		composer.addPass(outPass);
@@ -115,24 +121,11 @@ export default function SpaceStation() {
 		gltfLoader.setPath('/src/pages/SpaceStation/assets/model');
 
 		/**
-		 * Textures
-		 */
-
-		const starColorTexture = textureLoader.load('/diffuse.png');
-		const starAlphaTexture = textureLoader.load('/star-alpha.png');
-
-		/**
-		 * Variable
-		 */
-
-		const STAR_COUNT = 500;
-
-		/**
 		 * Scene
 		 */
 
-		const starGeometry = new SphereGeometry(0.3, 32, 32);
-		const starMaterial = new MeshPhysicalMaterial({
+		const sphereGeometry = new SphereGeometry(0.3, 32, 32);
+		const sphereMaterial = new MeshPhysicalMaterial({
 			transparent: true,
 			color: 'white',
 			iridescence: 0,
@@ -142,37 +135,85 @@ export default function SpaceStation() {
 			iridescenceThicknessRange: [1, 1200],
 			ior: 2,
 		});
-		const star = new InstancedMesh(starGeometry, starMaterial, 1);
-		star.receiveShadow = true;
-		star.castShadow = true;
+		const sphere = new InstancedMesh(sphereGeometry, sphereMaterial, 1);
+		sphere.receiveShadow = true;
+		sphere.castShadow = true;
 
-		scene.add(star);
+		scene.add(sphere);
+
+		// Stars
+		const STAR_COUNT = 1;
+
+		const starGeometry = new BufferGeometry();
+		const starPosition = new Float32Array(STAR_COUNT * 3);
+		for (let i = 0; i < STAR_COUNT; i++) {
+			const i3 = i * 3;
+
+			starPosition[i3 + 0] = 0;
+			starPosition[i3 + 1] = 1;
+			starPosition[i3 + 2] = 1;
+		}
+		const attrPosition = new BufferAttribute(starPosition, 3);
+		starGeometry.setAttribute('position', attrPosition);
+
+		const starMaterial = new ShaderMaterial({
+			vertexShader: pointsVertexShader,
+			fragmentShader: ShaderLib.points.fragmentShader,
+			uniforms: ShaderLib.points.uniforms,
+		});
+		const stars = new Points(starGeometry, starMaterial);
+		scene.add(stars);
 
 		/**
 		 * Lights
 		 */
 
-		const ambientLight = new AmbientLight();
-		ambientLight.intensity = 0.2;
+		const ambientLight = new AmbientLight(0xffffff);
+		ambientLight.intensity = 0.1;
 		scene.add(ambientLight);
 
-		const dircetionalLight = new DirectionalLight();
-		dircetionalLight.intensity = 1.8;
-		dircetionalLight.castShadow = true;
-		dircetionalLight.position.set(0, 10, 10);
-		dircetionalLight.color = new Color(theme.white);
-		scene.add(dircetionalLight);
+		const directionalLight = new DirectionalLight();
+		directionalLight.position.set(0, -1, 1);
+		scene.add(directionalLight);
 
 		/**
 		 * Helper
 		 */
 
-		const directionalLightHelper = new DirectionalLightHelper(dircetionalLight);
-		scene.add(directionalLightHelper);
+		const axesHelper = new AxesHelper();
+		scene.add(axesHelper);
+
+		/**
+		 * Pane
+		 */
+
+		const pane = new Pane({ title: 'Debug Params' });
+		// Directional Light
+		{
+			const folder = pane.addFolder({ title: 'Directional Light' });
+			folder.addBinding(directionalLight, 'color', {
+				color: { type: 'float' },
+			});
+			folder.addBinding(directionalLight, 'intensity', {
+				step: 0.1,
+				max: 5.0,
+				min: 1.0,
+			});
+		}
 
 		/**
 		 * Events
 		 */
+
+		function updatePosition() {
+			const attr = starGeometry.getAttribute('position') as BufferAttribute;
+
+			for (let i = 0; i < STAR_COUNT; i++) {
+				const x = attr.getX(i) + 0.01;
+				attr.needsUpdate = true;
+				attr.setXYZ(0, x, 2, 0);
+			}
+		}
 
 		function render(time?: number) {
 			requestAnimationFrame(render);
