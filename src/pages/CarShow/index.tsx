@@ -11,6 +11,7 @@ import {
 	ChromaticAberration,
 	DepthOfField,
 	EffectComposer,
+	FXAA,
 } from '@react-three/postprocessing';
 import { useControls } from 'leva';
 import { BlendFunction, KernelSize } from 'postprocessing';
@@ -57,18 +58,6 @@ function CarShowScene() {
 		},
 	});
 
-	const { focusRange, focalLength, bokehScale, height } = useControls({
-		focusRange: 0.0035,
-		focalLength: 0.01,
-		bokehScale: 1,
-		height: {
-			value: 480,
-			step: 1,
-			min: 0,
-			max: 1024,
-		},
-	});
-
 	return (
 		<>
 			{/* Basics */}
@@ -80,11 +69,12 @@ function CarShowScene() {
 			/>
 			{/* Effect */}
 			<EffectComposer>
+				<FXAA />
 				<DepthOfField
-					focusRange={focusRange}
-					focalLength={focalLength}
-					bokehScale={bokehScale}
-					height={height}
+					focusDistance={0.0035}
+					focalLength={0.01}
+					bokehScale={0.5}
+					height={480}
 				/>
 				<Bloom
 					blendFunction={BlendFunction.ADD}
@@ -253,11 +243,13 @@ function Car(props: GroupProps) {
 function Rings() {
 	const refs = useRef<Mesh<TorusGeometry, MeshStandardMaterial>[]>([]);
 
-	useFrame(() => {
+	useFrame((state) => {
+		const elapsedTime = state.clock.getElapsedTime();
+
 		for (let i = 0; i < refs.current.length; i++) {
 			const mesh = refs.current[i];
 
-			const z = (i - refs.current.length / 2) * 3.5;
+			const z = (i - refs.current.length / 2) * 3.5 - ((elapsedTime * 0.4) % 3.5) * 2;
 
 			// [-7, 7]
 			const distance = Math.abs(z);
