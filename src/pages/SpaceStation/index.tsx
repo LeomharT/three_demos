@@ -3,18 +3,15 @@ import { useEffect } from 'react';
 import {
 	AmbientLight,
 	AxesHelper,
-	BufferAttribute,
-	BufferGeometry,
+	BoxGeometry,
 	Color,
 	DirectionalLight,
-	InstancedMesh,
-	MeshPhysicalMaterial,
+	Layers,
+	Mesh,
+	MeshBasicMaterial,
 	PerspectiveCamera,
-	Points,
+	ReinhardToneMapping,
 	Scene,
-	ShaderLib,
-	ShaderMaterial,
-	SphereGeometry,
 	TextureLoader,
 	Vector2,
 	WebGLRenderer,
@@ -31,7 +28,6 @@ import {
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
-import pointsVertexShader from './shader/points/vertex.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
 export default function SpaceStation() {
 	const theme = useMantineTheme();
@@ -46,6 +42,16 @@ export default function SpaceStation() {
 		el.innerHTML = '';
 
 		/**
+		 * Loader
+		 */
+
+		const textureLoader = new TextureLoader();
+		textureLoader.setPath('/src/pages/SpaceStation/assets/texture');
+
+		const gltfLoader = new GLTFLoader();
+		gltfLoader.setPath('/src/pages/SpaceStation/assets/model');
+
+		/**
 		 * Basic
 		 */
 
@@ -55,6 +61,7 @@ export default function SpaceStation() {
 		});
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		renderer.setPixelRatio(window.devicePixelRatio);
+		renderer.toneMapping = ReinhardToneMapping;
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
@@ -66,7 +73,7 @@ export default function SpaceStation() {
 			0.1,
 			1000
 		);
-		camera.position.setScalar(1);
+		camera.position.set(0, 0, 1);
 		camera.lookAt(scene.position);
 
 		const controls = new OrbitControls(camera, renderer.domElement);
@@ -94,7 +101,7 @@ export default function SpaceStation() {
 			0.5,
 			0
 		);
-		// composer.addPass(boolmPass);
+		composer.addPass(boolmPass);
 
 		const shitPass = new ShaderPass({
 			name: 'CopyShader',
@@ -105,64 +112,47 @@ export default function SpaceStation() {
 			vertexShader,
 			fragmentShader,
 		});
-		composer.addPass(shitPass);
+		// composer.addPass(shitPass);
 
 		const outPass = new OutputPass();
 		composer.addPass(outPass);
 
 		/**
-		 * Loader
+		 * Layers
 		 */
 
-		const textureLoader = new TextureLoader();
-		textureLoader.setPath('/src/pages/SpaceStation/assets/texture');
+		const BLOOM_LAYER = 1;
 
-		const gltfLoader = new GLTFLoader();
-		gltfLoader.setPath('/src/pages/SpaceStation/assets/model');
+		const bloomLayey = new Layers();
+		bloomLayey.set(BLOOM_LAYER);
+
+		/**
+		 * Raycaster
+		 */
 
 		/**
 		 * Scene
 		 */
 
-		const sphereGeometry = new SphereGeometry(0.3, 32, 32);
-		const sphereMaterial = new MeshPhysicalMaterial({
-			transparent: true,
-			color: 'white',
-			iridescence: 0,
-			iridescenceIOR: 1,
-			roughness: 0.8,
-			metalness: 0.2,
-			iridescenceThicknessRange: [1, 1200],
-			ior: 2,
-		});
-		const sphere = new InstancedMesh(sphereGeometry, sphereMaterial, 1);
-		sphere.receiveShadow = true;
-		sphere.castShadow = true;
-
-		scene.add(sphere);
+		const darkMaterial = new MeshBasicMaterial({ color: 'black' });
 
 		// Stars
-		const STAR_COUNT = 1;
 
-		const starGeometry = new BufferGeometry();
-		const starPosition = new Float32Array(STAR_COUNT * 3);
-		for (let i = 0; i < STAR_COUNT; i++) {
-			const i3 = i * 3;
+		const boxGeometry = new BoxGeometry(0.25, 0.5, 0.5, 16, 16, 16);
 
-			starPosition[i3 + 0] = 0;
-			starPosition[i3 + 1] = 1;
-			starPosition[i3 + 2] = 1;
-		}
-		const attrPosition = new BufferAttribute(starPosition, 3);
-		starGeometry.setAttribute('position', attrPosition);
-
-		const starMaterial = new ShaderMaterial({
-			vertexShader: pointsVertexShader,
-			fragmentShader: ShaderLib.points.fragmentShader,
-			uniforms: ShaderLib.points.uniforms,
+		const box1Material = new MeshBasicMaterial({
+			color: theme.colors.blue[4],
 		});
-		const stars = new Points(starGeometry, starMaterial);
-		scene.add(stars);
+		const box2Material = new MeshBasicMaterial({
+			color: theme.colors.green[4],
+		});
+
+		const box1 = new Mesh(boxGeometry, box1Material);
+		box1.position.x = 0.25 / 2;
+		const box2 = new Mesh(boxGeometry, box2Material);
+		box2.position.x = -0.25 / 2;
+
+		scene.add(box1, box2);
 
 		/**
 		 * Lights
@@ -173,6 +163,7 @@ export default function SpaceStation() {
 		scene.add(ambientLight);
 
 		const directionalLight = new DirectionalLight();
+		directionalLight.color = new Color('#edf3ed');
 		directionalLight.position.set(0, -1, 1);
 		scene.add(directionalLight);
 
@@ -204,16 +195,6 @@ export default function SpaceStation() {
 		/**
 		 * Events
 		 */
-
-		function updatePosition() {
-			const attr = starGeometry.getAttribute('position') as BufferAttribute;
-
-			for (let i = 0; i < STAR_COUNT; i++) {
-				const x = attr.getX(i) + 0.01;
-				attr.needsUpdate = true;
-				attr.setXYZ(0, x, 2, 0);
-			}
-		}
 
 		function render(time?: number) {
 			requestAnimationFrame(render);
