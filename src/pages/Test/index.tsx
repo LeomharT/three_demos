@@ -21,6 +21,7 @@ import {
 } from 'three';
 import {
 	EffectComposer,
+	FXAAShader,
 	GLTFLoader,
 	OrbitControls,
 	OutputPass,
@@ -129,11 +130,13 @@ export default function Test() {
 			'baseTexture'
 		);
 		mixPass.needsSwap = true;
+		const fxaaPass = new ShaderPass(FXAAShader);
 
 		const outPass = new OutputPass();
 		finalComposer.addPass(renderPass);
 		finalComposer.addPass(mixPass);
-		// finalComposer.addPass(shitPass);
+		finalComposer.addPass(shitPass);
+		finalComposer.addPass(fxaaPass);
 		finalComposer.addPass(outPass);
 
 		/**

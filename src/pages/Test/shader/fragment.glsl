@@ -1,23 +1,12 @@
+uniform float opacity;
+uniform sampler2D tDiffuse;
+
 varying vec2 vUv;
 
-uniform vec4 uColor;
+void main() {
+    vec4 diffuse = texture2D(tDiffuse, vUv);
+    
+	vec4 color = vec4(diffuse.rgb, opacity);
 
-void main()
-{
-    vec2 uv = vUv;
-
-    vec4 color = uColor;
-
-    float radius = 0.5;
-
-    vec2 center = vec2(0.5, 0.5);
-
-    float distanceToCenter = distance(uv, center); 
-
-    if(distanceToCenter > radius)
-    {
-        color.a = 0.0;
-    }
-
-    gl_FragColor = color;
+	gl_FragColor = color;
 }
