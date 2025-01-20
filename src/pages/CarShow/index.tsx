@@ -233,6 +233,16 @@ function Car(props: GroupProps) {
 		});
 	}, []);
 
+	useFrame((state) => {
+		const t = state.clock.getElapsedTime();
+
+		const group = gltf.scene.children[0].children[0].children[0];
+		group.children[0].rotation.x = t;
+		group.children[2].rotation.x = t;
+		group.children[4].rotation.x = t;
+		group.children[6].rotation.x = t;
+	});
+
 	return (
 		<group {...props} dispose={null}>
 			<primitive object={gltf.scene} />
@@ -297,13 +307,15 @@ function Rings() {
 function Box({ color }: { color: Color | [r: number, g: number, b: number] }) {
 	const box = useRef<Mesh<BoxGeometry, MeshStandardMaterial>>();
 
+	const time = useRef(0);
+
 	const [xRotateSpeed] = useState(() => Math.random());
 	const [yRotateSpeed] = useState(() => Math.random());
 
 	const [scale] = useState(() => Math.pow(Math.random(), 2.0) * 0.5 + 0.05);
-	const [position] = useState(resetPosition());
+	const [position, setPosition] = useState(initialPosition());
 
-	function resetPosition() {
+	function initialPosition() {
 		const position = new Vector3(
 			(Math.random() * 2 - 1) * 3,
 			Math.random() * 2.5 + 0.1,
@@ -319,7 +331,34 @@ function Box({ color }: { color: Color | [r: number, g: number, b: number] }) {
 		return position;
 	}
 
+	function resetPosition() {
+		const position = new Vector3(
+			(Math.random() * 2 - 1) * 3,
+			Math.random() * 2.5 + 0.1,
+			Math.random() * 10 + 10
+		);
+
+		/**
+		 * For the space station also!!
+		 */
+		if (position.x < 0) position.x -= 1.75;
+		if (position.x > 0) position.x += 1.75;
+
+		setPosition(position);
+	}
+
 	useFrame((_, delta) => {
+		time.current = delta * 1.2;
+
+		const newZ = position.z - time.current;
+
+		if (newZ < -10) {
+			resetPosition();
+			time.current = 0;
+		}
+
+		position.z = newZ;
+
 		if (box.current) {
 			box.current.position.copy(position);
 			box.current.rotation.x += delta * xRotateSpeed;
