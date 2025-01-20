@@ -217,6 +217,20 @@ export default function Test() {
 				min: 1.0,
 			});
 		}
+		// Bloom
+		{
+			const folder = pane.addFolder({ title: 'Bloom' });
+			folder.addBinding(bloomPass, 'strength', {
+				min: 0,
+				max: 3,
+				step: 0.001,
+			});
+			folder.addBinding(bloomPass, 'radius', {
+				min: 0,
+				max: 10,
+				step: 0.01,
+			});
+		}
 
 		/**
 		 * Events
