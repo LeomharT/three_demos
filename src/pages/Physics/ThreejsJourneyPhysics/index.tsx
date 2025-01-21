@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import {
 	AmbientLight,
 	AxesHelper,
+	BoxGeometry,
 	CubeTextureLoader,
 	DirectionalLight,
 	DirectionalLightHelper,
@@ -11,9 +12,12 @@ import {
 	MeshStandardMaterial,
 	PerspectiveCamera,
 	PlaneGeometry,
+	Quaternion,
 	Scene,
 	SphereGeometry,
 	TextureLoader,
+	Vector3,
+	Vector3Like,
 	WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
@@ -97,24 +101,13 @@ export default function ThreejsJourneyPhysics() {
 		floor.receiveShadow = true;
 		scene.add(floor);
 
-		const sphereGeometry = new SphereGeometry(0.5, 32, 32);
-		const sphereMaterial = new MeshStandardMaterial({
-			metalness: 0.4,
-			roughness: 0.3,
-			envMap: environmentTexture,
-			envMapIntensity: 0.5,
-		});
-		const sphere = new Mesh(sphereGeometry, sphereMaterial);
-		sphere.castShadow = true;
-		sphere.receiveShadow = true;
-		sphere.position.y = 0.5;
-		scene.add(sphere);
-
 		/**
 		 * Physics
 		 */
 
 		const world = new Cannon.World();
+		world.broadphase = new Cannon.SAPBroadphase(world);
+		world.allowSleep = true;
 		world.gravity.set(0, -9.82, 0);
 
 		// Material
@@ -141,14 +134,98 @@ export default function ThreejsJourneyPhysics() {
 		floorBody.quaternion.setFromAxisAngle(new Cannon.Vec3(1, 0, 0), -Math.PI / 2);
 		world.addBody(floorBody);
 
-		const sphereShape = new Cannon.Sphere(0.5);
-		const sphereBody = new Cannon.Body({
-			mass: 1,
-			position: new Cannon.Vec3(0, 3, 0),
-			shape: sphereShape,
+		/**
+		 * Utils
+		 */
+
+		const hitAudio = new Audio(
+			'/src/pages/Physics/ThreejsJourneyPhysics/assets/audio/hit.mp3'
+		);
+		function playHitAudio(event: any) {
+			const contact = event.contact;
+			const impactStrengh = contact.getImpactVelocityAlongNormal();
+
+			if (impactStrengh > 1.5) {
+				hitAudio.volume = Math.random();
+				hitAudio.currentTime === 0;
+				hitAudio.play();
+			}
+		}
+
+		const objectToUpdate: {
+			mesh: Mesh;
+			body: Cannon.Body;
+		}[] = [];
+
+		const sphereGeometry = new SphereGeometry(1, 32, 32);
+		const sphereMaterial = new MeshStandardMaterial({
+			metalness: 0.3,
+			roughness: 0.4,
+			envMap: environmentTexture,
 		});
-		sphereBody.applyLocalForce(new Cannon.Vec3(23, 0, 50), new Cannon.Vec3(0, 0, 0));
-		world.addBody(sphereBody);
+
+		function createSphere(radius: number, position: Vector3Like) {
+			const mesh = new Mesh(sphereGeometry, sphereMaterial);
+			// Scale 1 * radius
+			mesh.scale.setScalar(radius);
+			mesh.castShadow = true;
+			mesh.receiveShadow = true;
+			mesh.position.copy(position);
+			scene.add(mesh);
+
+			const shape = new Cannon.Sphere(radius);
+			const body = new Cannon.Body({
+				shape,
+				mass: 1,
+				position: new Cannon.Vec3(0, 3, 0),
+				material: defaultMaterial,
+			});
+			body.position.copy(position as Cannon.Vec3);
+			body.addEventListener('collide', playHitAudio);
+			world.addBody(body);
+			objectToUpdate.push({
+				mesh,
+				body,
+			});
+		}
+
+		createSphere(0.5, { x: 0, y: 3, z: 0 });
+
+		const boxGeometry = new BoxGeometry(1, 1, 1, 16, 16, 16);
+		const boxMaterial = new MeshStandardMaterial({
+			metalness: 0.3,
+			roughness: 0.4,
+			envMap: environmentTexture,
+		});
+
+		function createBox(
+			width: number,
+			height: number,
+			depth: number,
+			position: Vector3Like
+		) {
+			const mesh = new Mesh(boxGeometry, boxMaterial);
+			mesh.scale.set(width, height, depth);
+			mesh.castShadow = true;
+			mesh.receiveShadow = true;
+			mesh.position.copy(position);
+			scene.add(mesh);
+
+			const shape = new Cannon.Box(new Cannon.Vec3(width / 2, height / 2, depth / 2));
+			const body = new Cannon.Body({
+				shape,
+				mass: 1,
+				position: new Cannon.Vec3(0, 3, 0),
+				material: defaultMaterial,
+			});
+			body.addEventListener('collide', playHitAudio);
+			world.addBody(body);
+
+			objectToUpdate.push({
+				mesh,
+				body,
+			});
+		}
 
 		/**
 		 * Lights
@@ -194,6 +271,40 @@ export default function ThreejsJourneyPhysics() {
 				color: { type: 'float' },
 			});
 		}
+		// Physics
+		{
+			const folder = pane.addFolder({ title: 'Physics' });
+			folder
+				.addButton({
+					title: 'Create Shpere',
+				})
+				.on('click', () => {
+					createSphere(
+						Math.random() * 0.5,
+						new Vector3((Math.random() - 0.5) * 3, 3, (Math.random() - 0.5) * 3)
+					);
+				});
+			folder
+				.addButton({
+					title: 'Create Box',
+				})
+				.on('click', () => {
+					createBox(
+						Math.random() * 0.5,
+						Math.random() * 0.5,
+						Math.random() * 0.5,
+						new Vector3((Math.random() - 0.5) * 3, 3, (Math.random() - 0.5) * 3)
+					);
+				});
+			folder.addButton({ title: 'Rest' }).on('click', () => {
+				for (const object of objectToUpdate) {
+					object.body.removeEventListener('collide', playHitAudio);
+					world.remove(object.body);
+					scene.remove(object.mesh);
+				}
+				objectToUpdate.length = 0;
+			});
+		}
 
 		/**
 		 * Events
@@ -208,9 +319,18 @@ export default function ThreejsJourneyPhysics() {
 			previousTime = time;
 			deltaTime /= 1000;
 
+			// Wind
+
 			// Update Phtsics World
 			world.step(1 / 60, deltaTime, 3);
-			sphere.position.copy(sphereBody.position);
+
+			const q = new Quaternion();
+
+			for (const { mesh, body } of objectToUpdate) {
+				mesh.position.copy(body.position);
+				q.set(body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w);
+				mesh.rotation.setFromQuaternion(q, 'XYZ');
+			}
 
 			stats.update();
 			controls.update(time);
