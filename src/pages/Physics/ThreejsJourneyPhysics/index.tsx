@@ -9,13 +9,16 @@ import {
 	DirectionalLight,
 	DirectionalLightHelper,
 	Mesh,
+	MeshBasicMaterial,
 	MeshStandardMaterial,
 	PerspectiveCamera,
 	PlaneGeometry,
 	Quaternion,
+	Raycaster,
 	Scene,
 	SphereGeometry,
 	TextureLoader,
+	Vector2,
 	Vector3,
 	Vector3Like,
 	WebGLRenderer,
@@ -60,6 +63,14 @@ export default function ThreejsJourneyPhysics() {
 		el.append(stats.dom);
 
 		/**
+		 * Raycaster
+		 */
+
+		const raycaster = new Raycaster();
+		let point = new Vector2();
+		let intersectPoint: undefined | Vector3Like;
+
+		/**
 		 * Loaders
 		 */
 
@@ -101,6 +112,21 @@ export default function ThreejsJourneyPhysics() {
 		floor.receiveShadow = true;
 		scene.add(floor);
 
+		const plane = new Mesh(
+			new PlaneGeometry(50, 50, 16, 16),
+			new MeshBasicMaterial({
+				color: 'yellow',
+				wireframe: true,
+			})
+		);
+		plane.lookAt(camera.position);
+		scene.add(plane);
+
+		controls.addEventListener('change', (e) => {
+			plane.lookAt(camera.position);
+			plane.updateMatrix();
+		});
+
 		/**
 		 * Physics
 		 */
@@ -126,12 +152,12 @@ export default function ThreejsJourneyPhysics() {
 		world.addContactMaterial(defaultContactMaterial);
 		world.defaultContactMaterial = defaultContactMaterial;
 
-		const floorShape = new Cannon.Plane();
+		const floorShape = new Cannon.Box(new Cannon.Vec3(10 / 2, 0.5, 10 / 2));
 		const floorBody = new Cannon.Body({
 			mass: 0,
 			shape: floorShape,
 		});
-		floorBody.quaternion.setFromAxisAngle(new Cannon.Vec3(1, 0, 0), -Math.PI / 2);
+		// floorBody.quaternion.setFromAxisAngle(new Cannon.Vec3(1, 0, 0), -Math.PI / 2);
 		world.addBody(floorBody);
 
 		/**
@@ -344,6 +370,52 @@ export default function ThreejsJourneyPhysics() {
 			camera.updateProjectionMatrix();
 		}
 		window.addEventListener('resize', resize);
+
+		function handleOnPointerMove(e: PointerEvent) {
+			const rect = renderer.domElement.getBoundingClientRect();
+			point.x = (e.clientX / rect.width) * 2 - 1;
+			point.y = -(e.clientY / rect.height) * 2 + 1;
+
+			raycaster.setFromCamera(point, camera);
+
+			const intersect = raycaster.intersectObject(plane, true);
+
+			if (intersect.length) {
+				intersectPoint = intersect[0].point;
+			}
+		}
+		window.addEventListener('pointermove', handleOnPointerMove);
+
+		function handleOnPointerClick(e: PointerEvent) {
+			const mesh = new Mesh(
+				new SphereGeometry(0.5, 32, 32),
+				new MeshBasicMaterial({ color: 'red' })
+			);
+			mesh.position.copy(camera.position);
+			scene.add(mesh);
+
+			const body = new Cannon.Body({
+				shape: new Cannon.Sphere(0.5),
+				material: defaultMaterial,
+				mass: 1,
+			});
+			body.applyLocalForce(
+				new Cannon.Vec3(
+					camera.position.x * 100,
+					camera.position.y,
+					-camera.position.z * 100
+				),
+				new Cannon.Vec3(0, 0, 0)
+			);
+			body.position.set(camera.position.x, camera.position.y, camera.position.z);
+			world.addBody(body);
+
+			objectToUpdate.push({
+				mesh,
+				body,
+			});
+		}
+		window.addEventListener('pointerdown', handleOnPointerClick);
 	};
 
 	useEffect(() => {
