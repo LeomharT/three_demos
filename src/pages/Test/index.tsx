@@ -227,7 +227,7 @@ export default function Test() {
 			});
 			folder.addBinding(bloomPass, 'radius', {
 				min: 0,
-				max: 10,
+				max: 2,
 				step: 0.01,
 			});
 		}
