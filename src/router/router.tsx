@@ -50,6 +50,7 @@ const ThreejsJourneyPhysics = lazy(
 );
 const ContactShadowSource = lazy(() => import('../pages/Shadow/ContactShadowSource'));
 const Test = lazy(() => import('../pages/Test'));
+const CupBooks = lazy(() => import('../pages/CustomModel/CupBooks'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -67,6 +68,10 @@ export const router = createBrowserRouter(
 					<Route path='tj-hauntedhouse' element={<HauntedHouseDocs />} />
 					<Route path='spaceship' element={<SpaceshipDocs />} />
 				</Route>
+			</Route>
+			<Route path='custom'>
+				<Route index element={<CupBooks />} />
+				<Route path='cupbooks' element={<CupBooks />} />
 			</Route>
 			<Route path='mix-color' element={<MixColor />} />
 			<Route path='html-markers' element={<HTMLMarkers />} />

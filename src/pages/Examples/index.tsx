@@ -69,6 +69,14 @@ const r3fExamples = [
 	},
 ];
 
+const custom = [
+	{
+		title: 'CupBooks',
+		description: 'CupBooks',
+		path: '/custom/cupbooks',
+	},
+];
+
 const threejsJourneyExapmles = [
 	{
 		title: '3D Text',
@@ -150,6 +158,23 @@ export default function Examples() {
 			<Text c='dimmed'>React three fiber official exapmle</Text>
 			<SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} pt='md' mb='xl'>
 				{r3fExamples.map((value, index) => (
+					<Card key={value.path} withBorder component='a' href={value.path}>
+						<Card.Section>
+							<Image
+								height={160}
+								alt='Norway'
+								src={MANTINE_IMAGE_PATH + `${cover(index)}.png`}
+							/>
+						</Card.Section>
+						<Text mt='sm'>{value.title}</Text>
+						<Text c='dimmed'>{value.description}</Text>
+					</Card>
+				))}
+			</SimpleGrid>
+			<Title order={2}>Custom Models</Title>
+			<Text c='dimmed'>Blender Modules</Text>
+			<SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} pt='md' mb='xl'>
+				{custom.map((value, index) => (
 					<Card key={value.path} withBorder component='a' href={value.path}>
 						<Card.Section>
 							<Image
