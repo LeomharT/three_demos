@@ -20,6 +20,7 @@ import {
 	RGBELoader,
 } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
+import { Pane } from 'tweakpane';
 
 export default function CupBooks() {
 	const theme = useMantineTheme();
@@ -105,7 +106,7 @@ export default function CupBooks() {
 		floor.receiveShadow = true;
 		scene.add(floor);
 
-		gltfLoader.load('Cup&Books.gltf', (data) => {
+		gltfLoader.load('book.glb', (data) => {
 			const cupBooks = data.scene;
 
 			cupBooks.traverse((mesh) => {
@@ -131,20 +132,28 @@ export default function CupBooks() {
 		scene.add(ambientLight);
 
 		const directionalLight = new DirectionalLight();
-		directionalLight.position.set(0, 10, 0);
+		directionalLight.position.set(0, 5, 0);
 		directionalLight.castShadow = true;
 		directionalLight.intensity = 2.0;
 		scene.add(directionalLight);
 
-		const directionalLight2 = directionalLight.clone();
-		directionalLight2.castShadow = true;
-		directionalLight2.position.set(1, 0, 1);
-		scene.add(directionalLight2);
+		/**
+		 * Pane
+		 */
 
-		const directionalLight3 = directionalLight.clone();
-		directionalLight3.castShadow = true;
-		directionalLight3.position.set(-1, 0, 0);
-		scene.add(directionalLight3);
+		const pane = new Pane({ title: 'Debug Params' });
+
+		const directionalLightPane1 = pane.addFolder({ title: 'Directional Light 1' });
+		directionalLightPane1.addBinding(directionalLight, 'intensity', {
+			min: 0,
+			max: 10,
+			step: 0.01,
+		});
+		directionalLightPane1.addBinding(directionalLight, 'color', {
+			color: {
+				type: 'float',
+			},
+		});
 
 		/**
 		 * Events
