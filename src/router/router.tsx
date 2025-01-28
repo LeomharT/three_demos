@@ -51,6 +51,9 @@ const ThreejsJourneyPhysics = lazy(
 const ContactShadowSource = lazy(() => import('../pages/Shadow/ContactShadowSource'));
 const Test = lazy(() => import('../pages/Test'));
 const CupBooks = lazy(() => import('../pages/CustomModel/CupBooks'));
+const ThreeJSJourneyEnvironmentMap = lazy(
+	() => import('../pages/ThreeJSJourneyEnvironmentMap')
+);
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -97,6 +100,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-shadow' element={<ThreejsJourneyShadow />} />
 			<Route path='tj-scrollanimate' element={<ScrollAnimate />} />
 			<Route path='tj-physics' element={<ThreejsJourneyPhysics />} />
+			<Route path='tj-environment' element={<ThreeJSJourneyEnvironmentMap />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

@@ -128,6 +128,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey Physics',
 		path: '/tj-physics',
 	},
+	{
+		title: 'Threejs Journey Environment',
+		description: 'Threejs Journey Environment',
+		path: '/tj-environment',
+	},
 ];
 
 function cover(index: number) {

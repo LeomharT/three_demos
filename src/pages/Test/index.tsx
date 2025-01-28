@@ -13,7 +13,12 @@ import {
 	TextureLoader,
 	WebGLRenderer,
 } from 'three';
-import { DRACOLoader, GLTFLoader, OrbitControls } from 'three/examples/jsm/Addons.js';
+import {
+	DRACOLoader,
+	GLTFLoader,
+	OrbitControls,
+	RGBELoader,
+} from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 
 export default function Test() {
@@ -40,6 +45,9 @@ export default function Test() {
 
 		const cubeTextureLoader = new CubeTextureLoader();
 		cubeTextureLoader.setPath('/src/assets/texture/env/1/');
+
+		const rgbeLoader = new RGBELoader();
+		rgbeLoader.setPath('/src/assets/texture/env/');
 
 		/**
 		 * Basic
