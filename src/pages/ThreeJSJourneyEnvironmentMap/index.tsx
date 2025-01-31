@@ -3,8 +3,8 @@ import {
 	AmbientLight,
 	AxesHelper,
 	CubeCamera,
-	CubeTextureLoader,
 	EquirectangularRefractionMapping,
+	HalfFloatType,
 	LinearFilter,
 	Mesh,
 	MeshStandardMaterial,
@@ -16,13 +16,20 @@ import {
 	TorusGeometry,
 	WebGLRenderer,
 } from 'three';
-import { GLTFLoader, OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
+import {
+	GLTFLoader,
+	GroundedSkybox,
+	OrbitControls,
+	RGBELoader,
+} from 'three/examples/jsm/Addons.js';
 import CubeRenderTarget from 'three/src/renderers/common/CubeRenderTarget.js';
 import { Pane } from 'tweakpane';
 
 export default function ThreeJSJourneyEnvironmentMap() {
 	async function initialScene() {
 		const el = document.querySelector('#container') as HTMLDivElement;
+
+		const ENVIRONMENT_LAYER: number = 1;
 
 		/**
 		 * Loaders
@@ -36,8 +43,6 @@ export default function ThreeJSJourneyEnvironmentMap() {
 
 		const gltfLoader = new GLTFLoader();
 		gltfLoader.setPath('/src/assets/models/');
-
-		const cubeLoader = new CubeTextureLoader();
 
 		/**
 		 * Texture
@@ -68,7 +73,10 @@ export default function ThreeJSJourneyEnvironmentMap() {
 
 		const scene = new Scene();
 		scene.background = envMap;
-		scene.environment = envMap;
+		// scene.environment = envMap;
+		// Skybox
+		const skyBox = new GroundedSkybox(envMap, 15, 75);
+		scene.add(skyBox);
 
 		const camera = new PerspectiveCamera(
 			35,
@@ -86,8 +94,11 @@ export default function ThreeJSJourneyEnvironmentMap() {
 			generateMipmaps: true,
 			minFilter: LinearFilter,
 			magFilter: LinearFilter,
+			// 这个会加强环境照明的效果, type就是这个Texuture的数据是如何储存的, 我们需要HDR需要Float
+			type: HalfFloatType,
 		});
 		const cubeCamera = new CubeCamera(0.1, 1000, cubeEnvironmentTexture);
+		cubeCamera.layers.set(ENVIRONMENT_LAYER);
 		cubeCamera.position.set(0, 0, 0);
 
 		/**
@@ -97,7 +108,7 @@ export default function ThreeJSJourneyEnvironmentMap() {
 		const sphereGeometry = new SphereGeometry(0.5, 32, 32);
 		const sphereMaterial = new MeshStandardMaterial({
 			metalness: 0.8,
-			roughness: 0.1,
+			roughness: 0,
 			envMap: cubeEnvironmentTexture.texture,
 		});
 		const sphere = new Mesh(sphereGeometry, sphereMaterial);
@@ -112,6 +123,7 @@ export default function ThreeJSJourneyEnvironmentMap() {
 				emissiveIntensity: 3.0,
 			})
 		);
+		ring.layers.enable(ENVIRONMENT_LAYER);
 		scene.add(ring);
 
 		gltfLoader.load('FlightHelmet/FlightHelmet.gltf', (data) => {
@@ -121,6 +133,7 @@ export default function ThreeJSJourneyEnvironmentMap() {
 				if (mesh instanceof Mesh) {
 					if (mesh.material instanceof MeshStandardMaterial) {
 						mesh.material.envMap = cubeEnvironmentTexture.texture;
+						mesh.material.envMapIntensity = 4.0;
 					}
 				}
 			});
@@ -174,7 +187,7 @@ export default function ThreeJSJourneyEnvironmentMap() {
 			cubeCamera.update(renderer, scene);
 			sphere.visible = true;
 
-			ring.rotation.x = time * 0.001;
+			ring.rotation.x = Math.sin(time * 0.001) * 2;
 
 			renderer.render(scene, camera);
 		}

@@ -1,4 +1,3 @@
-import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
 import {
 	AddEquation,
@@ -44,8 +43,6 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
 
 export default function Spaceship() {
-	const theme = useMantineTheme();
-
 	const initialScene = async () => {
 		const el = document.querySelector('#container') as HTMLDivElement;
 
