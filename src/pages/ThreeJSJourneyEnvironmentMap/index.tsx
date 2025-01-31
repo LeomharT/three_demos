@@ -3,20 +3,22 @@ import {
 	AmbientLight,
 	AxesHelper,
 	CubeCamera,
+	CubeTextureLoader,
 	EquirectangularRefractionMapping,
 	LinearFilter,
 	Mesh,
 	MeshStandardMaterial,
 	PerspectiveCamera,
-	PMREMGenerator,
 	Scene,
 	SphereGeometry,
+	SRGBColorSpace,
+	TextureLoader,
 	TorusGeometry,
 	WebGLRenderer,
-	WebGLRenderTarget,
 } from 'three';
-import { OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader, OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
 import CubeRenderTarget from 'three/src/renderers/common/CubeRenderTarget.js';
+import { Pane } from 'tweakpane';
 
 export default function ThreeJSJourneyEnvironmentMap() {
 	async function initialScene() {
@@ -29,12 +31,26 @@ export default function ThreeJSJourneyEnvironmentMap() {
 		const rgbeLoader = new RGBELoader();
 		rgbeLoader.setPath('/src/assets/texture/hdr/');
 
+		const textureLoader = new TextureLoader();
+		textureLoader.setPath('/src/assets/texture/hdr/');
+
+		const gltfLoader = new GLTFLoader();
+		gltfLoader.setPath('/src/assets/models/');
+
+		const cubeLoader = new CubeTextureLoader();
+
 		/**
 		 * Texture
 		 */
 
 		const environmentTexture = await rgbeLoader.loadAsync('teatro_massimo_1k.hdr');
 		environmentTexture.mapping = EquirectangularRefractionMapping;
+
+		const envMap = await textureLoader.loadAsync(
+			'interior_views_cozy_wood_cabin_with_cauldron_and_p.jpg'
+		);
+		envMap.mapping = EquirectangularRefractionMapping;
+		envMap.colorSpace = SRGBColorSpace;
 
 		/**
 		 * Basic
@@ -51,7 +67,8 @@ export default function ThreeJSJourneyEnvironmentMap() {
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
-		scene.background = environmentTexture;
+		scene.background = envMap;
+		scene.environment = envMap;
 
 		const camera = new PerspectiveCamera(
 			35,
@@ -65,7 +82,7 @@ export default function ThreeJSJourneyEnvironmentMap() {
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.enableDamping = true;
 
-		const cubeEnvironmentTexture = new CubeRenderTarget(128, {
+		const cubeEnvironmentTexture = new CubeRenderTarget(512, {
 			generateMipmaps: true,
 			minFilter: LinearFilter,
 			magFilter: LinearFilter,
@@ -73,26 +90,22 @@ export default function ThreeJSJourneyEnvironmentMap() {
 		const cubeCamera = new CubeCamera(0.1, 1000, cubeEnvironmentTexture);
 		cubeCamera.position.set(0, 0, 0);
 
-		const pmrem = new PMREMGenerator(renderer);
-
-		let t: undefined | WebGLRenderTarget;
-
 		/**
 		 * Scene
 		 */
 
 		const sphereGeometry = new SphereGeometry(0.5, 32, 32);
 		const sphereMaterial = new MeshStandardMaterial({
-			color: 'red',
 			metalness: 0.8,
-			roughness: 0.21,
+			roughness: 0.1,
 			envMap: cubeEnvironmentTexture.texture,
 		});
 		const sphere = new Mesh(sphereGeometry, sphereMaterial);
+		sphere.position.x = -2;
 		scene.add(sphere);
 
 		const ring = new Mesh(
-			new TorusGeometry(5, 0.1, 16),
+			new TorusGeometry(1, 0.1, 16),
 			new MeshStandardMaterial({
 				color: 'white',
 				emissive: 'white',
@@ -100,6 +113,20 @@ export default function ThreeJSJourneyEnvironmentMap() {
 			})
 		);
 		scene.add(ring);
+
+		gltfLoader.load('FlightHelmet/FlightHelmet.gltf', (data) => {
+			const fightHelmet = data.scene;
+
+			fightHelmet.traverse((mesh) => {
+				if (mesh instanceof Mesh) {
+					if (mesh.material instanceof MeshStandardMaterial) {
+						mesh.material.envMap = cubeEnvironmentTexture.texture;
+					}
+				}
+			});
+
+			scene.add(fightHelmet);
+		});
 
 		/**
 		 * Lights
@@ -115,20 +142,39 @@ export default function ThreeJSJourneyEnvironmentMap() {
 		const axesHelper = new AxesHelper();
 		scene.add(axesHelper);
 
+		/**
+		 * Pane
+		 */
+		const pane = new Pane({ title: 'Debug Params' });
+		{
+			const scenePane = pane.addFolder({ title: 'Scene Params' });
+			scenePane.addBinding(scene, 'backgroundIntensity', {
+				min: 0,
+				max: 2,
+				step: 0.01,
+			});
+			scenePane.addBinding(scene, 'backgroundBlurriness', {
+				min: 0,
+				max: 1,
+				step: 0.01,
+			});
+			scenePane.addBinding(scene, 'environmentIntensity', {
+				min: 0,
+				max: 2,
+				step: 0.01,
+			});
+		}
+
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
 
-			if (t) t.dispose();
-
 			controls.update(time);
+
 			sphere.visible = false;
 			cubeCamera.update(renderer, scene);
-			t = pmrem.fromScene(scene, 0, 0.1, 1000);
-			sphere.material.envMap = t.texture;
 			sphere.visible = true;
 
 			ring.rotation.x = time * 0.001;
-			ring.rotation.y = time * 0.001;
 
 			renderer.render(scene, camera);
 		}
