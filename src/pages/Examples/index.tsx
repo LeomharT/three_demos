@@ -133,6 +133,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey Environment',
 		path: '/tj-environment',
 	},
+	{
+		title: 'Threejs Journey Realistic Render',
+		description: 'Threejs Journey Realistic Render',
+		path: '/tj-realistic',
+	},
 ];
 
 function cover(index: number) {
