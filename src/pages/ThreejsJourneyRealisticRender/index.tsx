@@ -146,6 +146,21 @@ export default function ThreejsJourneyRealisticRender() {
 		});
 		{
 			pane.addBinding(directionalLight, 'castShadow');
+			/**
+			 * Bias可以用来解决伪影的效果
+			 */
+			pane.addBinding(directionalLight.shadow, 'bias', {
+				label: 'Directional Light Bias',
+				step: 0.0001,
+				min: -5,
+				max: 5,
+			});
+			pane.addBinding(directionalLight.shadow, 'normalBias', {
+				label: 'Directional Light NormalBias',
+				step: 0.0001,
+				min: -5,
+				max: 5,
+			});
 			pane.addBinding(directionalLight, 'intensity', {
 				label: 'Directional Light Intensity',
 				step: 0.001,

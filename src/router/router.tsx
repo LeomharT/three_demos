@@ -57,6 +57,9 @@ const ThreeJSJourneyEnvironmentMap = lazy(
 const ThreejsJourneyRealisticRender = lazy(
 	() => import('../pages/ThreejsJourneyRealisticRender')
 );
+const ThreejsJourneyImportModels = lazy(
+	() => import('../pages/ThreejsJourneyImportModels')
+);
 export const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route>
@@ -104,6 +107,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-physics' element={<ThreejsJourneyPhysics />} />
 			<Route path='tj-environment' element={<ThreeJSJourneyEnvironmentMap />} />
 			<Route path='tj-realistic' element={<ThreejsJourneyRealisticRender />} />
+			<Route path='tj-import' element={<ThreejsJourneyImportModels />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

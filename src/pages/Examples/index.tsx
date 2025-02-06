@@ -138,6 +138,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey Realistic Render',
 		path: '/tj-realistic',
 	},
+	{
+		title: 'Threejs Journey Import Model',
+		description: 'Threejs Journey Import Model',
+		path: '/tj-import',
+	},
 ];
 
 function cover(index: number) {
