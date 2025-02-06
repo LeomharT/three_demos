@@ -108,6 +108,20 @@ export default function FirstShader() {
 		 */
 
 		const pane = new Pane({ title: 'Debug Params' });
+		{
+			const bloomPane = pane.addFolder({ title: 'Bloom' });
+			bloomPane.addBinding(bloomPass, 'enabled');
+			bloomPane.addBinding(bloomPass, 'strength', {
+				min: 0,
+				max: 1,
+				step: 0.0001,
+			});
+			bloomPane.addBinding(bloomPass, 'radius', {
+				min: 0,
+				max: 1,
+				step: 0.0001,
+			});
+		}
 
 		/**
 		 * Event

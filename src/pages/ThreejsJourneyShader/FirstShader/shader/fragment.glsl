@@ -4,16 +4,22 @@ uniform sampler2D uTexture;
 
 void main()
 {
-    vec4 color = texture2D(uTexture, vUv);
+    vec2 uv = vUv;
 
-    if(vUv.x > 0.5)
+    uv *= 5.0;
+
+    uv = fract(uv);
+
+    vec4 color = texture2D(uTexture, uv);
+
+    if(uv.x > 0.5)
     {
-        color.r = vUv.x;
-        color.b = vUv.x;
+        color.r = uv.x;
+        color.b = uv.x;
     }
-    if(vUv.y < 0.5)
+    if(uv.y < 0.5)
     {
-        color.b = vUv.y;
+        color.b = uv.y;
     }
 
     gl_FragColor = color;
