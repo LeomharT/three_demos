@@ -3,13 +3,12 @@ import { MutableRefObject, useEffect, useRef } from 'react';
 import {
 	Color,
 	DirectionalLight,
-	DoubleSide,
 	Mesh,
 	PCFSoftShadowMap,
 	PerspectiveCamera,
 	PlaneGeometry,
+	RawShaderMaterial,
 	Scene,
-	ShaderMaterial,
 	TextureLoader,
 	Vector2,
 	WebGLRenderer,
@@ -91,14 +90,9 @@ export default function FirstShader() {
 
 		const planeGeometry = new PlaneGeometry(1.6, 1, 64, 64);
 
-		const planeMaterial = new ShaderMaterial({
-			uniforms,
+		const planeMaterial = new RawShaderMaterial({
 			fragmentShader,
 			vertexShader,
-			wireframe: false,
-			side: DoubleSide,
-			transparent: true,
-			shadowSide: PCFSoftShadowMap,
 		});
 
 		const plane = new Mesh(planeGeometry, planeMaterial);
