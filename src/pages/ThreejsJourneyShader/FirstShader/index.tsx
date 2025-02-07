@@ -2,6 +2,7 @@ import { useMantineTheme } from '@mantine/core';
 import { MutableRefObject, useEffect, useRef } from 'react';
 import {
 	Color,
+	DirectionalLight,
 	DoubleSide,
 	Mesh,
 	PCFSoftShadowMap,
@@ -23,6 +24,7 @@ import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
 import ColorTexture from './USFlag.png';
+
 export default function FirstShader() {
 	const el = useRef<HTMLDivElement>(null) as MutableRefObject<HTMLDivElement>;
 
@@ -102,6 +104,14 @@ export default function FirstShader() {
 		const plane = new Mesh(planeGeometry, planeMaterial);
 
 		scene.add(plane);
+
+		/**
+		 * Light
+		 */
+
+		const directionalLight = new DirectionalLight();
+		directionalLight.position.z = 2;
+		scene.add(directionalLight);
 
 		/**
 		 * Pane
