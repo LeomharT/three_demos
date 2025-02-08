@@ -84,15 +84,16 @@ export default function FirstShader() {
 		 */
 
 		const uniforms = {
-			uTime: { value: 0 },
+			uTime: { value: 0.0 },
 			uTexture: { value: flag },
 		};
 
-		const planeGeometry = new PlaneGeometry(1.6, 1, 64, 64);
+		const planeGeometry = new PlaneGeometry(1, 1, 16, 16);
 
 		const planeMaterial = new RawShaderMaterial({
 			fragmentShader,
 			vertexShader,
+			uniforms,
 		});
 
 		const plane = new Mesh(planeGeometry, planeMaterial);
