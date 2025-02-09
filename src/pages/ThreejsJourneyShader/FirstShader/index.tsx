@@ -92,6 +92,9 @@ export default function FirstShader() {
 
 		const planeGeometry = new PlaneGeometry(1.6, 1, 32, 32);
 
+		/**
+		 * RawShaderMaterial和ShaderMaterial的区别就是后者默认导入了一些uniform
+		 */
 		const planeMaterial = new RawShaderMaterial({
 			transparent: true,
 			fragmentShader,

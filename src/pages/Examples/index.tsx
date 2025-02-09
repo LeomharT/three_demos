@@ -148,6 +148,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey First Shader',
 		path: '/tj-firstshader',
 	},
+	{
+		title: 'Threejs Journey Shader Patterns',
+		description: 'Threejs Journey Shader Patterns',
+		path: '/tj-shaderpatterns',
+	},
 ];
 
 function cover(index: number) {

@@ -5,3 +5,8 @@ declare module 'color-normalize' {
 declare module 'three-bas' {
 	export { PhongAnimationMaterial, PrefabBufferGeometry, ShaderChunk };
 }
+
+declare module '*.glsl' {
+	const content: string;
+	export default content;
+}
