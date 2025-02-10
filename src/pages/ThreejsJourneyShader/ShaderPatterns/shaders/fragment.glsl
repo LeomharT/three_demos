@@ -24,5 +24,7 @@ void main()
     float barY = step(0.8, fract(uv.x * 10.0 + 0.2));
     barY *= step(0.4, fract(uv.y * 10.0));
 
-    gl_FragColor = vec4(vec3(barY - barX), 1.0);
+    float strength = step(0.2,min( abs(0.5 - uv.y) , abs(0.5 - uv.x)));
+
+    gl_FragColor = vec4(0.25, 0.452, 0.334, strength);
 }
