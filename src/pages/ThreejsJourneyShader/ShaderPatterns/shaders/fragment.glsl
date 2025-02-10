@@ -26,5 +26,5 @@ void main()
 
     float strength = step(0.2,min( abs(0.5 - uv.y) , abs(0.5 - uv.x)));
 
-    gl_FragColor = vec4(0.25, 0.452, 0.334, strength);
+    gl_FragColor = vec4(vec3(ceil(uv.x * 10.0) / 10.0), 1.0);
 }
