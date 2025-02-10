@@ -18,13 +18,11 @@ void main()
 
     vec4 color = vec4(uv.x, uv.y, 0.0, alphaMap.a);
 
-    vec4 patterns = vec4(vec3(fract(uv.y * 10.0)), 1.0);
-    patterns = step(0.5, patterns);
+    float barX = step(0.4, fract(uv.x * 10.0));
+    barX *= step(0.8, fract(uv.y * 10.0 + 0.2));
 
-    vec4 patterns2 = vec4(vec3(fract(uv.x * 10.0)), 1.0);
-    patterns2 = step(0.5, patterns2) * patterns;
+    float barY = step(0.8, fract(uv.x * 10.0 + 0.2));
+    barY *= step(0.4, fract(uv.y * 10.0));
 
-
-
-    gl_FragColor = patterns2;
+    gl_FragColor = vec4(vec3(barX + barY), 1.0);
 }
