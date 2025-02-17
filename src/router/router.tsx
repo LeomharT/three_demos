@@ -62,6 +62,7 @@ const ThreejsJourneyImportModels = lazy(
 );
 const FirstShader = lazy(() => import('../pages/ThreejsJourneyShader/FirstShader'));
 const ShaderPatterns = lazy(() => import('../pages/ThreejsJourneyShader/ShaderPatterns'));
+const RagingSea = lazy(() => import('../pages/ThreejsJourneyShader/RagingSea'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -113,6 +114,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-import' element={<ThreejsJourneyImportModels />} />
 			<Route path='tj-firstshader' element={<FirstShader />} />
 			<Route path='tj-shaderpatterns' element={<ShaderPatterns />} />
+			<Route path='tj-ragingsea' element={<RagingSea />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

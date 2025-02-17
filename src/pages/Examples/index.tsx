@@ -153,6 +153,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey Shader Patterns',
 		path: '/tj-shaderpatterns',
 	},
+	{
+		title: 'Threejs Journey RagingSea',
+		description: 'Threejs Journey RagingSea',
+		path: '/tj-ragingsea',
+	},
 ];
 
 function cover(index: number) {
