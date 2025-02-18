@@ -48,11 +48,22 @@ export default function RagingSea() {
 
 		const uniforms = {
 			uTime: { value: 0 },
-			uBigWaveElevation: { value: 0.1 },
+
+			uBigWaveElevation: { value: 0.2 },
 			uBigWaveFrequency: { value: new Vector2(4, 1.5) },
+			uBigWaveSpeed: { value: 0.75 },
+
+			uSmallWaveElevation: { value: 0.15 },
+			uSmallWaveFrequency: { value: 3.0 },
+			uSmallWaveSpeed: { value: 0.2 },
+
+			uBigWaveDepthColor: { value: new Color('#186691') },
+			uBigWaveSurfaceColor: { value: new Color('#9bd8ff') },
+			uBigWaveColorOffset: { value: 0.08 },
+			uBigWaveColorMultiplier: { value: 5.0 },
 		};
 
-		const planeGeometry = new PlaneGeometry(1, 1, 64, 64);
+		const planeGeometry = new PlaneGeometry(2, 2, 512, 512);
 		const planeMaterial = new ShaderMaterial({
 			vertexShader,
 			fragmentShader,
@@ -70,7 +81,7 @@ export default function RagingSea() {
 		 */
 
 		const pane = new Pane({ title: 'Debug Params' });
-		pane.element.parentElement!.style.width = '325px';
+		pane.element.parentElement!.style.width = '350px';
 		pane.addBinding(uniforms.uBigWaveElevation, 'value', {
 			label: 'Big Wave Elevation',
 			min: -0.2,
@@ -86,6 +97,47 @@ export default function RagingSea() {
 			label: 'Big Wave Frequency Y',
 			min: 0,
 			max: 30,
+		});
+		pane.addBinding(uniforms.uBigWaveSpeed, 'value', {
+			label: 'Big Wave Speed',
+			min: 0,
+			max: 2,
+		});
+		pane.addBinding(uniforms.uSmallWaveElevation, 'value', {
+			label: 'Small Wave Elevation',
+			min: 0,
+			max: 1,
+		});
+		pane.addBinding(uniforms.uSmallWaveFrequency, 'value', {
+			label: 'Small Wave Frequency',
+			min: 0,
+			max: 30,
+		});
+		pane.addBinding(uniforms.uSmallWaveSpeed, 'value', {
+			label: 'Small Wave Speed',
+			min: 0,
+			max: 4,
+			step: 0.001,
+		});
+		pane.addBinding(uniforms.uBigWaveDepthColor, 'value', {
+			label: 'Depth Color',
+			color: { type: 'float' },
+		});
+		pane.addBinding(uniforms.uBigWaveSurfaceColor, 'value', {
+			label: 'Surface Color',
+			color: { type: 'float' },
+		});
+		pane.addBinding(uniforms.uBigWaveColorOffset, 'value', {
+			label: 'Color Offset',
+			min: 0,
+			max: 1,
+			step: 0.001,
+		});
+		pane.addBinding(uniforms.uBigWaveColorMultiplier, 'value', {
+			label: 'Color Multiplier',
+			min: 0,
+			max: 10,
+			step: 0.001,
 		});
 		pane.addBinding(planeMaterial, 'wireframe');
 
