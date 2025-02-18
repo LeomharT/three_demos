@@ -7,6 +7,7 @@ import {
 	PlaneGeometry,
 	Scene,
 	ShaderMaterial,
+	Vector2,
 	WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
@@ -47,6 +48,8 @@ export default function RagingSea() {
 
 		const uniforms = {
 			uTime: { value: 0 },
+			uBigWaveElevation: { value: 0.1 },
+			uBigWaveFrequency: { value: new Vector2(4, 1.5) },
 		};
 
 		const planeGeometry = new PlaneGeometry(1, 1, 64, 64);
@@ -56,6 +59,7 @@ export default function RagingSea() {
 			uniforms,
 			side: DoubleSide,
 			transparent: true,
+			wireframe: false,
 		});
 		const plane = new Mesh(planeGeometry, planeMaterial);
 		plane.rotation.x = -Math.PI / 2;
@@ -66,6 +70,24 @@ export default function RagingSea() {
 		 */
 
 		const pane = new Pane({ title: 'Debug Params' });
+		pane.element.parentElement!.style.width = '325px';
+		pane.addBinding(uniforms.uBigWaveElevation, 'value', {
+			label: 'Big Wave Elevation',
+			min: -0.2,
+			max: 0.2,
+			step: 0.001,
+		});
+		pane.addBinding(uniforms.uBigWaveFrequency.value, 'x', {
+			label: 'Big Wave Frequency X',
+			min: 0,
+			max: 30,
+		});
+		pane.addBinding(uniforms.uBigWaveFrequency.value, 'y', {
+			label: 'Big Wave Frequency Y',
+			min: 0,
+			max: 30,
+		});
+		pane.addBinding(planeMaterial, 'wireframe');
 
 		/**
 		 * Events
