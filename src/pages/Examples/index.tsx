@@ -158,6 +158,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journey RagingSea',
 		path: '/tj-ragingsea',
 	},
+	{
+		title: 'Threejs Journey Galaxy Animation',
+		description: 'Threejs Galaxy Animation',
+		path: '/tj-galaxyanimation',
+	},
 ];
 
 function cover(index: number) {

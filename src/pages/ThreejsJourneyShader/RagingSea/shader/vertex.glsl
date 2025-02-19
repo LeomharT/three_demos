@@ -83,6 +83,7 @@ float cnoise(vec3 P){
  
 void main()
 {
+    // Model Position will add rotation and position outside of shader
     vec4 modelPosition = modelMatrix * vec4(position, 1.0);
 
     float elevation = sin(uTime * uBigWaveSpeed + modelPosition.x * uBigWaveFrequency.x) *
