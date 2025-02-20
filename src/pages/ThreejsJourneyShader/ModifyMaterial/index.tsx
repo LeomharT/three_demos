@@ -109,6 +109,9 @@ export default function ModifyMaterial() {
 		plane.position.z = 5;
 		scene.add(plane);
 
+		/**
+		 * To fix drop shadow
+		 */
 		const customDepthMaterial = new MeshDepthMaterial({
 			depthPacking: RGBADepthPacking,
 		});
