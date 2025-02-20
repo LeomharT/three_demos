@@ -1,15 +1,16 @@
 import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
 import {
-	AmbientLight,
-	CubeReflectionMapping,
+	AdditiveBlending,
+	AxesHelper,
+	BufferAttribute,
+	BufferGeometry,
+	Color,
 	CubeTextureLoader,
-	DirectionalLight,
-	Mesh,
-	MeshStandardMaterial,
 	PerspectiveCamera,
-	PlaneGeometry,
+	Points,
 	Scene,
+	ShaderMaterial,
 	TextureLoader,
 	WebGLRenderer,
 } from 'three';
@@ -20,6 +21,9 @@ import {
 	RGBELoader,
 } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
+import { Pane } from 'tweakpane';
+import fragmentShader from './shader/fragment.glsl?raw';
+import vertexShader from './shader/vertex.glsl?raw';
 
 export default function Test() {
 	const theme = useMantineTheme();
@@ -81,63 +85,113 @@ export default function Test() {
 		el.append(stats.dom);
 
 		/**
-		 * Texture
-		 */
-
-		const environmentTexture = await cubeTextureLoader.loadAsync([
-			'px.png',
-			'nx.png',
-			'py.png',
-			'ny.png',
-			'pz.png',
-			'nz.png',
-		]);
-		scene.background = environmentTexture;
-		scene.backgroundBlurriness = 1.0;
-		scene.background.mapping = CubeReflectionMapping;
-
-		scene.environment = environmentTexture;
-		scene.environment.mapping = CubeReflectionMapping;
-
-		/**
 		 * Scene
 		 */
 
-		const floorGeometry = new PlaneGeometry(3, 3, 32, 32);
-		floorGeometry.rotateX(-Math.PI / 2);
-		const floorMaterial = new MeshStandardMaterial({
-			color: '#777777',
-			metalness: 0.3,
-			roughness: 0.4,
-			envMapIntensity: 0.5,
-		});
-		const floor = new Mesh(floorGeometry, floorMaterial);
-		floor.receiveShadow = true;
-		scene.add(floor);
+		const params = {
+			count: 20000,
+			size: 10.0,
+			radius: 5.0,
+			branches: 3,
+		};
 
-		gltfLoader.load('FlightHelmet/FlightHelmet.gltf', (data) => {
-			const helmet = data.scene;
+		let pointsGeometry = new BufferGeometry();
+		let pointsMaterial = new ShaderMaterial();
+		let points: null | Points;
 
-			helmet.traverse((mesh) => {
-				if (mesh instanceof Mesh) {
-					if (mesh.material instanceof MeshStandardMaterial) {
-						mesh.material.wireframe = true;
-					}
-				}
+		const INSIDECOLOR = new Color('#ff6030');
+		const OUTSIDECOLOR = new Color('#1b3984');
+
+		function genetatorPoints() {
+			if (points) {
+				pointsGeometry.dispose();
+				pointsMaterial.dispose();
+				scene.remove(points);
+			}
+
+			const position = new Float32Array(params.count * 3);
+			const attrPosition = new BufferAttribute(position, 3);
+
+			const colors = new Float32Array(params.count * 3);
+			const attrColor = new BufferAttribute(colors, 3);
+
+			const random = new Float32Array(params.count);
+			const attrRandom = new BufferAttribute(random, 1);
+
+			pointsGeometry = new BufferGeometry();
+			pointsGeometry.setAttribute('position', attrPosition);
+			pointsGeometry.setAttribute('color', attrColor);
+			pointsGeometry.setAttribute('aRandom', attrRandom);
+
+			pointsMaterial = new ShaderMaterial({
+				vertexShader,
+				fragmentShader,
+				uniforms: {
+					uTime: { value: 0 },
+					uSize: { value: params.size },
+				},
+				transparent: true,
+				depthWrite: false,
+				vertexColors: true,
+				blending: AdditiveBlending,
 			});
 
-			scene.add(helmet);
-		});
+			for (let i = 0; i < params.count; i++) {
+				const i3 = i * 3;
+
+				const index = i % params.branches;
+
+				const branchAngle = (index / params.branches) * Math.PI * 2;
+
+				const radius = Math.random() * params.radius;
+
+				position[i3 + 0] = Math.cos(branchAngle) * radius;
+				position[i3 + 1] = 0;
+				position[i3 + 2] = Math.sin(branchAngle) * radius;
+
+				random[i] = Math.random();
+
+				const mixColor = INSIDECOLOR.clone();
+				mixColor.lerp(OUTSIDECOLOR, radius / params.radius);
+
+				colors[i3 + 0] = mixColor.r;
+				colors[i3 + 1] = mixColor.g;
+				colors[i3 + 2] = mixColor.b;
+			}
+
+			points = new Points(pointsGeometry, pointsMaterial);
+			scene.add(points);
+		}
+		genetatorPoints();
 
 		/**
-		 * Light
+		 * Pane
 		 */
 
-		const ambientLight = new AmbientLight();
-		scene.add(ambientLight);
+		const pane = new Pane({ title: 'Debug Params' });
+		pane.element.parentElement!.style.width = '320px';
+		pane
+			.addBinding(params, 'size', {
+				label: 'Point Size',
+				min: 20,
+				max: 50,
+			})
+			.on('change', genetatorPoints);
+		pane
+			.addBinding(params, 'branches', {
+				label: 'Point Branches',
+				min: 1,
+				max: 10,
+				step: 1,
+			})
+			.on('change', genetatorPoints);
 
-		const directionalLight = new DirectionalLight();
-		scene.add(directionalLight);
+		/**
+		 * Helpers
+		 */
+
+		const axesHelper = new AxesHelper();
+		scene.add(axesHelper);
 
 		/**
 		 * Events
@@ -146,7 +200,11 @@ export default function Test() {
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
 
+			stats.update();
 			controls.update(time);
+
+			pointsMaterial.uniforms.uTime.value += 0.001;
+
 			renderer.render(scene, camera);
 		}
 		render();
