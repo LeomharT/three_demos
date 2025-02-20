@@ -163,6 +163,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Galaxy Animation',
 		path: '/tj-galaxyanimation',
 	},
+	{
+		title: 'Threejs Journey Modify Material',
+		description: 'Threejs Modify Material',
+		path: '/tj-modifymaterial',
+	},
 ];
 
 function cover(index: number) {

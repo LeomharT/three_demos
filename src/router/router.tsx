@@ -66,6 +66,7 @@ const RagingSea = lazy(() => import('../pages/ThreejsJourneyShader/RagingSea'));
 const GalaxyAnimation = lazy(
 	() => import('../pages/ThreejsJourneyShader/GalaxyAnimation')
 );
+const ModifyMaterial = lazy(() => import('../pages/ThreejsJourneyShader/ModifyMaterial'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -119,6 +120,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-shaderpatterns' element={<ShaderPatterns />} />
 			<Route path='tj-ragingsea' element={<RagingSea />} />
 			<Route path='tj-galaxyanimation' element={<GalaxyAnimation />} />
+			<Route path='tj-modifymaterial' element={<ModifyMaterial />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),
