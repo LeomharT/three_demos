@@ -168,6 +168,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Modify Material',
 		path: '/tj-modifymaterial',
 	},
+	{
+		title: 'Threejs Journey Coffee Smoke',
+		description: 'Threejs Coffee Smoke',
+		path: '/tj-coffeesmoke',
+	},
 ];
 
 function cover(index: number) {

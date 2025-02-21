@@ -145,9 +145,9 @@ export default function Test() {
 
 				const radius = Math.random() * params.radius;
 
-				position[i3 + 0] = Math.cos(branchAngle) * radius;
+				position[i3 + 0] = Math.cos(branchAngle);
 				position[i3 + 1] = 0;
-				position[i3 + 2] = Math.sin(branchAngle) * radius;
+				position[i3 + 2] = Math.sin(branchAngle);
 
 				random[i] = Math.random();
 
