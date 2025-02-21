@@ -10,6 +10,7 @@ import {
 	WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
 
@@ -61,6 +62,8 @@ export default function CoffeeSmoke() {
 
 		const uniforms = {
 			uTime: { value: 0 },
+			uDepthColor: { value: new Color('#186691') },
+			uSurfaceColor: { value: new Color('#9bd8ff') },
 		};
 
 		const planeGeometry = new PlaneGeometry(5, 5, 64, 64);
@@ -74,6 +77,20 @@ export default function CoffeeSmoke() {
 		plane.receiveShadow = true;
 		plane.rotation.x = -Math.PI / 2;
 		scene.add(plane);
+
+		/**
+		 * Pane
+		 */
+
+		const pane = new Pane({ title: 'Debug Params' });
+		pane.addBinding(uniforms.uDepthColor, 'value', {
+			label: 'Depth Color',
+			color: { type: 'float' },
+		});
+		pane.addBinding(uniforms.uSurfaceColor, 'value', {
+			label: 'Surface Color',
+			color: { type: 'float' },
+		});
 
 		/**
 		 * Event

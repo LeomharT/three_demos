@@ -1,10 +1,13 @@
 varying float vElevation;
 
+uniform vec3 uDepthColor;
+uniform vec3 uSurfaceColor;
+
 void main()
 {
-    vec3 baseColor = vec3(0.85, 0.125, 0.4);
+    vec3 mixColor = mix(uDepthColor, uSurfaceColor, vElevation);
 
-    vec4 color = vec4(baseColor * vElevation, 1.0);
-    
+    vec4 color = vec4(mixColor, 1.0);
+
     gl_FragColor = color;
 }
