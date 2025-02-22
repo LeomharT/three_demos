@@ -1,6 +1,7 @@
 uniform float uTime;
 
 varying float vElevation;
+varying vec2 vUv;
 
 void main()
 {
@@ -13,4 +14,6 @@ void main()
     gl_Position = projectionMatrix * modelViewMatrix * vec4(displacementPosition, 1.0);
 
     vElevation = elevation;
-}
+
+    vUv = uv;
+}  

@@ -1,18 +1,24 @@
 import { useEffect } from 'react';
 import {
 	Color,
+	DoubleSide,
 	Mesh,
 	PerspectiveCamera,
 	PlaneGeometry,
+	RepeatWrapping,
 	Scene,
 	ShaderMaterial,
 	TextureLoader,
+	Uniform,
 	WebGLRenderer,
 } from 'three';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader, OrbitControls } from 'three/examples/jsm/Addons.js';
+import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
+
+const ASSETS_PATH = '/src/pages/ThreejsJourneyShader/CoffeeSmoke/assets/';
 
 export default function CoffeeSmoke() {
 	async function initialScene() {
@@ -45,16 +51,26 @@ export default function CoffeeSmoke() {
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.enableDamping = true;
 
+		const stats = new Stats();
+		el.append(stats.dom);
+
 		/**
 		 * Loaders
 		 */
 
 		const textureLoader = new TextureLoader();
-		textureLoader.setPath('/src/assets/');
+		textureLoader.setPath(ASSETS_PATH);
+
+		const gltfLoader = new GLTFLoader();
+		gltfLoader.setPath(ASSETS_PATH);
 
 		/**
 		 * Textures
 		 */
+
+		const noiseTexture = textureLoader.load('perlin.png');
+		noiseTexture.wrapS = noiseTexture.wrapT = RepeatWrapping;
+		noiseTexture.repeat.set(10, 10);
 
 		/**
 		 * Scene
@@ -62,35 +78,44 @@ export default function CoffeeSmoke() {
 
 		const uniforms = {
 			uTime: { value: 0 },
-			uDepthColor: { value: new Color('#186691') },
-			uSurfaceColor: { value: new Color('#9bd8ff') },
+			uNoiseTexture: new Uniform(noiseTexture),
 		};
 
-		const planeGeometry = new PlaneGeometry(5, 5, 64, 64);
-		const planeMaterial = new ShaderMaterial({
+		const smokeGeometry = new PlaneGeometry(1, 1, 16, 64);
+		smokeGeometry.translate(0, 0.5, 0);
+		smokeGeometry.scale(1.5, 6, 1.5);
+		const smokeMaterial = new ShaderMaterial({
 			vertexShader,
 			fragmentShader,
 			uniforms,
 			transparent: true,
+			side: DoubleSide,
+			wireframe: false,
 		});
-		const plane = new Mesh(planeGeometry, planeMaterial);
-		plane.receiveShadow = true;
-		plane.rotation.x = -Math.PI / 2;
-		scene.add(plane);
+		const smoke = new Mesh(smokeGeometry, smokeMaterial);
+		smoke.receiveShadow = true;
+		smoke.position.y = 1.83;
+		scene.add(smoke);
+
+		gltfLoader.load('bakedModel.glb', (data) => {
+			const mesh = data.scene;
+
+			scene.add(mesh);
+		});
 
 		/**
 		 * Pane
 		 */
 
 		const pane = new Pane({ title: 'Debug Params' });
-		pane.addBinding(uniforms.uDepthColor, 'value', {
-			label: 'Depth Color',
-			color: { type: 'float' },
+		pane.element.parentElement!.style.width = '380px';
+		pane.addBinding(smoke.position, 'y', {
+			label: 'Smoke Position Y',
+			step: 0.0001,
+			min: 0,
+			max: 10,
 		});
-		pane.addBinding(uniforms.uSurfaceColor, 'value', {
-			label: 'Surface Color',
-			color: { type: 'float' },
-		});
+		pane.addBinding(smokeMaterial, 'wireframe');
 
 		/**
 		 * Event
@@ -99,6 +124,7 @@ export default function CoffeeSmoke() {
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
 
+			stats.update();
 			controls.update(time);
 
 			uniforms.uTime.value += 0.01;
