@@ -91,6 +91,7 @@ export default function CoffeeSmoke() {
 			transparent: true,
 			side: DoubleSide,
 			wireframe: false,
+			depthWrite: false,
 		});
 		const smoke = new Mesh(smokeGeometry, smokeMaterial);
 		smoke.receiveShadow = true;
