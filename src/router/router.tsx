@@ -68,6 +68,7 @@ const GalaxyAnimation = lazy(
 );
 const ModifyMaterial = lazy(() => import('../pages/ThreejsJourneyShader/ModifyMaterial'));
 const CoffeeSmoke = lazy(() => import('../pages/ThreejsJourneyShader/CoffeeSmoke'));
+const Hologram = lazy(() => import('../pages/ThreejsJourneyShader/Hologram'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -123,6 +124,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-galaxyanimation' element={<GalaxyAnimation />} />
 			<Route path='tj-modifymaterial' element={<ModifyMaterial />} />
 			<Route path='tj-coffeesmoke' element={<CoffeeSmoke />} />
+			<Route path='tj-hologram' element={<Hologram />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

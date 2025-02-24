@@ -173,6 +173,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Coffee Smoke',
 		path: '/tj-coffeesmoke',
 	},
+	{
+		title: 'Threejs Journey Hologram',
+		description: 'Threejs Hologram',
+		path: '/tj-hologram',
+	},
 ];
 
 function cover(index: number) {
