@@ -175,8 +175,13 @@ const threejsJourneyExapmles = [
 	},
 	{
 		title: 'Threejs Journey Hologram',
-		description: 'Threejs Hologram',
+		description: 'Threejs Journey Hologram',
 		path: '/tj-hologram',
+	},
+	{
+		title: 'Threejs Journey Fireworks',
+		description: 'Threejs Journet Fireworks',
+		path: '/tj-fireworks',
 	},
 ];
 

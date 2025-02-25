@@ -145,8 +145,8 @@ export default function Hologram() {
 			controls.update(time);
 
 			meshes.forEach((mesh) => {
-				// mesh.rotation.x += 0.01;
-				// mesh.rotation.y += 0.01;
+				mesh.rotation.x += 0.01;
+				mesh.rotation.y += 0.01;
 			});
 			uniforms.uTime.value += 0.01;
 
