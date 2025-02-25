@@ -34,8 +34,14 @@ void main(void)
     float holographic = stripes * fresnel;
     holographic += fresnel * 1.25;
     holographic *= falloff;
+
+    vec3 mixColor = mix(
+        vec3(1.0, 0.1, 0.1),
+        uColor,
+        fresnel
+    );
    
-    gl_FragColor = vec4(uColor, holographic);
+    gl_FragColor = vec4(mixColor, holographic);
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
