@@ -22,16 +22,19 @@ void main(void)
     stripes = pow(stripes, 3.0);
 
     // Fresnel
+    // Normal length
     vec3 viewDirection = normalize(vPosition - cameraPosition);
     float fresnel = dot(viewDirection, normal) + 1.0;
     fresnel = pow(fresnel, 2.0);
 
-    // Holographic
-    float holographic = fresnel * stripes;
-    holographic += fresnel * 1.25;
+    // Falloff
+    float falloff = smoothstep(0.8, 0.0, fresnel);
 
+    // Holographic
+    float holographic = stripes * fresnel;
+    holographic += fresnel * 1.25;
+    holographic *= falloff;
    
-    
     gl_FragColor = vec4(uColor, holographic);
 
     #include <tonemapping_fragment>

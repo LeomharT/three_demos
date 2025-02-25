@@ -61,9 +61,13 @@ export default function Hologram() {
 		 * Scene
 		 */
 
+		const materialParams = {
+			color: '#70c1ff',
+		};
+
 		const uniforms = {
 			uTime: new Uniform(0),
-			uColor: new Uniform(new Color(0xfc6254)),
+			uColor: new Uniform(new Color(materialParams.color)),
 		};
 
 		const hologramMaterial = new ShaderMaterial({
@@ -123,10 +127,12 @@ export default function Hologram() {
 		{
 			const hologramPane = pane.addFolder({ title: 'Hologram' });
 			hologramPane.addBinding(hologramMaterial, 'wireframe');
-			hologramPane.addBinding(uniforms.uColor, 'value', {
-				label: 'Hologram Color',
-				color: { type: 'float' },
-			});
+			hologramPane
+				.addBinding(materialParams, 'color', {
+					label: 'Hologram Color',
+					color: { type: 'int' },
+				})
+				.on('change', (val) => uniforms.uColor.value.set(val.value));
 		}
 
 		/**
@@ -139,8 +145,8 @@ export default function Hologram() {
 			controls.update(time);
 
 			meshes.forEach((mesh) => {
-				mesh.rotation.x += 0.01;
-				mesh.rotation.y += 0.01;
+				// mesh.rotation.x += 0.01;
+				// mesh.rotation.y += 0.01;
 			});
 			uniforms.uTime.value += 0.01;
 
