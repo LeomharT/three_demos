@@ -24,6 +24,9 @@ void main(void)
     // Fresnel
     // Normal length
     vec3 viewDirection = normalize(vPosition - cameraPosition);
+    // Same Direction = 1.0
+    // Perpendicular = 0.0
+    // Opposite = -1.0
     float fresnel = dot(viewDirection, normal) + 1.0;
     fresnel = pow(fresnel, 2.0);
 
