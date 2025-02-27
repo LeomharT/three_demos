@@ -183,6 +183,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet Fireworks',
 		path: '/tj-fireworks',
 	},
+	{
+		title: 'Threejs Journey Light Shading',
+		description: 'Threejs Journet Light Shading',
+		path: '/tj-lightshading',
+	},
 ];
 
 function cover(index: number) {

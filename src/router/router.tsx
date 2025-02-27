@@ -70,6 +70,7 @@ const ModifyMaterial = lazy(() => import('../pages/ThreejsJourneyShader/ModifyMa
 const CoffeeSmoke = lazy(() => import('../pages/ThreejsJourneyShader/CoffeeSmoke'));
 const Hologram = lazy(() => import('../pages/ThreejsJourneyShader/Hologram'));
 const Fireworks = lazy(() => import('../pages/ThreejsJourneyShader/Fireworks'));
+const LightShading = lazy(() => import('../pages/ThreejsJourneyShader/LightShading'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -127,6 +128,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-coffeesmoke' element={<CoffeeSmoke />} />
 			<Route path='tj-hologram' element={<Hologram />} />
 			<Route path='tj-fireworks' element={<Fireworks />} />
+			<Route path='tj-lightshading' element={<LightShading />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),
