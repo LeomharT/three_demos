@@ -2,15 +2,19 @@ import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
 import {
 	AxesHelper,
+	Color,
 	CubeTextureLoader,
 	DoubleSide,
 	Mesh,
+	MeshBasicMaterial,
 	PerspectiveCamera,
 	PlaneGeometry,
 	RepeatWrapping,
 	Scene,
 	ShaderMaterial,
+	SphereGeometry,
 	TextureLoader,
+	TorusKnotGeometry,
 	Uniform,
 	WebGLRenderer,
 } from 'three';
@@ -76,7 +80,7 @@ export default function Test() {
 			0.1,
 			1000
 		);
-		camera.position.set(2, 2, 2);
+		camera.position.set(4, 4, 4);
 		camera.lookAt(scene.position);
 
 		const controls = new OrbitControls(camera, renderer.domElement);
@@ -88,29 +92,52 @@ export default function Test() {
 
 		const noiseTexture = await textureLoader.loadAsync('perlin.png');
 		noiseTexture.wrapT = noiseTexture.wrapS = RepeatWrapping;
+
 		/**
 		 * Scene
 		 */
 
 		const uniforms = {
-			uTime: new Uniform(0),
-			uNoiseTexture: new Uniform(noiseTexture),
+			uMaterialColor: new Uniform(new Color(0xffffff)),
+			uAmbientLightColor: new Uniform(new Color(0xffffff)),
+			uDirectionalLightColor: new Uniform(new Color(0x6cff24)),
 		};
 
-		const smokeGeometry = new PlaneGeometry(1, 1, 16, 64);
-		smokeGeometry.translate(0, 0.5, 0);
-		smokeGeometry.scale(1.5, 6, 1.5);
-		const smokeMaterial = new ShaderMaterial({
-			fragmentShader,
-			vertexShader,
+		const lightShadingMaterial = new ShaderMaterial({
 			uniforms,
-			transparent: true,
-			side: DoubleSide,
-			wireframe: false,
-			depthWrite: false,
+			vertexShader,
+			fragmentShader,
 		});
-		const smoke = new Mesh(smokeGeometry, smokeMaterial);
-		scene.add(smoke);
+
+		const sphereGeometry = new SphereGeometry(1, 32, 32);
+		const sphere = new Mesh(sphereGeometry, lightShadingMaterial);
+		sphere.position.x = -3;
+		scene.add(sphere);
+
+		const suzanne = (await gltfLoader.loadAsync('suzanne.glb')).scene;
+		suzanne.traverse((mesh) => {
+			if (mesh instanceof Mesh) {
+				mesh.material = lightShadingMaterial;
+			}
+		});
+		scene.add(suzanne);
+
+		const torusKnotGeometry = new TorusKnotGeometry(0.5, 0.2, 64, 16);
+		const torusKnot = new Mesh(torusKnotGeometry, lightShadingMaterial);
+		torusKnot.position.x = 3;
+		scene.add(torusKnot);
+
+		const meshes = [sphere, suzanne, torusKnot] as Mesh[];
+
+		const directionalLightHelper = new Mesh(
+			new PlaneGeometry(1, 1, 16, 16),
+			new MeshBasicMaterial({
+				color: uniforms.uDirectionalLightColor.value,
+				side: DoubleSide,
+			})
+		);
+		directionalLightHelper.position.z = 3.0;
+		scene.add(directionalLightHelper);
 
 		/**
 		 * Pane
@@ -118,7 +145,24 @@ export default function Test() {
 
 		const pane = new Pane({ title: 'Debug Params' });
 		pane.element.parentElement!.style.width = '320px';
-		pane.addBinding(smokeMaterial, 'wireframe');
+		pane.addBinding(uniforms.uMaterialColor, 'value', {
+			label: 'Material Color',
+			color: {
+				type: 'float',
+			},
+		});
+		pane.addBinding(uniforms.uAmbientLightColor, 'value', {
+			label: 'Ambient Light Color',
+			color: {
+				type: 'float',
+			},
+		});
+		pane.addBinding(uniforms.uDirectionalLightColor, 'value', {
+			label: 'Directional Color',
+			color: {
+				type: 'float',
+			},
+		});
 
 		/**
 		 * Helpers
@@ -137,7 +181,10 @@ export default function Test() {
 			stats.update();
 			controls.update(time);
 
-			uniforms.uTime.value += 0.001;
+			meshes.forEach((mesh) => {
+				mesh.rotation.x += 0.01;
+				mesh.rotation.z += 0.01;
+			});
 
 			renderer.render(scene, camera);
 		}

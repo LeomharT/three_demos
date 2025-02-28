@@ -1,0 +1,21 @@
+import MDXTitle from '../../../../component/MDXTitle';
+import MDXCode from '../../../../component/MDXCode';
+
+# Light Shading
+
+使用着色器时, 光照一直是一个非常困难的话题, `Threejs`的几个基本光源如果想要应用在着色器材质中是非常困难的.
+所以在使用自定义着色器语法时想要有光照需要自己实现
+
+下面记录一下三个基础光源在 Shader 中的实现, 下面几个光源并非根据真实的物理效果实现, 但是也足够接近, 最主要的是学习光照的基础原理
+
+<MDXTitle order={2}>Ambient Light 环境光</MDXTitle>
+`Ambient Light`环境光的作用是给与场景下的所有模型一个均匀的光照效果, 那么从实现的角度分析就是给所有模型添加上环境光的颜色
+<MDXCode
+	language='glsl'
+	code={`
+vec3 ambientLight(vec3 _color, float _intensity)
+{
+    return _color * _intensity;
+}
+    `}
+/>

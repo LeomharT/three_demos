@@ -1,24 +1,60 @@
-uniform sampler2D uNoiseTexture;
-uniform float uTime;
+uniform vec3 uMaterialColor;
+uniform vec3 uAmbientLightColor;
+uniform vec3 uDirectionalLightColor;
 
-varying vec2 vUv;
+varying vec3 vNormal;
+
+vec3 ambientLight(vec3 _color, float _intensity)
+{
+    return _color * _intensity;
+}
+
+vec3 directionalLight(
+    vec3 _color, 
+    float _intensity, 
+    vec3 _normal,
+    vec3 _lightPosition
+)
+{
+    // Normalize make sure wont over 1.0
+    vec3 lightDirection = normalize(_lightPosition);
+
+    vec3 lightReflection = reflect(lightDirection, _normal);
+
+    float shading = dot(lightDirection, _normal);
+    shading = max(0.0, shading);
+
+    // return vec3 (shading);
+
+    return _color * _intensity * shading;
+}
+
 
 void main()
 {
-    vec2 smokeUV = vUv;
+    vec3 normal = normalize(vNormal);
 
-    smokeUV.x *= 0.5;
-    smokeUV.y *= 0.3;
+    vec3 light = vec3(0.0);
+    // Ambient Light
+    // light += ambientLight(
+    //     uAmbientLightColor,
+    //     1.0
+    // );
 
-    smokeUV.y -= uTime * 2.0;
+    // Directional Light
+    light += directionalLight(
+        uDirectionalLightColor,
+        1.0,
+        normal,
+        vec3(0.0, 0.0, 3.0)
+    );
 
-    float smoke = texture2D(uNoiseTexture, smokeUV).r;
-    smoke = smoothstep(0.4, 1.0, smoke);
 
-    smoke *= smoothstep(0.0, 0.1, vUv.x);
-    smoke *= smoothstep(1.0, 0.9, vUv.x);
-    smoke *= smoothstep(0.0, 0.1, vUv.y);
-    smoke *= smoothstep(1.0, 0.4, vUv.y);
+    vec3 color = uMaterialColor;
+    color *= light;
+    
+    gl_FragColor = vec4(color, 1.0);
 
-    gl_FragColor = vec4(0.6, 0.3 ,0.2, smoke);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
 }

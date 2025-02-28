@@ -71,6 +71,9 @@ const CoffeeSmoke = lazy(() => import('../pages/ThreejsJourneyShader/CoffeeSmoke
 const Hologram = lazy(() => import('../pages/ThreejsJourneyShader/Hologram'));
 const Fireworks = lazy(() => import('../pages/ThreejsJourneyShader/Fireworks'));
 const LightShading = lazy(() => import('../pages/ThreejsJourneyShader/LightShading'));
+const LightShadingDocs = lazy(
+	() => import('../pages/ThreejsJourneyShader/LightShading/docs/docs.mdx')
+);
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -87,6 +90,7 @@ export const router = createBrowserRouter(
 					<Route path='tj-particle' element={<ParticleThreejsJourneyDocs />} />
 					<Route path='tj-hauntedhouse' element={<HauntedHouseDocs />} />
 					<Route path='spaceship' element={<SpaceshipDocs />} />
+					<Route path='lightshading' element={<LightShadingDocs />} />
 				</Route>
 			</Route>
 			<Route path='custom'>
