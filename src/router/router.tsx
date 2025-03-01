@@ -74,6 +74,9 @@ const LightShading = lazy(() => import('../pages/ThreejsJourneyShader/LightShadi
 const LightShadingDocs = lazy(
 	() => import('../pages/ThreejsJourneyShader/LightShading/docs/docs.mdx')
 );
+const RagingSeaLightShading = lazy(
+	() => import('../pages/ThreejsJourneyShader/RagingSeaLightShading')
+);
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -133,6 +136,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-hologram' element={<Hologram />} />
 			<Route path='tj-fireworks' element={<Fireworks />} />
 			<Route path='tj-lightshading' element={<LightShading />} />
+			<Route path='tj-ragingsealightshading' element={<RagingSeaLightShading />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

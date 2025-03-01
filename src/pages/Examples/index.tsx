@@ -188,6 +188,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet Light Shading',
 		path: '/tj-lightshading',
 	},
+	{
+		title: 'Threejs Journey Raging Sea Light Shading',
+		description: 'Threejs Journet Raging Sea Light Shading',
+		path: '/tj-ragingsealightshading',
+	},
 ];
 
 function cover(index: number) {
