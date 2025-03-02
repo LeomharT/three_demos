@@ -15,7 +15,7 @@ import {
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
-import cnoise from './shader/include/cnoise.glsl?raw';
+import perlinClassic3D from './shader/include/perlinClassic3D.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
 
 export default function RegingSeaLightShading() {
@@ -50,7 +50,7 @@ export default function RegingSeaLightShading() {
 		controls.enableDamping = true;
 
 		// @ts-ignore
-		ShaderChunk['cnoise'] = cnoise;
+		ShaderChunk['perlinClassic3D'] = perlinClassic3D;
 
 		/**
 		 * Scene
@@ -66,10 +66,10 @@ export default function RegingSeaLightShading() {
 			uSmallWaveFrequency: new Uniform(3.0),
 			uSmallWaveSpeed: new Uniform(0.2),
 
-			uBigWaveDepthColor: new Uniform(new Color('#186691')),
-			uBigWaveSurfaceColor: new Uniform(new Color('#9bd8ff')),
-			uBigWaveColorOffset: new Uniform(0.08),
-			uBigWaveColorMultiplier: new Uniform(5.0),
+			uBigWaveDepthColor: new Uniform(new Color('#ff4000')),
+			uBigWaveSurfaceColor: new Uniform(new Color('#151c37')),
+			uBigWaveColorOffset: new Uniform(0.925),
+			uBigWaveColorMultiplier: new Uniform(1.0),
 		};
 
 		const regingSeaGeometry = new PlaneGeometry(2, 2, 512, 512);
