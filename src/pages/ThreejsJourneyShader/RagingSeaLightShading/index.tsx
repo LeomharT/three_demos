@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import {
+	ACESFilmicToneMapping,
 	AxesHelper,
 	Color,
 	DoubleSide,
@@ -35,6 +36,7 @@ export default function RegingSeaLightShading() {
 		});
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		renderer.setPixelRatio(Math.max(2, window.devicePixelRatio));
+		renderer.toneMapping = ACESFilmicToneMapping;
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
@@ -80,6 +82,9 @@ export default function RegingSeaLightShading() {
 		};
 
 		const regingSeaGeometry = new PlaneGeometry(2, 2, 512, 512);
+		regingSeaGeometry.deleteAttribute('uv');
+		regingSeaGeometry.deleteAttribute('normal');
+
 		const regingSeaMaterial = new ShaderMaterial({
 			vertexShader,
 			fragmentShader,

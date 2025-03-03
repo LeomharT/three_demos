@@ -20,13 +20,15 @@ void main()
 
     vec3 light = vec3(0.0);
 
-    light += directionalLight(
+    light += pointLight(
         vec3(1.0),
-        1.0,
+        10.0,
         normal,
-        vec3(-1.0, 0.5, 0.0),
+        vec3(0.0, 0.25, 0.0),
         viewDirection,
-        30.0
+        30.0,
+        vPosition,
+        0.95
     );
 
     float mixStrength = (vElevation + uBigWaveColorOffset) * uBigWaveColorMultiplier;
@@ -40,7 +42,7 @@ void main()
 
     mixColor *= light;
     
-    gl_FragColor = vec4(normal, 1.0);
+    gl_FragColor = vec4(mixColor, 1.0);
 
 
     #include <tonemapping_fragment>
