@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import {
+	AxesHelper,
 	Color,
 	DoubleSide,
 	Mesh,
@@ -15,7 +16,9 @@ import {
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
+import directionalLight from './shader/include/directionalLight.glsl?raw';
 import perlinClassic3D from './shader/include/perlinClassic3D.glsl?raw';
+import pointLight from './shader/include/pointLight.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
 
 export default function RegingSeaLightShading() {
@@ -51,6 +54,10 @@ export default function RegingSeaLightShading() {
 
 		// @ts-ignore
 		ShaderChunk['perlinClassic3D'] = perlinClassic3D;
+		// @ts-ignore
+		ShaderChunk['directionalLight'] = directionalLight;
+		// @ts-ignore
+		ShaderChunk['pointLight'] = pointLight;
 
 		/**
 		 * Scene
@@ -83,6 +90,14 @@ export default function RegingSeaLightShading() {
 		const regingSea = new Mesh(regingSeaGeometry, regingSeaMaterial);
 		regingSea.rotation.x = -Math.PI / 2;
 		scene.add(regingSea);
+
+		/**
+		 * Helpers
+		 */
+
+		const axesHelper = new AxesHelper();
+		axesHelper.position.y = 0.25;
+		scene.add(axesHelper);
 
 		/**
 		 * Pane

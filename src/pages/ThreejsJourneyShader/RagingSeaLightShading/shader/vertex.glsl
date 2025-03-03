@@ -9,29 +9,38 @@ uniform float uSmallWaveFrequency;
 uniform float uSmallWaveSpeed;
 
 varying float vElevation;
+varying vec3 vPosition;
 varying vec3 vNormal;
 
 #include <perlinClassic3D>
+
+float waveElevation(
+    vec3 _position
+)
+{
+    float elevation = sin(uTime * uBigWaveSpeed + _position.x * uBigWaveFrequency.x) *
+                      sin(uTime * uBigWaveSpeed + _position.z + uBigWaveFrequency.y) *
+                      uBigWaveElevation;
+
+    for(float i = 1.0; i <= 4.0; i += 1.0)
+    {
+        elevation -= abs(perlinClassic3D(
+            vec3(_position.xz * i * uSmallWaveFrequency, uTime * uSmallWaveSpeed)
+        ) * uSmallWaveElevation / i);
+    }
+
+    return elevation;
+}
 
 void main()
 {
 
     // Model Position
     vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-
     vec4 modelNormal = modelMatrix * vec4(normal, 0.0);
 
     // Elevation
-    float elevation = sin(uTime * uBigWaveSpeed + modelPosition.x * uBigWaveFrequency.x) *
-                      sin(uTime * uBigWaveSpeed + modelPosition.z + uBigWaveFrequency.y) *
-                      uBigWaveElevation;
-
-    for(float i = 1.0; i <= 4.0; i += 1.0)
-    {
-        elevation -= abs(perlinClassic3D(
-            vec3(modelPosition.xz * i * uSmallWaveFrequency, uTime * uSmallWaveSpeed)
-        ) * uSmallWaveElevation / i);
-    }
+    float elevation = waveElevation(modelPosition.xyz);
 
     modelPosition.y += elevation;
 
@@ -43,4 +52,5 @@ void main()
     // Varing
     vElevation = elevation;
     vNormal = modelNormal.xyz;
+    vPosition = modelPosition.xyz;
 }
