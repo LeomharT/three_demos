@@ -1,30 +1,26 @@
-uniform vec3 uMaterialColor;
-uniform vec3 uAmbientLightColor;
-uniform vec3 uDirectionalLightColor;
-
 varying vec3 vNormal;
 
-vec3 ambientLight(vec3 _color, float _intensity)
-{
+
+uniform vec3 uDirectionalLightColor;
+
+
+vec3 ambientLight(
+    vec3 _color,
+    float _intensity
+){
     return _color * _intensity;
 }
 
 vec3 directionalLight(
-    vec3 _color, 
-    float _intensity, 
+    vec3 _color,
+    float _intensity,
     vec3 _normal,
     vec3 _lightPosition
-)
-{
-    // Normalize make sure wont over 1.0
+){
     vec3 lightDirection = normalize(_lightPosition);
-
-    vec3 lightReflection = reflect(lightDirection, _normal);
 
     float shading = dot(lightDirection, _normal);
     shading = max(0.0, shading);
-
-    // return vec3 (shading);
 
     return _color * _intensity * shading;
 }
@@ -34,14 +30,13 @@ void main()
 {
     vec3 normal = normalize(vNormal);
 
+    // Without any light, everything is black
     vec3 light = vec3(0.0);
-    // Ambient Light
+
     // light += ambientLight(
-    //     uAmbientLightColor,
+    //     vec3(0.25, 0.12, 0.36),
     //     1.0
     // );
-
-    // Directional Light
     light += directionalLight(
         uDirectionalLightColor,
         1.0,
@@ -49,12 +44,8 @@ void main()
         vec3(0.0, 0.0, 3.0)
     );
 
-
-    vec3 color = uMaterialColor;
+    vec3 color = vec3(1.0);
     color *= light;
-    
-    gl_FragColor = vec4(color, 1.0);
 
-    #include <tonemapping_fragment>
-    #include <colorspace_fragment>
+    gl_FragColor = vec4(color, 1.0);
 }
