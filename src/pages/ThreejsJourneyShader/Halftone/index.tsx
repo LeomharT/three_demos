@@ -78,6 +78,9 @@ export default function Halftone() {
 			),
 			uShadowRepetitions: new Uniform(100),
 			uShadowColor: new Uniform(new Color('#8e19b8')),
+
+			uLightRepetitions: new Uniform(130),
+			uLightColor: new Uniform(new Color('#e5ffe0')),
 		};
 
 		const halftoneMaterial = new ShaderMaterial({
@@ -133,6 +136,16 @@ export default function Halftone() {
 			});
 			uniformPane.addBinding(uniforms.uShadowRepetitions, 'value', {
 				label: 'Shadow Repetitions',
+				step: 1,
+				min: 1,
+				max: 300,
+			});
+			uniformPane.addBinding(uniforms.uLightColor, 'value', {
+				label: 'Light Color',
+				color: { type: 'float' },
+			});
+			uniformPane.addBinding(uniforms.uLightRepetitions, 'value', {
+				label: 'Light Repetitions',
 				step: 1,
 				min: 1,
 				max: 300,

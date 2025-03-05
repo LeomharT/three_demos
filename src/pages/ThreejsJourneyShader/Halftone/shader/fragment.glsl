@@ -2,6 +2,9 @@ uniform vec3 uColor;
 uniform vec2 uResolution;
 uniform vec3 uShadowColor;
 uniform float uShadowRepetitions;
+uniform vec3 uLightColor;
+uniform float uLightRepetitions;
+
 
 varying vec3 vPosition;
 varying vec3 vNormal;
@@ -76,6 +79,15 @@ void main()
         low,
         high,
         pointColor,
+        normal
+    );
+    color += halftone(
+        color,
+        uLightRepetitions,
+        vec3(1.0, 1.0, 0.0),
+        low,
+        high,
+        uLightColor,
         normal
     );
 
