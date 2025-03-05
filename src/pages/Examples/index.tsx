@@ -193,6 +193,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet Raging Sea Light Shading',
 		path: '/tj-ragingsealightshading',
 	},
+	{
+		title: 'Threejs Journey Halftone',
+		description: 'Threejs Journet Halftone',
+		path: '/tj-halftone',
+	},
 ];
 
 function cover(index: number) {

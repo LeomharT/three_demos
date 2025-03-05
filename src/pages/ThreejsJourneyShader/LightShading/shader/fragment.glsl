@@ -19,6 +19,8 @@ vec3 directionalLight(
 )
 {
     vec3 lightDirection = normalize(_lightPosition);
+
+    // Negative is because now light is faceing normal
     vec3 lightReflection = reflect(-lightDirection, _normal);
 
     float shading = dot(_normal, lightDirection);
