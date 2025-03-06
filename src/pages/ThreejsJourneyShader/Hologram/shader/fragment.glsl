@@ -23,6 +23,7 @@ void main(void)
 
     // Fresnel
     // Normal length
+    // Camera direction to vertex point
     vec3 viewDirection = normalize(vPosition - cameraPosition);
     // Same Direction = 1.0
     // Perpendicular = 0.0

@@ -78,6 +78,7 @@ const RagingSeaLightShading = lazy(
 	() => import('../pages/ThreejsJourneyShader/RagingSeaLightShading')
 );
 const Halftone = lazy(() => import('../pages/ThreejsJourneyShader/Halftone'));
+const Earth = lazy(() => import('../pages/ThreejsJourneyShader/Earth'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -139,6 +140,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-lightshading' element={<LightShading />} />
 			<Route path='tj-ragingsealightshading' element={<RagingSeaLightShading />} />
 			<Route path='tj-halftone' element={<Halftone />} />
+			<Route path='tj-earth' element={<Earth />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

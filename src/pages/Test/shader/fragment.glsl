@@ -1,5 +1,5 @@
 varying vec3 vNormal;
-
+varying vec3 vPosition;
 
 uniform vec3 uDirectionalLightColor;
 
@@ -37,15 +37,22 @@ void main()
     //     vec3(0.25, 0.12, 0.36),
     //     1.0
     // );
-    light += directionalLight(
-        uDirectionalLightColor,
-        1.0,
-        normal,
-        vec3(0.0, 0.0, 3.0)
-    );
+    // light += directionalLight(
+    //     uDirectionalLightColor,
+    //     1.0,
+    //     normal,
+    //     vec3(0.0, 0.0, 3.0)
+    // );
+    if(!gl_FrontFacing)
+    {
+        // normal *= -1.0;
+    }
 
-    vec3 color = vec3(1.0);
-    color *= light;
+    vec3 viewDirection = normalize(vPosition - cameraPosition);
+
+    float fresnel = dot(viewDirection, normal) + 1.0;
+
+    vec3 color = vec3(fresnel);
 
     gl_FragColor = vec4(color, 1.0);
 }

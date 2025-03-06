@@ -198,6 +198,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet Halftone',
 		path: '/tj-halftone',
 	},
+	{
+		title: 'Threejs Journey Earth',
+		description: 'Threejs Journet Earth',
+		path: '/tj-earth',
+	},
 ];
 
 function cover(index: number) {
