@@ -68,21 +68,34 @@ export default function Earth() {
 
 		const earthDayTexture = textureLoader.load('2k_earth_daymap.jpg');
 		earthDayTexture.colorSpace = SRGBColorSpace;
+		// Sharper Texture
+		earthDayTexture.anisotropy = 8;
 
 		const earthNightTexture = textureLoader.load('2k_earth_nightmap.jpg');
 		earthNightTexture.colorSpace = SRGBColorSpace;
+		earthNightTexture.anisotropy = 8;
 
 		const earthSpecularCloudsTexture = textureLoader.load('specularClouds.jpg');
 		earthSpecularCloudsTexture.colorSpace = SRGBColorSpace;
+		earthSpecularCloudsTexture.anisotropy = 8;
 
 		/**
 		 * Scene
 		 */
 
 		const uniforms = {
+			uTextureMixEdge0: new Uniform(-0.25),
+			uTextureMixEdge1: new Uniform(0.5),
+			uCloudsVolume: new Uniform(0.7),
+
 			uDayMapTexture: new Uniform(earthDayTexture),
 			uNightMapTexture: new Uniform(earthNightTexture),
+			uSpecularCloudsTexture: new Uniform(earthSpecularCloudsTexture),
+
 			uSunDirection: new Uniform(new Vector3(0, 0, 1)),
+
+			uAtmosphereDayColor: new Uniform(new Color('#00aaff')),
+			uAtmosphereTwilightColor: new Uniform(new Color('#ff6600')),
 		};
 
 		const sunSpherical = new Spherical(1.0, Math.PI / 2, 0.5);
@@ -122,6 +135,40 @@ export default function Earth() {
 		{
 			const earthPane = pane.addFolder({ title: '🌍 Earth' });
 			earthPane.addBinding(earthMaterial, 'wireframe');
+			earthPane.addBinding(uniforms.uTextureMixEdge0, 'value', {
+				label: 'Mix Color Remap Edge 0',
+				step: 0.001,
+				min: -1,
+				max: 1,
+			});
+			earthPane.addBinding(uniforms.uTextureMixEdge1, 'value', {
+				label: 'Mix Color Remap Edge 1',
+				step: 0.001,
+				min: -1,
+				max: 1,
+			});
+			earthPane
+				.addBinding(uniforms.uAtmosphereDayColor, 'value', {
+					label: 'Day Color',
+					color: { type: 'float' },
+				})
+				.on('change', (val) => uniforms.uAtmosphereDayColor.value.set(val.value));
+
+			earthPane
+				.addBinding(uniforms.uAtmosphereTwilightColor, 'value', {
+					label: 'Twilight Color',
+					color: { type: 'float' },
+				})
+				.on('change', (val) => uniforms.uAtmosphereTwilightColor.value.set(val.value));
+		}
+		{
+			const cloudsPane = pane.addFolder({ title: '🌥️ Clouds' });
+			cloudsPane.addBinding(uniforms.uCloudsVolume, 'value', {
+				label: 'Clouds Volume',
+				min: 0,
+				max: 1,
+				step: 0.001,
+			});
 		}
 		{
 			const sunPane = pane.addFolder({ title: '🌞 Sun' });
