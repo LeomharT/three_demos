@@ -73,10 +73,11 @@ void main()
     float specular = - dot(viewDirection, reflection);
     specular = max(0.0, specular);
     specular = pow(specular, 20.0);
+    specular *= specularTexture.r;
 
     vec3 specularColor = mix(vec3(1.0), atmosphereDayColor, fresnel);
 
-    color = specular * specularColor;
+    color += specular * specularColor;
 
     // Final Color
     gl_FragColor = vec4(color, 1.0);

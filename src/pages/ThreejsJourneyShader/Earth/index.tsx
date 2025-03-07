@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import {
+	BackSide,
 	Color,
 	IcosahedronGeometry,
 	Mesh,
@@ -18,9 +19,10 @@ import {
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
-import fragmentShader from './shader/fragment.glsl?raw';
-import vertexShader from './shader/vertex.glsl?raw';
-
+import atomsphereFragmentShader from './shader/atomsphere/fragment.glsl?raw';
+import atomsphereVertexShader from './shader/atomsphere/vertex.glsl?raw';
+import earthFragmentShader from './shader/earth/fragment.glsl?raw';
+import earthVertexShader from './shader/earth/vertex.glsl?raw';
 export default function Earth() {
 	async function initialScene() {
 		const el = document.querySelector('#container') as HTMLDivElement;
@@ -38,7 +40,7 @@ export default function Earth() {
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
-		scene.background = new Color(0x000000);
+		scene.background = new Color(0x000011);
 
 		const camera = new PerspectiveCamera(
 			75,
@@ -103,13 +105,24 @@ export default function Earth() {
 
 		const sphereGeometry = new SphereGeometry(1.0, 64, 64);
 		const earthMaterial = new ShaderMaterial({
-			vertexShader,
-			fragmentShader,
 			uniforms,
+			vertexShader: earthVertexShader,
+			fragmentShader: earthFragmentShader,
 			transparent: true,
 		});
 		const earth = new Mesh(sphereGeometry, earthMaterial);
 		scene.add(earth);
+
+		const atomsphereMaterial = new ShaderMaterial({
+			uniforms,
+			transparent: true,
+			side: BackSide,
+			vertexShader: atomsphereVertexShader,
+			fragmentShader: atomsphereFragmentShader,
+		});
+		const atomsphere = new Mesh(sphereGeometry, atomsphereMaterial);
+		atomsphere.scale.multiplyScalar(1.04);
+		scene.add(atomsphere);
 
 		const sun = new Mesh(new IcosahedronGeometry(0.1, 2), new MeshBasicMaterial());
 		scene.add(sun);
