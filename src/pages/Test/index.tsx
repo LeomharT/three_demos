@@ -4,18 +4,18 @@ import {
 	AxesHelper,
 	Color,
 	CubeTextureLoader,
-	DoubleSide,
+	IcosahedronGeometry,
 	Mesh,
 	MeshBasicMaterial,
 	PerspectiveCamera,
-	PlaneGeometry,
-	RepeatWrapping,
 	Scene,
 	ShaderMaterial,
 	SphereGeometry,
+	Spherical,
+	SRGBColorSpace,
 	TextureLoader,
-	TorusKnotGeometry,
 	Uniform,
+	Vector3,
 	WebGLRenderer,
 } from 'three';
 import {
@@ -28,8 +28,6 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
-
-const ASSETS_PATH = '/src/pages/ThreejsJourneyShader/CoffeeSmoke/assets/';
 
 export default function Test() {
 	const theme = useMantineTheme();
@@ -51,7 +49,7 @@ export default function Test() {
 		gltfLoader.setDRACOLoader(dracoLoader);
 
 		const textureLoader = new TextureLoader();
-		textureLoader.setPath(ASSETS_PATH);
+		textureLoader.setPath('/src/assets/texture/');
 
 		const cubeTextureLoader = new CubeTextureLoader();
 		cubeTextureLoader.setPath('/src/assets/texture/env/1/');
@@ -73,6 +71,7 @@ export default function Test() {
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
+		scene.background = new Color(0x000011);
 
 		const camera = new PerspectiveCamera(
 			75,
@@ -80,7 +79,7 @@ export default function Test() {
 			0.1,
 			1000
 		);
-		camera.position.set(4, 4, 4);
+		camera.position.set(1.5, 1.5, 1.5);
 		camera.lookAt(scene.position);
 
 		const controls = new OrbitControls(camera, renderer.domElement);
@@ -90,79 +89,81 @@ export default function Test() {
 		const stats = new Stats();
 		el.append(stats.dom);
 
-		const noiseTexture = await textureLoader.loadAsync('perlin.png');
-		noiseTexture.wrapT = noiseTexture.wrapS = RepeatWrapping;
+		/**
+		 * Texture
+		 */
+
+		const earthDayMapTexture = textureLoader.load('earth/2k_earth_daymap.jpg');
+		earthDayMapTexture.colorSpace = SRGBColorSpace;
+		earthDayMapTexture.anisotropy = 8;
+
+		const earthNightMapTexture = textureLoader.load('earth/2k_earth_nightmap.jpg');
+		earthNightMapTexture.colorSpace = SRGBColorSpace;
+		earthNightMapTexture.anisotropy = 8;
 
 		/**
 		 * Scene
 		 */
 
+		const sunSpherical = new Spherical(1, Math.PI / 2, 0.5);
+		const sunDirection = new Vector3();
+
 		const uniforms = {
-			uMaterialColor: new Uniform(new Color(0xffffff)),
-			uAmbientLightColor: new Uniform(new Color(0xffffff)),
-			uDirectionalLightColor: new Uniform(new Color(0x6cff24)),
+			uEarthDayTexture: new Uniform(earthDayMapTexture),
+			uEarthNightTexture: new Uniform(earthNightMapTexture),
+
+			uSunDirection: new Uniform(sunDirection),
 		};
 
-		const lightShadingMaterial = new ShaderMaterial({
-			uniforms,
+		// Earth
+		const earthGeometry = new SphereGeometry(1, 64, 64);
+		const earthMaterial = new ShaderMaterial({
 			vertexShader,
 			fragmentShader,
+			uniforms,
 		});
+		const earth = new Mesh(earthGeometry, earthMaterial);
+		scene.add(earth);
 
-		const sphereGeometry = new SphereGeometry(1, 32, 32);
-		const sphere = new Mesh(sphereGeometry, lightShadingMaterial);
-		sphere.position.x = -3;
-		scene.add(sphere);
+		// Sun
+		const sun = new Mesh(new IcosahedronGeometry(0.1, 3), new MeshBasicMaterial());
+		scene.add(sun);
 
-		const suzanne = (await gltfLoader.loadAsync('suzanne.glb')).scene;
-		suzanne.traverse((mesh) => {
-			if (mesh instanceof Mesh) {
-				mesh.material = lightShadingMaterial;
-			}
-		});
-		scene.add(suzanne);
+		function updateSun() {
+			sunDirection.setFromSpherical(sunSpherical);
 
-		const torusKnotGeometry = new TorusKnotGeometry(0.5, 0.2, 64, 16);
-		const torusKnot = new Mesh(torusKnotGeometry, lightShadingMaterial);
-		torusKnot.position.x = 3;
-		scene.add(torusKnot);
+			sun.position.copy(sunDirection).multiplyScalar(5.0);
 
-		const meshes = [sphere, suzanne, torusKnot] as Mesh[];
-
-		const directionalLightHelper = new Mesh(
-			new PlaneGeometry(1, 1, 16, 16),
-			new MeshBasicMaterial({
-				color: uniforms.uDirectionalLightColor.value,
-				side: DoubleSide,
-			})
-		);
-		directionalLightHelper.position.z = 3.0;
-		scene.add(directionalLightHelper);
+			uniforms.uSunDirection.value.copy(sunDirection);
+		}
+		updateSun();
 
 		/**
 		 * Pane
 		 */
 
-		const pane = new Pane({ title: 'Debug Params' });
-		pane.element.parentElement!.style.width = '320px';
-		pane.addBinding(uniforms.uMaterialColor, 'value', {
-			label: 'Material Color',
-			color: {
-				type: 'float',
-			},
-		});
-		pane.addBinding(uniforms.uAmbientLightColor, 'value', {
-			label: 'Ambient Light Color',
-			color: {
-				type: 'float',
-			},
-		});
-		pane.addBinding(uniforms.uDirectionalLightColor, 'value', {
-			label: 'Directional Color',
-			color: {
-				type: 'float',
-			},
-		});
+		const pane = new Pane({ title: '🐞 Debug Params' });
+		pane.element.parentElement!.style.width = '380px';
+
+		{
+			const sunPane = pane.addFolder({ title: 'Sun' });
+			sunPane
+				.addBinding(sunSpherical, 'phi', {
+					label: 'Sun Phi',
+					min: 0,
+					max: Math.PI,
+					step: 0.001,
+				})
+				.on('change', updateSun);
+			sunPane
+				.addBinding(sunSpherical, 'theta', {
+					label: 'Sun Theta',
+					min: 0,
+					max: Math.PI * 2,
+					step: 0.001,
+				})
+				.on('change', updateSun);
+		}
 
 		/**
 		 * Helpers
@@ -180,11 +181,6 @@ export default function Test() {
 
 			stats.update();
 			controls.update(time);
-
-			meshes.forEach((mesh) => {
-				mesh.rotation.x += 0.01;
-				mesh.rotation.z += 0.01;
-			});
 
 			renderer.render(scene, camera);
 		}
