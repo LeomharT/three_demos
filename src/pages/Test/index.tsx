@@ -101,6 +101,10 @@ export default function Test() {
 		earthNightMapTexture.colorSpace = SRGBColorSpace;
 		earthNightMapTexture.anisotropy = 8;
 
+		const earthSpecularCloudsTexture = textureLoader.load('earth/specularClouds.jpg');
+		earthSpecularCloudsTexture.colorSpace = SRGBColorSpace;
+		earthSpecularCloudsTexture.anisotropy = 8;
+
 		/**
 		 * Scene
 		 */
@@ -111,6 +115,7 @@ export default function Test() {
 		const uniforms = {
 			uEarthDayTexture: new Uniform(earthDayMapTexture),
 			uEarthNightTexture: new Uniform(earthNightMapTexture),
+			uEarthSpecularCloudTexture: new Uniform(earthSpecularCloudsTexture),
 
 			uSunDirection: new Uniform(sunDirection),
 		};
