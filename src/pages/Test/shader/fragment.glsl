@@ -41,6 +41,15 @@ void main()
         cloudMix
     );
 
+    if(!gl_FrontFacing)
+    {
+        normal *= -1.0;
+    }
+
+    // Fresnel
+    float fresnel = dot(viewDirection, normal) + 1.0;
+    fresnel = pow(fresnel, 2.0);
+
     // Specular
     vec3 reflection = reflect(-sunDirection, normal);
     float specular = -dot(reflection, viewDirection);
@@ -49,6 +58,8 @@ void main()
     specular *= specularMap.r;
  
     color += specular;
+
+    color = vec3(fresnel);
 
     gl_FragColor = vec4(color, 1.0);
 
