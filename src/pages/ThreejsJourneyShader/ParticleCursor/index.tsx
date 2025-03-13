@@ -131,8 +131,40 @@ export default function ParticleCursor() {
 		window.addEventListener('resize', resize);
 	}
 
+	function initialCanvas() {
+		const canvas = document.querySelector('#canvas-2d') as HTMLCanvasElement;
+		const { width, height } = canvas.getBoundingClientRect();
+
+		// Resolution
+		canvas.width = width * window.devicePixelRatio;
+		canvas.height = height * window.devicePixelRatio;
+
+		// Canvas Context
+		const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+		const image = new Image();
+		image.src = '/src/assets/texture/glow.png';
+
+		image.onload = () => {
+			ctx.drawImage(image, 0, 0);
+		};
+	}
+
 	useEffect(() => {
 		initialScene();
+		initialCanvas();
 	}, []);
-	return <div id='container'></div>;
+
+	return (
+		<div id='container'>
+			<canvas
+				id='canvas-2d'
+				style={{
+					width: 128,
+					height: 128,
+					position: 'absolute',
+				}}
+			/>
+		</div>
+	);
 }
