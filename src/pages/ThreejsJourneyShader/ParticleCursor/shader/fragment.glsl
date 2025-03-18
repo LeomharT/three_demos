@@ -1,5 +1,3 @@
-uniform sampler2D uTexture;
-
 varying vec2 vUv;
 varying vec3 vColor;
 
@@ -15,7 +13,9 @@ void main()
         discard;
     }
 
-    gl_FragColor = vec4(vColor, 1.0);
+    vec3 colors = vec3(vUv.x, vUv.y, 1.0);
+
+    gl_FragColor = vec4(colors * vColor, 1.0);
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
