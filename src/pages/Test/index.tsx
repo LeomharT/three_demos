@@ -75,6 +75,8 @@ export default function Test() {
 		earthDayMapTexture.anisotropy = 8;
 
 		const earthNightMapTexture = textureLoader.load('earth/2k_earth_nightmap.jpg');
+		earthNightMapTexture.colorSpace = SRGBColorSpace;
+		earthNightMapTexture.anisotropy = 8;
 
 		const specularCloudsTexture = textureLoader.load('earth/specularClouds.jpg');
 

@@ -5,6 +5,7 @@ varying vec3 vNormal;
 varying vec3 vPosition;
 
 uniform sampler2D uEarthDayTexture;
+uniform sampler2D uEarthNightTexture;
 uniform sampler2D uSpecularCloudsTexture;
 
 uniform vec3 uSunDirection;
@@ -23,11 +24,18 @@ void main()
     float sunOrentation = dot(sunDirection, normal);
 
     vec4 earthDayColor = texture2D(uEarthDayTexture, uv);
+    vec4 earthNightColor = texture2D(uEarthNightTexture, uv);
     vec4 specularCloudsColor = texture2D(uSpecularCloudsTexture, uv);
 
     // Earth Color
 
     float dayMix = smoothstep(-0.25, 0.5, sunOrentation);
+
+    color = mix(
+        earthNightColor.rgb,
+        earthDayColor.rgb,
+        dayMix
+    );
 
     // Specular
     vec3 reflection = reflect(-sunDirection, normal);
@@ -36,9 +44,7 @@ void main()
     specular = pow(specular, 20.0);
     specular *= specularCloudsColor.r;
 
-
-    color = vec3(specular);
-
+    color += vec3(specular);
 
     // Final Color
     gl_FragColor = vec4(color, 1.0);
