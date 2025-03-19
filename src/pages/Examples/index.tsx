@@ -208,6 +208,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet Particle Cursor',
 		path: '/tj-particle-cursor',
 	},
+	{
+		title: 'Threejs Journey Particle Morphing',
+		description: 'Threejs Journet Particle Morphing',
+		path: '/tj-particle-morphing',
+	},
 ];
 
 function cover(index: number) {

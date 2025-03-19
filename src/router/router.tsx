@@ -80,6 +80,9 @@ const RagingSeaLightShading = lazy(
 const Halftone = lazy(() => import('../pages/ThreejsJourneyShader/Halftone'));
 const Earth = lazy(() => import('../pages/ThreejsJourneyShader/Earth'));
 const ParticleCursor = lazy(() => import('../pages/ThreejsJourneyShader/ParticleCursor'));
+const ParticleMorphing = lazy(
+	() => import('../pages/ThreejsJourneyShader/ParticleMorphing')
+);
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -143,6 +146,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-halftone' element={<Halftone />} />
 			<Route path='tj-earth' element={<Earth />} />
 			<Route path='tj-particle-cursor' element={<ParticleCursor />} />
+			<Route path='tj-particle-morphing' element={<ParticleMorphing />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),
