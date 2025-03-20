@@ -18,8 +18,8 @@ import {
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
-import fragmentShader from './shader/fragment.glsl?raw';
-import vertexShader from './shader/vertex.glsl?raw';
+import earthFragmentShader from './shader/earth/fragment.glsl?raw';
+import earthVertexShader from './shader/earth/vertex.glsl?raw';
 
 const ASSETS_TEXTURE_PATH = '/src/assets/texture/';
 
@@ -49,15 +49,15 @@ export default function Test() {
 		scene.background = new Color(0x000011);
 
 		const camera = new PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
-		camera.position.set(2, 2, 2);
+		camera.position.set(3, 0, 3);
 		camera.lookAt(scene.position);
 
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.enableDamping = true;
 
-		const statsFPS = new Stats();
-		statsFPS.showPanel(0);
-		el.append(statsFPS.dom);
+		const stats = new Stats();
+		stats.showPanel(0);
+		el.append(stats.dom);
 
 		/**
 		 * Loaders
@@ -70,15 +70,16 @@ export default function Test() {
 		 * Textures
 		 */
 
-		const earthDayMapTexture = textureLoader.load('earth/2k_earth_daymap.jpg');
-		earthDayMapTexture.colorSpace = SRGBColorSpace;
-		earthDayMapTexture.anisotropy = 8;
+		const earthDayTexture = textureLoader.load('earth/2k_earth_daymap.jpg');
+		earthDayTexture.anisotropy = 8;
+		earthDayTexture.colorSpace = SRGBColorSpace;
 
-		const earthNightMapTexture = textureLoader.load('earth/2k_earth_nightmap.jpg');
-		earthNightMapTexture.colorSpace = SRGBColorSpace;
-		earthNightMapTexture.anisotropy = 8;
+		const earthNightTexture = textureLoader.load('earth/2k_earth_nightmap.jpg');
+		earthNightTexture.anisotropy = 8;
+		earthNightTexture.colorSpace = SRGBColorSpace;
 
-		const specularCloudsTexture = textureLoader.load('earth/specularClouds.jpg');
+		const specularCloudTexture = textureLoader.load('earth/specularClouds.jpg');
+		specularCloudTexture.anisotropy = 8;
 
 		/**
 		 * Scene
@@ -88,18 +89,24 @@ export default function Test() {
 		const sunDirection = new Vector3();
 
 		const uniforms = {
-			uEarthDayTexture: new Uniform(earthDayMapTexture),
-			uEarthNightTexture: new Uniform(earthNightMapTexture),
-			uSpecularCloudsTexture: new Uniform(specularCloudsTexture),
-
+			// Sun
 			uSunDirection: new Uniform(sunDirection),
+
+			//Earth
+			uEarthDayTexture: new Uniform(earthDayTexture),
+			uEarthNightTexture: new Uniform(earthNightTexture),
+			uSpecularCloudTexture: new Uniform(specularCloudTexture),
+
+			uAtmosphereDayColor: new Uniform(new Color('#00aaff')),
+			uAtmosphereTwilightColor: new Uniform(new Color('#ff6600')),
 		};
 
-		const earthGeometry = new SphereGeometry(1, 32, 32);
+		const earthGeometry = new SphereGeometry(2, 64, 64);
 		const earthMaterial = new ShaderMaterial({
-			fragmentShader,
-			vertexShader,
+			vertexShader: earthVertexShader,
+			fragmentShader: earthFragmentShader,
 			uniforms,
+			transparent: true,
 		});
 		const earth = new Mesh(earthGeometry, earthMaterial);
 		scene.add(earth);
@@ -110,13 +117,13 @@ export default function Test() {
 		scene.add(sun);
 
 		function updateSun() {
-			// Position
+			// Direction
 			sunDirection.setFromSpherical(sunSpherical);
 
-			// Debug
-			sun.position.copy(sunDirection).multiplyScalar(3);
+			// Update Sun
+			sun.position.copy(sunDirection).multiplyScalar(5);
 
-			// Uniform
+			// Uniforms
 			uniforms.uSunDirection.value.copy(sunDirection);
 		}
 		updateSun();
@@ -125,37 +132,27 @@ export default function Test() {
 		 * Pane
 		 */
 
-		const pane = new Pane({ title: 'Debug Params' });
+		const pane = new Pane({ title: '🚧 Debug Params 🚧' });
 		pane.element.parentElement!.style.width = '380px';
-		// Earth Params
 		{
 			const earthPane = pane.addFolder({ title: '🌏 Earth' });
 		}
-		// Sun Params
 		{
 			const sunPane = pane.addFolder({ title: '🌞 Sun' });
 			sunPane
-				.addBinding(sunSpherical, 'radius', {
-					label: 'Sun Spherical Radius',
-					min: 0,
-					max: 5,
-					step: 0.001,
-				})
-				.on('change', updateSun);
-			sunPane
 				.addBinding(sunSpherical, 'phi', {
 					label: 'Sun Spherical Phi',
+					step: 0.01,
 					min: 0,
 					max: Math.PI,
-					step: 0.001,
 				})
 				.on('change', updateSun);
 			sunPane
 				.addBinding(sunSpherical, 'theta', {
 					label: 'Sun Spherical Theta',
-					min: 0,
-					max: Math.PI * 2,
-					step: 0.001,
+					step: 0.01,
+					min: -Math.PI,
+					max: Math.PI,
 				})
 				.on('change', updateSun);
 		}
@@ -167,7 +164,7 @@ export default function Test() {
 		function render(time: number = 0) {
 			requestAnimationFrame(render);
 
-			statsFPS.update();
+			stats.update();
 			controls.update(time);
 
 			renderer.render(scene, camera);
