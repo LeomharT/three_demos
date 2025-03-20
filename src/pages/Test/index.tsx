@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import {
+	BackSide,
 	Color,
 	IcosahedronGeometry,
 	Mesh,
@@ -21,6 +22,8 @@ import { Pane } from 'tweakpane';
 import earthFragmentShader from './shader/earth/fragment.glsl?raw';
 import earthVertexShader from './shader/earth/vertex.glsl?raw';
 
+import atmosphereFragmentShader from './shader/atmosphere/fragment.glsl?raw';
+import atmosphereVertexShader from './shader/atmosphere/vertex.glsl?raw';
 const ASSETS_TEXTURE_PATH = '/src/assets/texture/';
 
 export default function Test() {
@@ -109,7 +112,20 @@ export default function Test() {
 			transparent: true,
 		});
 		const earth = new Mesh(earthGeometry, earthMaterial);
+		// earth.visible = false;
 		scene.add(earth);
+
+		const atmosphereGeometry = new SphereGeometry(2, 64, 64);
+		const atmosphereMaterial = new ShaderMaterial({
+			vertexShader: atmosphereVertexShader,
+			fragmentShader: atmosphereFragmentShader,
+			uniforms,
+			transparent: true,
+			side: BackSide,
+		});
+		const atmosphere = new Mesh(atmosphereGeometry, atmosphereMaterial);
+		atmosphere.scale.setScalar(1.04);
+		scene.add(atmosphere);
 
 		const sunGeometry = new IcosahedronGeometry(0.1, 3);
 		const sunMaterial = new MeshBasicMaterial();

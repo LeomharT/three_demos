@@ -48,7 +48,7 @@ void main()
     color = mix(
         color, 
         atmosphereColor,
-        fresnel  * dayMix
+        fresnel * dayMix
     );
 
     // Specular
@@ -58,7 +58,9 @@ void main()
     specular = pow(specular, 20.0);
     specular *= specularCloudColor.r;
 
-    color += specular;
+    float specularColor = mix(vec3(0.0), atmosphereColor, fresnel);
+
+    color += specular * specularColor;
 
     gl_FragColor = vec4(color, 1.0);
 
