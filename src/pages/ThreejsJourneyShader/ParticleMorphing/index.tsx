@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { useEffect, useState } from 'react';
 import {
 	AdditiveBlending,
+	BufferAttribute,
 	BufferGeometry,
 	Color,
 	Float32BufferAttribute,
@@ -84,7 +85,7 @@ export default function ParticleMorphing() {
 		 */
 
 		const uniforms = {
-			uSize: new Uniform(0.2),
+			uSize: new Uniform(0.4),
 			uResolution: new Uniform(
 				new Vector2(
 					window.innerWidth * window.devicePixelRatio,
@@ -92,6 +93,8 @@ export default function ParticleMorphing() {
 				)
 			),
 			uProgress: new Uniform(0),
+			uColorA: new Uniform(new Color(0xff7300)),
+			uColorB: new Uniform(new Color(0x0091ff)),
 		};
 
 		/**
@@ -114,7 +117,10 @@ export default function ParticleMorphing() {
 		}
 
 		// New Particle Position
-		const particlePositions = [];
+		const particlePositions: BufferAttribute[] = [];
+
+		// Particle Index
+		let particleIndex = 0;
 
 		for (const position of positions) {
 			const originalArray = position.array;
@@ -138,9 +144,17 @@ export default function ParticleMorphing() {
 			particlePositions.push(new Float32BufferAttribute(newArray, 3));
 		}
 
+		const sizeArray = new Float32Array(particleMaxCount);
+		const sizeAttr = new BufferAttribute(sizeArray, 1);
+
+		for (let i = 0; i < particleMaxCount; i++) {
+			sizeArray[i] = Math.random();
+		}
+
 		const particleGeometry = new BufferGeometry();
-		particleGeometry.setAttribute('position', particlePositions[1]);
+		particleGeometry.setAttribute('position', particlePositions[particleIndex]);
 		particleGeometry.setAttribute('aPositionTarget', particlePositions[3]);
+		particleGeometry.setAttribute('aSize', sizeAttr);
 
 		const particleMaterial = new ShaderMaterial({
 			vertexShader,
@@ -151,6 +165,22 @@ export default function ParticleMorphing() {
 		});
 		const particle = new Points(particleGeometry, particleMaterial);
 		scene.add(particle);
+
+		function particleMorph(index: number = 0) {
+			// Update Attribute
+			particle.geometry.attributes.position = particlePositions[particleIndex];
+			particle.geometry.attributes.aPositionTarget = particlePositions[index];
+
+			// Animate uProgress
+			gsap.fromTo(
+				particle.material.uniforms.uProgress,
+				{ value: 0 },
+				{ value: 1, duration: 3, ease: 'linear' }
+			);
+
+			// Save Index
+			particleIndex = index;
+		}
 
 		/**
 		 * Pane
@@ -185,17 +215,34 @@ export default function ParticleMorphing() {
 				max: 1,
 				step: 0.01,
 			});
+			particlePane.addBinding(uniforms.uColorA, 'value', {
+				label: 'Particle Color A',
+				color: { type: 'float' },
+			});
+			particlePane.addBinding(uniforms.uColorB, 'value', {
+				label: 'Particle Color B',
+				color: { type: 'float' },
+			});
 			particlePane
 				.addButton({
 					title: 'Morphing 01',
 				})
-				.on('click', () => {
-					gsap.to(uniforms.uProgress, {
-						duration: 0.4,
-						value: 1,
-						ease: 'linear',
-					});
-				});
+				.on('click', () => particleMorph(0));
+			particlePane
+				.addButton({
+					title: 'Morphing 02',
+				})
+				.on('click', () => particleMorph(1));
+			particlePane
+				.addButton({
+					title: 'Morphing 03',
+				})
+				.on('click', () => particleMorph(2));
+			particlePane
+				.addButton({
+					title: 'Morphing 04',
+				})
+				.on('click', () => particleMorph(3));
 		}
 
 		/**

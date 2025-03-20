@@ -1,4 +1,11 @@
 varying vec3 vColor;
+varying vec3 vPosition;
+
+uniform vec3 uColorA;
+uniform vec3 uColorB;
+
+#include <simplexNoise>
+
 
 void main()
 {
@@ -9,7 +16,15 @@ void main()
     
     float alpha = 0.05 / distanceToCenter - 1.0;
 
-    vec3 color = vColor;
+    float mixA = simplexNoise3d(vPosition);
+
+    vec3 color = mix(
+        uColorA,
+        uColorB,
+        mixA
+    );
+
+    color *= vColor;
 
     gl_FragColor = vec4(color, alpha);
 
