@@ -152,6 +152,7 @@ export default function ParticleMorphing() {
 		}
 
 		const particleGeometry = new BufferGeometry();
+		particleGeometry.computeBoundingBox();
 		particleGeometry.setAttribute('position', particlePositions[particleIndex]);
 		particleGeometry.setAttribute('aPositionTarget', particlePositions[3]);
 		particleGeometry.setAttribute('aSize', sizeAttr);
