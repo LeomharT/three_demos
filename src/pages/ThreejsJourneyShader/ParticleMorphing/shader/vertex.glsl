@@ -7,7 +7,9 @@ attribute vec3 aPositionTarget;
 attribute float aSize;
 
 varying vec3 vColor;
-varying vec3 vPosition;
+
+uniform vec3 uColorA;
+uniform vec3 uColorB;
 
 #include <simplexNoise>
 
@@ -43,6 +45,5 @@ void main()
     gl_PointSize *= (1.0 / -viewMatrix.z);
 
     // Varyings 
-    vColor = vec3(noise);
-    vPosition = modelPosition.xyz;
+    vColor = mix(uColorA, uColorB, noise);
 }
