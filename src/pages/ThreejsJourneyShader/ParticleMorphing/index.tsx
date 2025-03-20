@@ -85,6 +85,7 @@ export default function ParticleMorphing() {
 		 */
 
 		const uniforms = {
+			uTime: new Uniform(0.0),
 			uSize: new Uniform(0.4),
 			uResolution: new Uniform(
 				new Vector2(
@@ -165,6 +166,8 @@ export default function ParticleMorphing() {
 			depthWrite: false,
 		});
 		const particle = new Points(particleGeometry, particleMaterial);
+		// Render particles even outside camera
+		particle.frustumCulled = false;
 		scene.add(particle);
 
 		function particleMorph(index: number = 0) {
@@ -253,6 +256,8 @@ export default function ParticleMorphing() {
 		function render(time: number = 0) {
 			// Update
 			controls.update(time);
+
+			uniforms.uTime.value += 0.1;
 
 			// Render
 			renderer.render(scene, camera);

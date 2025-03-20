@@ -1,5 +1,6 @@
 uniform float uSize;
 uniform float uProgress;
+uniform float uTime;
 
 uniform vec2 uResolution;
 
@@ -35,6 +36,7 @@ void main()
 
     // Final Position
     vec4 modelPosition = modelMatrix * vec4(displacementPosition, 1.0);
+
     vec4 viewMatrix = viewMatrix * modelPosition ;
     vec4 projectionPosition = projectionMatrix * viewMatrix;
 
