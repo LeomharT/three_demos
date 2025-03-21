@@ -213,6 +213,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet Particle Morphing',
 		path: '/tj-particle-morphing',
 	},
+	{
+		title: 'Threejs Journey GPGPU Flow Field Particle',
+		description: 'Threejs Journet GPGPU Flow Field Particle',
+		path: '/tj-particle-gpgpu',
+	},
 ];
 
 function cover(index: number) {

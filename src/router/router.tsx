@@ -83,7 +83,9 @@ const ParticleCursor = lazy(() => import('../pages/ThreejsJourneyShader/Particle
 const ParticleMorphing = lazy(
 	() => import('../pages/ThreejsJourneyShader/ParticleMorphing')
 );
-
+const GPGPUFlowFieldParticle = lazy(
+	() => import('../pages/ThreejsJourneyShader/GPGPUFlowFieldParticle')
+);
 export const router = createBrowserRouter(
 	createRoutesFromElements(
 		<Route>
@@ -147,6 +149,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-earth' element={<Earth />} />
 			<Route path='tj-particle-cursor' element={<ParticleCursor />} />
 			<Route path='tj-particle-morphing' element={<ParticleMorphing />} />
+			<Route path='tj-particle-gpgpu' element={<GPGPUFlowFieldParticle />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),
