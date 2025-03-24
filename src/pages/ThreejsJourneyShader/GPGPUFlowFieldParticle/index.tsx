@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import {
-	AdditiveBlending,
 	BufferAttribute,
 	BufferGeometry,
 	Color,
@@ -110,7 +109,7 @@ export default function GPGPUFlowFieldParticle() {
 		gpgpu.init();
 
 		const uniforms = {
-			uSize: new Uniform(0.02),
+			uSize: new Uniform(0.04),
 			uResolution: new Uniform(new Vector2(window.innerWidth, window.innerHeight)),
 			uParticleTexture: new Uniform(null as any),
 		};
@@ -118,8 +117,13 @@ export default function GPGPUFlowFieldParticle() {
 		// Particle UV
 		const particleUVArray = new Float32Array(baseGeometry.count * 2);
 		const particleUVAttr = new BufferAttribute(particleUVArray, 2);
+
+		const sizesArray = new Float32Array(baseGeometry.count);
+		const sizesAttr = new BufferAttribute(sizesArray, 1);
+
 		for (let y = 0; y < gpgpuSize; y++) {
 			for (let x = 0; x < gpgpuSize; x++) {
+				// Particle UV
 				const i = y * gpgpuSize + x;
 				const i2 = i * 2;
 
@@ -128,19 +132,22 @@ export default function GPGPUFlowFieldParticle() {
 
 				particleUVArray[i2 + 0] = uvX;
 				particleUVArray[i2 + 1] = uvY;
+
+				// Size
+				sizesArray[i] = Math.random();
 			}
 		}
 
 		const particleGeometry = new BufferGeometry();
 		particleGeometry.setDrawRange(0, baseGeometry.count);
 		particleGeometry.setAttribute('aParticleUv', particleUVAttr);
+		particleGeometry.setAttribute('aColor', baseGeometry.instance.attributes.color);
+		particleGeometry.setAttribute('aSize', sizesAttr);
 
 		const particleMaterial = new ShaderMaterial({
 			uniforms,
 			vertexShader,
 			fragmentShader,
-			depthWrite: false,
-			blending: AdditiveBlending,
 		});
 		const particle = new Points(particleGeometry, particleMaterial);
 		scene.add(particle);
