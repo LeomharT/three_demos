@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import {
 	AdditiveBlending,
+	BufferAttribute,
 	BufferGeometry,
 	Color,
 	Mesh,
+	MeshBasicMaterial,
 	PerspectiveCamera,
+	PlaneGeometry,
 	Points,
 	Scene,
 	ShaderMaterial,
@@ -12,9 +15,15 @@ import {
 	Vector2,
 	WebGLRenderer,
 } from 'three';
-import { DRACOLoader, GLTFLoader, OrbitControls } from 'three/examples/jsm/Addons.js';
+import {
+	DRACOLoader,
+	GLTFLoader,
+	GPUComputationRenderer,
+	OrbitControls,
+} from 'three/examples/jsm/Addons.js';
 import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
+import gpgpuShader from './shader/gpgpu/particle.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
 
 export default function GPGPUFlowFieldParticle() {
@@ -67,16 +76,64 @@ export default function GPGPUFlowFieldParticle() {
 
 		const gltf = await gltfLoader.loadAsync('boat.glb');
 
+		// Base Geometry
+		const baseGeometry: { [key: string]: any } = {};
+		baseGeometry.instance = (gltf.scene.children[0] as Mesh).geometry;
+		baseGeometry.count = baseGeometry.instance.attributes.position.count;
+
+		// GPU Computation
+		const gpgpuSize = Math.ceil(Math.sqrt(baseGeometry.count));
+		const gpgpu = new GPUComputationRenderer(gpgpuSize, gpgpuSize, renderer);
+
+		// Base Particle
+		const baseParticlesTexture = gpgpu.createTexture();
+
+		for (let i = 0; i < baseGeometry.count; i++) {
+			const i3 = i * 3;
+			const i4 = i * 4;
+
+			baseParticlesTexture.image.data[i4 + 0] =
+				baseGeometry.instance.attributes.position.array[i3 + 0];
+			baseParticlesTexture.image.data[i4 + 1] =
+				baseGeometry.instance.attributes.position.array[i3 + 1];
+			baseParticlesTexture.image.data[i4 + 2] =
+				baseGeometry.instance.attributes.position.array[i3 + 2];
+			baseParticlesTexture.image.data[i4 + 3] = 0.0;
+		}
+
+		const particleVariable = gpgpu.addVariable(
+			'uParticle',
+			gpgpuShader,
+			baseParticlesTexture
+		);
+		gpgpu.setVariableDependencies(particleVariable, [particleVariable]);
+		gpgpu.init();
+
 		const uniforms = {
 			uSize: new Uniform(0.02),
 			uResolution: new Uniform(new Vector2(window.innerWidth, window.innerHeight)),
+			uParticleTexture: new Uniform(null as any),
 		};
 
+		// Particle UV
+		const particleUVArray = new Float32Array(baseGeometry.count * 2);
+		const particleUVAttr = new BufferAttribute(particleUVArray, 2);
+		for (let y = 0; y < gpgpuSize; y++) {
+			for (let x = 0; x < gpgpuSize; x++) {
+				const i = y * gpgpuSize + x;
+				const i2 = i * 2;
+
+				const uvX = (x + 0.5) / gpgpuSize;
+				const uvY = (y + 0.5) / gpgpuSize;
+
+				particleUVArray[i2 + 0] = uvX;
+				particleUVArray[i2 + 1] = uvY;
+			}
+		}
+
 		const particleGeometry = new BufferGeometry();
-		particleGeometry.setAttribute(
-			'position',
-			(gltf.scene.children[0] as Mesh).geometry.getAttribute('position')
-		);
+		particleGeometry.setDrawRange(0, baseGeometry.count);
+		particleGeometry.setAttribute('aParticleUv', particleUVAttr);
 
 		const particleMaterial = new ShaderMaterial({
 			uniforms,
@@ -87,6 +144,15 @@ export default function GPGPUFlowFieldParticle() {
 		});
 		const particle = new Points(particleGeometry, particleMaterial);
 		scene.add(particle);
+
+		const debug = new Mesh(
+			new PlaneGeometry(2, 2),
+			new MeshBasicMaterial({
+				map: gpgpu.getCurrentRenderTarget(particleVariable).texture,
+			})
+		);
+		debug.position.x = 3;
+		scene.add(debug);
 
 		/**
 		 * Pane
@@ -120,6 +186,12 @@ export default function GPGPUFlowFieldParticle() {
 
 			controls.update(time);
 
+			// GPGPU Update
+			gpgpu.compute();
+			uniforms.uParticleTexture.value =
+				gpgpu.getCurrentRenderTarget(particleVariable).texture;
+
+			// Render normal scene
 			renderer.render(scene, camera);
 		}
 		render();
