@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import {
 	BufferAttribute,
 	BufferGeometry,
+	Clock,
 	Color,
 	Mesh,
 	MeshBasicMaterial,
@@ -9,6 +10,7 @@ import {
 	PlaneGeometry,
 	Points,
 	Scene,
+	ShaderChunk,
 	ShaderMaterial,
 	Uniform,
 	Vector2,
@@ -23,8 +25,8 @@ import {
 import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
 import gpgpuShader from './shader/gpgpu/particle.glsl?raw';
+import simplex4DNoise from './shader/include/simplex4DNoise.glsl?raw';
 import vertexShader from './shader/vertex.glsl?raw';
-
 export default function GPGPUFlowFieldParticle() {
 	async function initialScene() {
 		const el = document.querySelector('#container') as HTMLDivElement;
@@ -69,6 +71,9 @@ export default function GPGPUFlowFieldParticle() {
 		gltfLoader.dracoLoader = dracoLoader;
 		gltfLoader.setPath('/src/assets/models/');
 
+		// @ts-ignore
+		ShaderChunk['simplex4DNoise'] = simplex4DNoise;
+
 		/**
 		 * Scene
 		 */
@@ -97,7 +102,7 @@ export default function GPGPUFlowFieldParticle() {
 				baseGeometry.instance.attributes.position.array[i3 + 1];
 			baseParticlesTexture.image.data[i4 + 2] =
 				baseGeometry.instance.attributes.position.array[i3 + 2];
-			baseParticlesTexture.image.data[i4 + 3] = 0.0;
+			baseParticlesTexture.image.data[i4 + 3] = Math.random();
 		}
 
 		const particleVariable = gpgpu.addVariable(
@@ -106,6 +111,16 @@ export default function GPGPUFlowFieldParticle() {
 			baseParticlesTexture
 		);
 		gpgpu.setVariableDependencies(particleVariable, [particleVariable]);
+
+		// GPGPU Uniform
+		particleVariable.material.uniforms.uTime = new Uniform(0.0);
+		particleVariable.material.uniforms.uDeltaTime = new Uniform(0.0);
+		particleVariable.material.uniforms.uBase = new Uniform(baseParticlesTexture);
+		particleVariable.material.uniforms.uFlowFieldInfluence = new Uniform(0.5);
+		particleVariable.material.uniforms.uFlowFieldStrength = new Uniform(2.0);
+		particleVariable.material.uniforms.uFlowFieldFrequency = new Uniform(0.5);
+
+		// Init
 		gpgpu.init();
 
 		const uniforms = {
@@ -158,6 +173,7 @@ export default function GPGPUFlowFieldParticle() {
 				map: gpgpu.getCurrentRenderTarget(particleVariable).texture,
 			})
 		);
+		debug.visible = false;
 		debug.position.x = 3;
 		scene.add(debug);
 
@@ -182,19 +198,60 @@ export default function GPGPUFlowFieldParticle() {
 				min: 0,
 				max: 1,
 			});
+			pointPane.addBinding(
+				particleVariable.material.uniforms.uFlowFieldInfluence,
+				'value',
+				{
+					label: 'Point Flow Field InFluence',
+					min: 0.0,
+					max: 1.0,
+					step: 0.01,
+				}
+			);
+			pointPane.addBinding(
+				particleVariable.material.uniforms.uFlowFieldStrength,
+				'value',
+				{
+					label: 'Point Flow Field uFlowFieldStrength',
+					min: 0.0,
+					max: 10.0,
+					step: 0.01,
+				}
+			);
+			pointPane.addBinding(
+				particleVariable.material.uniforms.uFlowFieldFrequency,
+				'value',
+				{
+					label: 'Point Flow Field uFlowFieldFrequency',
+					min: 0.0,
+					max: 1.0,
+					step: 0.001,
+				}
+			);
 		}
 
 		/**
 		 * Events
 		 */
 
+		const clock = new Clock();
+		let previousTime = 0;
+
 		function render(time: number = 0) {
+			const elapsedTime = clock.getElapsedTime();
+			const deltaTime = elapsedTime - previousTime;
+			previousTime = elapsedTime;
+
 			requestAnimationFrame(render);
 
 			controls.update(time);
 
 			// GPGPU Update
+			particleVariable.material.uniforms.uDeltaTime.value = deltaTime;
+			particleVariable.material.uniforms.uTime.value = elapsedTime;
+
 			gpgpu.compute();
+
 			uniforms.uParticleTexture.value =
 				gpgpu.getCurrentRenderTarget(particleVariable).texture;
 
