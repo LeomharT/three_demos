@@ -218,6 +218,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet GPGPU Flow Field Particle',
 		path: '/tj-particle-gpgpu',
 	},
+	{
+		title: 'Threejs Journey WobblySphere',
+		description: 'Threejs Journet WobblySphere',
+		path: '/tj-wobbly-sphere',
+	},
 ];
 
 function cover(index: number) {
