@@ -18,7 +18,7 @@ import {
 	WebGLRenderer,
 } from 'three';
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { DRACOLoader, GLTFLoader, OrbitControls } from 'three/examples/jsm/Addons.js';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { Pane } from 'tweakpane';
 import fragmentShader from './shader/fragment.glsl?raw';
@@ -66,8 +66,17 @@ export default function WobblySphere() {
 		 * Loaders
 		 */
 
+		const dracoLoader = new DRACOLoader();
+		dracoLoader.setDecoderPath('node_modules/three/examples/jsm/libs/draco/');
+		dracoLoader.setDecoderConfig({ type: 'js' });
+		dracoLoader.preload();
+
 		const cubeTextureLoader = new CubeTextureLoader();
 		cubeTextureLoader.setPath('/src/assets/texture/env/');
+
+		const gltfLoader = new GLTFLoader();
+		gltfLoader.setPath('/src/assets/models/');
+		gltfLoader.dracoLoader = dracoLoader;
 
 		/**
 		 * Textures
@@ -149,6 +158,19 @@ export default function WobblySphere() {
 		lightDebugPlane.receiveShadow = true;
 		scene.add(lightDebugPlane);
 
+		scene.remove(wobblySphere);
+
+		gltfLoader.load('suzanne.glb', (gltf) => {
+			const wobble = gltf.scene.children[0];
+
+			wobble.castShadow = true;
+			wobble.receiveShadow = true;
+
+			wobble.material = wobblySphereMaterial;
+			wobble.customDepthMaterial = depthMaterial;
+			scene.add(wobble);
+		});
+
 		/**
 		 * Light
 		 */
@@ -195,10 +217,6 @@ export default function WobblySphere() {
 			max: 1,
 			min: 0,
 			step: 0.001,
-		});
-		pane.addBinding(wobblySphereMaterial, 'color', {
-			label: 'Material Color',
-			color: { type: 'float' },
 		});
 		pane.addBinding(uniforms.uPositionFrequency, 'value', {
 			label: 'Position Frequency',
