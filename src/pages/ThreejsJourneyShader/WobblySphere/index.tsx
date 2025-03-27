@@ -1,20 +1,29 @@
 import { useEffect } from 'react';
 import {
+	Color,
 	CubeTextureLoader,
 	DirectionalLight,
 	IcosahedronGeometry,
 	Mesh,
+	MeshDepthMaterial,
 	MeshPhysicalMaterial,
 	MeshStandardMaterial,
 	PCFSoftShadowMap,
 	PerspectiveCamera,
 	PlaneGeometry,
+	RGBADepthPacking,
 	Scene,
+	ShaderChunk,
+	Uniform,
 	WebGLRenderer,
 } from 'three';
+import CustomShaderMaterial from 'three-custom-shader-material/vanilla';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { Pane } from 'tweakpane';
-
+import fragmentShader from './shader/fragment.glsl?raw';
+import simplex4DNoise from './shader/include/simplex4DNoise.glsl?raw';
+import vertexShader from './shader/vertex.glsl?raw';
 export default function WobblySphere() {
 	async function initialScene() {
 		/**
@@ -50,6 +59,9 @@ export default function WobblySphere() {
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.enableDamping = true;
 
+		// @ts-ignore
+		ShaderChunk['simplex4DNoise'] = simplex4DNoise;
+
 		/**
 		 * Loaders
 		 */
@@ -76,8 +88,32 @@ export default function WobblySphere() {
 		 * Scene
 		 */
 
-		const wobblySphereGeometry = new IcosahedronGeometry(2.5, 50);
-		const wobblySphereMaterial = new MeshPhysicalMaterial({
+		const uniforms = {
+			uTime: new Uniform(0.0),
+			uPositionFrequency: new Uniform(0.5),
+			uTimeFrequency: new Uniform(0.4),
+			uStrength: new Uniform(0.3),
+
+			uWarpPositionFrequency: new Uniform(0.38),
+			uWarpTimeFrequency: new Uniform(0.12),
+			uWarpStrength: new Uniform(1.7),
+
+			uColorA: new Uniform(new Color(0x0000ff)),
+			uColorB: new Uniform(new Color(0xff0000)),
+		};
+
+		let wobblySphereGeometry = new IcosahedronGeometry(2.5, 50);
+		wobblySphereGeometry = mergeVertices(wobblySphereGeometry) as IcosahedronGeometry;
+		wobblySphereGeometry.computeTangents();
+
+		const wobblySphereMaterial = new CustomShaderMaterial({
+			// CMS
+			baseMaterial: MeshPhysicalMaterial,
+			fragmentShader,
+			vertexShader,
+			uniforms,
+
+			// MeshPhysicalMaterial
 			metalness: 0,
 			roughness: 0.5,
 			color: '#ffffff',
@@ -86,8 +122,20 @@ export default function WobblySphere() {
 			thickness: 1.5,
 			transparent: true,
 			wireframe: false,
+		}) as unknown as MeshPhysicalMaterial;
+
+		const depthMaterial = new CustomShaderMaterial({
+			// CMS
+			baseMaterial: MeshDepthMaterial,
+			vertexShader,
+			uniforms,
+
+			// MeshDepthMaterial
+			depthPacking: RGBADepthPacking,
 		});
+
 		const wobblySphere = new Mesh(wobblySphereGeometry, wobblySphereMaterial);
+		wobblySphere.customDepthMaterial = depthMaterial;
 		wobblySphere.castShadow = true;
 		wobblySphere.receiveShadow = true;
 		scene.add(wobblySphere);
@@ -152,6 +200,54 @@ export default function WobblySphere() {
 			label: 'Material Color',
 			color: { type: 'float' },
 		});
+		pane.addBinding(uniforms.uPositionFrequency, 'value', {
+			label: 'Position Frequency',
+			step: 0.001,
+			min: 0,
+			max: 2,
+		});
+		pane.addBinding(uniforms.uTimeFrequency, 'value', {
+			label: 'Time Frequency',
+			step: 0.001,
+			min: 0,
+			max: 2,
+		});
+		pane.addBinding(uniforms.uStrength, 'value', {
+			label: 'Strength',
+			step: 0.001,
+			min: 0,
+			max: 2,
+		});
+		pane.addBinding(uniforms.uWarpPositionFrequency, 'value', {
+			label: 'Warp Position Frequency',
+			step: 0.001,
+			min: 0,
+			max: 2,
+		});
+		pane.addBinding(uniforms.uWarpTimeFrequency, 'value', {
+			label: 'Warp Time Frequency',
+			step: 0.001,
+			min: 0,
+			max: 2,
+		});
+		pane.addBinding(uniforms.uWarpStrength, 'value', {
+			label: 'Warp Strength',
+			step: 0.001,
+			min: 0,
+			max: 2,
+		});
+		pane
+			.addBinding(uniforms.uColorA, 'value', {
+				label: 'Color A',
+				color: { type: 'float' },
+			})
+			.on('change', (val) => uniforms.uColorA.value.set(val.value));
+		pane
+			.addBinding(uniforms.uColorB, 'value', {
+				label: 'Color B',
+				color: { type: 'float' },
+			})
+			.on('change', (val) => uniforms.uColorB.value.set(val.value));
 
 		/**
 		 * Events
@@ -161,6 +257,8 @@ export default function WobblySphere() {
 			controls.update(time);
 
 			renderer.render(scene, camera);
+
+			uniforms.uTime.value += 0.01;
 
 			requestAnimationFrame(render);
 		}
