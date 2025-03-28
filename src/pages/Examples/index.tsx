@@ -223,6 +223,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet WobblySphere',
 		path: '/tj-wobbly-sphere',
 	},
+	{
+		title: 'Threejs Journey Sliced Model',
+		description: 'Threejs Journet Sliced Model',
+		path: '/tj-sliced-model',
+	},
 ];
 
 function cover(index: number) {

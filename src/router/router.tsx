@@ -87,6 +87,7 @@ const GPGPUFlowFieldParticle = lazy(
 	() => import('../pages/ThreejsJourneyShader/GPGPUFlowFieldParticle')
 );
 const WobblySphere = lazy(() => import('../pages/ThreejsJourneyShader/WobblySphere'));
+const SlicedModel = lazy(() => import('../pages/ThreejsJourneyShader/SlicedModel'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -153,6 +154,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-particle-morphing' element={<ParticleMorphing />} />
 			<Route path='tj-particle-gpgpu' element={<GPGPUFlowFieldParticle />} />
 			<Route path='tj-wobbly-sphere' element={<WobblySphere />} />
+			<Route path='tj-sliced-model' element={<SlicedModel />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),
