@@ -6,10 +6,12 @@ import {
 	DoubleSide,
 	EquirectangularReflectionMapping,
 	Mesh,
+	MeshDepthMaterial,
 	MeshStandardMaterial,
 	PCFSoftShadowMap,
 	PerspectiveCamera,
 	PlaneGeometry,
+	RGBADepthPacking,
 	Scene,
 	Uniform,
 	Vector3,
@@ -137,6 +139,16 @@ export default function SlicedModel() {
 			side: DoubleSide,
 		});
 
+		const slicedDepthMaterial = new CustomShaderMaterial({
+			baseMaterial: MeshDepthMaterial,
+			fragmentShader,
+			vertexShader,
+			uniforms,
+			patchMap,
+
+			depthPacking: RGBADepthPacking,
+		});
+
 		gltfLoader.load('gears.glb', (gltf) => {
 			const model = gltf.scene;
 
@@ -144,6 +156,7 @@ export default function SlicedModel() {
 				if (mesh instanceof Mesh) {
 					if (mesh.name === 'outerHull') {
 						mesh.material = slicedMaterial;
+						mesh.customDepthMaterial = slicedDepthMaterial;
 					} else {
 						mesh.material = material;
 					}
