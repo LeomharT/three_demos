@@ -228,6 +228,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet Sliced Model',
 		path: '/tj-sliced-model',
 	},
+	{
+		title: 'Threejs Journey Procedural Terrain',
+		description: 'Threejs Journet Procedural Terrain',
+		path: '/tj-procedural-terrain',
+	},
 ];
 
 function cover(index: number) {
