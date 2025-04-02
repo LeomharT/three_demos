@@ -233,6 +233,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet Procedural Terrain',
 		path: '/tj-procedural-terrain',
 	},
+	{
+		title: 'Threejs Journey Post Processing',
+		description: 'Threejs Journet Post Processing',
+		path: '/tj-post-processing',
+	},
 ];
 
 function cover(index: number) {
