@@ -1,10 +1,21 @@
 import { useEffect } from 'react';
-import { Color, PerspectiveCamera, Scene, TextureLoader, WebGLRenderer } from 'three';
+import {
+	BufferAttribute,
+	BufferGeometry,
+	Color,
+	PerspectiveCamera,
+	Points,
+	Scene,
+	ShaderMaterial,
+	Uniform,
+	Vector2,
+	WebGLRenderer,
+} from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
-
-const ASSETS_TEXTURE_PATH = '/src/assets/texture/';
+import fragmentShader from './shader/fragment.glsl?raw';
+import vertexShader from './shader/vertex.glsl?raw';
 
 export default function Test() {
 	function initialScene() {
@@ -46,9 +57,6 @@ export default function Test() {
 		 * Loaders
 		 */
 
-		const textureLoader = new TextureLoader();
-		textureLoader.setPath(ASSETS_TEXTURE_PATH);
-
 		/**
 		 * Textures
 		 */
@@ -56,6 +64,43 @@ export default function Test() {
 		/**
 		 * Scene
 		 */
+		const point = {
+			count: 500,
+		};
+
+		const uniforms = {
+			uTime: new Uniform(0.0),
+			uSize: new Uniform(0.01),
+			uResolution: new Uniform(
+				new Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)
+			),
+		};
+
+		const pointGeometry = new BufferGeometry();
+
+		// Attribute Position
+		const positionArr = new Float32Array(point.count * 3);
+		const positionAttr = new BufferAttribute(positionArr, 3);
+
+		for (let i = 0; i < point.count; i++) {
+			const i3 = i * 3;
+
+			positionArr[i3 + 0] = Math.random() - 0.5;
+			positionArr[i3 + 1] = Math.random() - 0.5;
+			positionArr[i3 + 2] = Math.random() - 0.5;
+		}
+
+		pointGeometry.setAttribute('position', positionAttr);
+
+		const pointMaterial = new ShaderMaterial({
+			fragmentShader,
+			vertexShader,
+			uniforms,
+			depthWrite: false,
+			transparent: true,
+		});
+		const points = new Points(pointGeometry, pointMaterial);
+		scene.add(points);
 
 		/**
 		 * Pane
@@ -74,6 +119,8 @@ export default function Test() {
 			stats.update();
 			controls.update(time);
 
+			uniforms.uTime.value += 0.1;
+
 			renderer.render(scene, camera);
 		}
 		render();
@@ -86,6 +133,11 @@ export default function Test() {
 			renderer.setSize(sizes.width, sizes.height);
 			camera.aspect = sizes.width / sizes.height;
 			camera.updateProjectionMatrix();
+
+			uniforms.uResolution.value.set(
+				sizes.width * sizes.pixelRatio,
+				sizes.height * sizes.pixelRatio
+			);
 		}
 		window.addEventListener('resize', resize);
 	}
