@@ -21,9 +21,11 @@ import {
 import { useMediaQuery } from '@mantine/hooks';
 import { Spotlight, spotlight, SpotlightActionData } from '@mantine/spotlight';
 import { IconBrandGithub, IconMoon, IconSearch, IconSun } from '@tabler/icons-react';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
+import { ShaderChunk } from 'three';
 import Hiddent from '../component/Hiddent';
+import simplex2DNoise from '../include/simplex2DNoise.glsl?raw';
 import classes from './app.module.css';
 
 const actions: SpotlightActionData[] = [
@@ -69,6 +71,11 @@ export default function App() {
 		{ href: '/docs/spaceship', label: 'Study of a spaceship example' },
 		{ href: '/docs/lightshading', label: 'Light Shading' },
 	];
+
+	useEffect(() => {
+		// @ts-ignore
+		ShaderChunk['simplex2DNoise'] = simplex2DNoise;
+	}, []);
 
 	return (
 		<AppShell
