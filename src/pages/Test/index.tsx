@@ -1,8 +1,11 @@
 import { useEffect } from 'react';
 import {
 	Color,
+	DirectionalLight,
+	DirectionalLightHelper,
 	Mesh,
 	MeshStandardMaterial,
+	PCFSoftShadowMap,
 	PerspectiveCamera,
 	PlaneGeometry,
 	Scene,
@@ -32,13 +35,16 @@ export default function Test() {
 		});
 		renderer.setSize(sizes.width, sizes.height);
 		renderer.setPixelRatio(sizes.pixelRatio);
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMap.type = PCFSoftShadowMap;
+		renderer.shadowMap.autoUpdate = true;
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
 		scene.background = new Color(0x000011);
 
 		const camera = new PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
-		camera.position.set(3, 0, 3);
+		camera.position.set(3, 3, 3);
 		camera.lookAt(scene.position);
 
 		const controls = new OrbitControls(camera, renderer.domElement);
@@ -60,12 +66,38 @@ export default function Test() {
 		 * Scene
 		 */
 
-		const planeGeometry = new PlaneGeometry(2, 2, 32, 32);
-		const planeMaterial = new MeshStandardMaterial({
-			emissive: new Color('#ffffff'),
-		});
+		const planeGeometry = new PlaneGeometry(3, 3, 32, 32);
+		planeGeometry.rotateX(-Math.PI / 2);
+
+		const planeMaterial = new MeshStandardMaterial({});
+
 		const plane = new Mesh(planeGeometry, planeMaterial);
+		plane.castShadow = true;
+		plane.receiveShadow = true;
 		scene.add(plane);
+
+		const shadowPlane = new Mesh(
+			new PlaneGeometry(10, 10, 1, 1),
+			new MeshStandardMaterial({})
+		);
+		shadowPlane.rotation.x = -0.3;
+		shadowPlane.receiveShadow = true;
+		shadowPlane.castShadow = true;
+		shadowPlane.position.z = -1.5;
+		scene.add(shadowPlane);
+
+		/**
+		 * Light
+		 */
+
+		const directionalLigit = new DirectionalLight(0xffffff);
+		directionalLigit.castShadow = true;
+		directionalLigit.intensity = 2.0;
+		directionalLigit.position.set(0, 2, 3);
+		scene.add(directionalLigit);
+
+		const helper = new DirectionalLightHelper(directionalLigit);
+		scene.add(helper);
 
 		/**
 		 * Pane
