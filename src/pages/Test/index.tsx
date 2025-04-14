@@ -93,6 +93,9 @@ export default function Test() {
 			uSpecularCloudTexture: new Uniform(specularCloudsTexture),
 
 			uSunDirection: new Uniform(new Vector3()),
+
+			uAtmosphereDayColor: new Uniform(new Color('#00aaff')),
+			uAtmosphereTwilightColor: new Uniform(new Color('#ff6600')),
 		};
 
 		const sunSpherical = new Spherical(1, Math.PI / 2, 0.5);
