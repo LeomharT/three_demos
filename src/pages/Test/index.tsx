@@ -1,21 +1,26 @@
 import { useEffect } from 'react';
 import {
 	Color,
-	DirectionalLight,
+	IcosahedronGeometry,
 	Mesh,
-	MeshStandardMaterial,
+	MeshBasicMaterial,
 	PCFSoftShadowMap,
 	PerspectiveCamera,
-	PlaneGeometry,
 	Scene,
+	ShaderMaterial,
+	SphereGeometry,
+	Spherical,
+	SRGBColorSpace,
+	TextureLoader,
+	Uniform,
+	Vector3,
 	WebGLRenderer,
 } from 'three';
-import CustomShaderMaterial from 'three-custom-shader-material/vanilla';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
-import fragmentShader from './shader/fragment.glsl?raw';
-import vertexShader from './shader/vertex.glsl?raw';
+import earthFragmentShader from './shader/earth/fragment.glsl?raw';
+import earthVertexShader from './shader/earth/vertex.glsl?raw';
 
 export default function Test() {
 	function initialScene() {
@@ -60,40 +65,64 @@ export default function Test() {
 		 * Loaders
 		 */
 
+		const textureLoader = new TextureLoader();
+		textureLoader.setPath('/src/assets/texture/earth/');
+
 		/**
 		 * Textures
 		 */
+
+		const earthDayTexture = textureLoader.load('2k_earth_daymap.jpg');
+		earthDayTexture.colorSpace = SRGBColorSpace;
+		earthDayTexture.anisotropy = 8;
+
+		const earthNightTexture = textureLoader.load('2k_earth_nightmap.jpg');
+		earthNightTexture.colorSpace = SRGBColorSpace;
+		earthNightTexture.anisotropy = 8;
+
+		const specularCloudsTexture = textureLoader.load('specularClouds.jpg');
+		specularCloudsTexture.anisotropy = 8;
 
 		/**
 		 * Scene
 		 */
 
-		const uniforms = {};
+		const uniforms = {
+			uEarthDayTexture: new Uniform(earthDayTexture),
+			uEarthNightTexture: new Uniform(earthNightTexture),
+			uSpecularCloudTexture: new Uniform(specularCloudsTexture),
 
-		const planeGeometry = new PlaneGeometry(3, 3, 32, 32);
-		planeGeometry.rotateX(-Math.PI / 2);
+			uSunDirection: new Uniform(new Vector3()),
+		};
 
-		const planeMaterial = new CustomShaderMaterial({
-			baseMaterial: MeshStandardMaterial,
-			fragmentShader,
-			vertexShader,
+		const sunSpherical = new Spherical(1, Math.PI / 2, 0.5);
+		const sunDirection = new Vector3();
+
+		const sun = new Mesh(
+			new IcosahedronGeometry(0.1, 5),
+			new MeshBasicMaterial({
+				color: 0xffffff,
+			})
+		);
+		scene.add(sun);
+
+		function updateSun() {
+			sunDirection.setFromSpherical(sunSpherical);
+
+			sun.position.copy(sunDirection).multiplyScalar(5.0);
+
+			uniforms.uSunDirection.value.copy(sunDirection);
+		}
+		updateSun();
+
+		const earthGeometry = new SphereGeometry(2, 64, 64);
+		const earthMaterial = new ShaderMaterial({
+			vertexShader: earthVertexShader,
+			fragmentShader: earthFragmentShader,
 			uniforms,
 		});
-
-		const plane = new Mesh(planeGeometry, planeMaterial);
-		plane.castShadow = true;
-		plane.receiveShadow = true;
-		scene.add(plane);
-
-		/**
-		 * Light
-		 */
-
-		const directionalLigit = new DirectionalLight(0xffffff);
-		directionalLigit.castShadow = true;
-		directionalLigit.intensity = 2.0;
-		directionalLigit.position.set(0, 2, 3);
-		scene.add(directionalLigit);
+		const earth = new Mesh(earthGeometry, earthMaterial);
+		scene.add(earth);
 
 		/**
 		 * Pane
@@ -101,6 +130,27 @@ export default function Test() {
 
 		const pane = new Pane({ title: '🚧 Debug Params 🚧' });
 		pane.element.parentElement!.style.width = '380px';
+		// Earth Pane
+		const earthPane = pane.addFolder({ title: '🌎 Earth' });
+
+		// Sun Pane
+		const sunPane = pane.addFolder({ title: '🌞 Sun' });
+		sunPane
+			.addBinding(sunSpherical, 'phi', {
+				label: 'Sun Direction Phi',
+				min: 0,
+				max: Math.PI,
+				step: 0.01,
+			})
+			.on('change', updateSun);
+		sunPane
+			.addBinding(sunSpherical, 'theta', {
+				label: 'Sun Direction Theta',
+				min: -Math.PI,
+				max: Math.PI,
+				step: 0.01,
+			})
+			.on('change', updateSun);
 
 		/**
 		 * Events
@@ -111,6 +161,8 @@ export default function Test() {
 
 			stats.update();
 			controls.update(time);
+
+			earth.rotation.y += 0.001;
 
 			renderer.render(scene, camera);
 		}
