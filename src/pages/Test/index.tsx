@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import {
 	Color,
 	DirectionalLight,
-	DirectionalLightHelper,
 	Mesh,
 	MeshStandardMaterial,
 	PCFSoftShadowMap,
@@ -11,9 +10,12 @@ import {
 	Scene,
 	WebGLRenderer,
 } from 'three';
+import CustomShaderMaterial from 'three-custom-shader-material/vanilla';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
+import fragmentShader from './shader/fragment.glsl?raw';
+import vertexShader from './shader/vertex.glsl?raw';
 
 export default function Test() {
 	function initialScene() {
@@ -66,25 +68,22 @@ export default function Test() {
 		 * Scene
 		 */
 
+		const uniforms = {};
+
 		const planeGeometry = new PlaneGeometry(3, 3, 32, 32);
 		planeGeometry.rotateX(-Math.PI / 2);
 
-		const planeMaterial = new MeshStandardMaterial({});
+		const planeMaterial = new CustomShaderMaterial({
+			baseMaterial: MeshStandardMaterial,
+			fragmentShader,
+			vertexShader,
+			uniforms,
+		});
 
 		const plane = new Mesh(planeGeometry, planeMaterial);
 		plane.castShadow = true;
 		plane.receiveShadow = true;
 		scene.add(plane);
-
-		const shadowPlane = new Mesh(
-			new PlaneGeometry(10, 10, 1, 1),
-			new MeshStandardMaterial({})
-		);
-		shadowPlane.rotation.x = -0.3;
-		shadowPlane.receiveShadow = true;
-		shadowPlane.castShadow = true;
-		shadowPlane.position.z = -1.5;
-		scene.add(shadowPlane);
 
 		/**
 		 * Light
@@ -95,9 +94,6 @@ export default function Test() {
 		directionalLigit.intensity = 2.0;
 		directionalLigit.position.set(0, 2, 3);
 		scene.add(directionalLigit);
-
-		const helper = new DirectionalLightHelper(directionalLigit);
-		scene.add(helper);
 
 		/**
 		 * Pane
