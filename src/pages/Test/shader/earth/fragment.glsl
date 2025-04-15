@@ -22,9 +22,9 @@ void main()
     vec4 specularCloudColor = texture2D(uSpecularCloudTexture, vUv);
 
     vec3 sunDirection = uSunDirection;
-    float sunOriantation = dot(sunDirection, normal);
+    float sunOrientation = dot(sunDirection, normal);
 
-    float dayMix = smoothstep(-0.25, 0.5, sunOriantation);
+    float dayMix = smoothstep(-0.25, 0.5, sunOrientation);
     color = mix(
         earthNightColor.xyz,
         earthDayColor.xyz,
@@ -40,19 +40,35 @@ void main()
         cloudMix
     );
 
-    // Specular
-    vec3 reflection = reflect(-sunDirection, normal);
-    float specular = - dot(viewDirection, reflection);
-    specular = max(0.0, specular);
-    specular = pow(specular, 20.0);
-    color += specularCloudColor.r * specular;
-
     // Fresnel
     float fresnel = dot(viewDirection, normal) + 1.0;
     fresnel = max(0.0, fresnel);
     fresnel = pow(fresnel, 2.0);
 
-    color = vec3(fresnel);
+    // Atmosphere
+    float atmosphereDayMix = smoothstep(-0.5, 1.0, sunOrientation);
+    vec3 atmosphere = mix(
+        uAtmosphereTwilightColor,
+        uAtmosphereDayColor,
+        atmosphereDayMix
+    );
+
+    color = mix(
+        color, 
+        atmosphere,
+        fresnel * dayMix
+    );
+
+    // Specular
+    vec3 reflection = reflect(-sunDirection, normal);
+    float specular = - dot(viewDirection, reflection);
+    specular = max(0.0, specular);
+    specular = pow(specular, 20.0);
+    specular *= specularCloudColor.r;
+
+    vec3 specularColor = mix(vec3(1.0), atmosphere, fresnel);
+
+    color += specular * specularColor;
 
     gl_FragColor = vec4(color, 1.0);
 
