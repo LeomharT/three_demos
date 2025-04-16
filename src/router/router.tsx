@@ -92,6 +92,7 @@ const ProceduralTerrain = lazy(
 	() => import('../pages/ThreejsJourneyShader/ProceduralTerrain')
 );
 const PostProcessing = lazy(() => import('../pages/PostProcessing'));
+const LoadingProgress = lazy(() => import('../pages/LoadingProgress'));
 
 export const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -161,6 +162,7 @@ export const router = createBrowserRouter(
 			<Route path='tj-sliced-model' element={<SlicedModel />} />
 			<Route path='tj-procedural-terrain' element={<ProceduralTerrain />} />
 			<Route path='tj-post-processing' element={<PostProcessing />} />
+			<Route path='loading-progress' element={<LoadingProgress />} />
 			<Route path='*' element={<IconError404 />} />
 		</Route>
 	),

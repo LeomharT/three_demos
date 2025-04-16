@@ -238,6 +238,11 @@ const threejsJourneyExapmles = [
 		description: 'Threejs Journet Post Processing',
 		path: '/tj-post-processing',
 	},
+	{
+		title: 'Loading Progress',
+		description: 'Loading Progress',
+		path: '/loading-progress',
+	},
 ];
 
 function cover(index: number) {
