@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import {
+	BackSide,
 	Color,
 	IcosahedronGeometry,
 	Mesh,
@@ -19,6 +20,8 @@ import {
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { Pane } from 'tweakpane';
+import atmosphereFragmentShader from './shader/atmosphere/fragment.glsl?raw';
+import atmosphereVertexShader from './shader/atmosphere/vertex.glsl?raw';
 import earthFragmentShader from './shader/earth/fragment.glsl?raw';
 import earthVertexShader from './shader/earth/vertex.glsl?raw';
 
@@ -126,6 +129,18 @@ export default function Test() {
 		});
 		const earth = new Mesh(earthGeometry, earthMaterial);
 		scene.add(earth);
+
+		const atmosphereGeometry = new SphereGeometry(2, 64, 64);
+		const atmosphereMaterial = new ShaderMaterial({
+			transparent: true,
+			vertexShader: atmosphereVertexShader,
+			fragmentShader: atmosphereFragmentShader,
+			uniforms,
+			side: BackSide,
+		});
+		const atmosphere = new Mesh(atmosphereGeometry, atmosphereMaterial);
+		atmosphere.scale.setScalar(1.04);
+		scene.add(atmosphere);
 
 		/**
 		 * Pane
