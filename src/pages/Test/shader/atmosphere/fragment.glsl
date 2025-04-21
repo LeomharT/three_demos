@@ -10,18 +10,33 @@ void main()
 {
     vec3 viewDirection = normalize(vPosition - cameraPosition);
     vec3 normal = normalize(vNormal);
-    vec3 color = vec3(1.0);
+    vec3 color = vec3(0.0);
 
     // Sun orientation
     vec3 sunDirection = uSunDirection;
     float sunOrientation = dot(sunDirection, normal);    
 
-    // Fresnel
-    float fresnel = dot(viewDirection, normal) + 1.0;
-    fresnel = max(0.0, fresnel);
-    fresnel = pow(fresnel, 2.0);
+    // Atmosphere
+    float atmosphereDayMix = smoothstep(-0.5, 1.0, sunOrientation);
+    vec3 atmosphereColor = mix(
+        uAtmosphereTwilightColor,
+        uAtmosphereDayColor,
+        atmosphereDayMix
+    );
 
-    color = vec3(fresnel);
+    color += atmosphereColor;
 
-    gl_FragColor = vec4(color, 1.0);
+    // Alpha
+    float edgeAlpha = dot(viewDirection, normal);
+    edgeAlpha = smoothstep(0.0, 0.5, edgeAlpha);
+
+    // Day Alpha
+    float dayAlpha = smoothstep(-0.5, 0.0, sunOrientation); 
+
+    float alpha = edgeAlpha * dayAlpha;
+
+    gl_FragColor = vec4(color, alpha);
+
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
 }
