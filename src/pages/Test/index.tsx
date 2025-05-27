@@ -1,30 +1,16 @@
-import { useMantineTheme } from '@mantine/core';
 import { useEffect } from 'react';
-import {
-	Color,
-	Mesh,
-	PerspectiveCamera,
-	Scene,
-	ShaderMaterial,
-	SphereGeometry,
-	Uniform,
-	WebGLRenderer,
-} from 'three';
+import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import { Pane } from 'tweakpane';
-import sunFragmentShader from './shader/sun/fragment.glsl?raw';
-import sunVertexShader from './shader/sun/vertex.glsl?raw';
+import Stats from 'three/examples/jsm/libs/stats.module.js';
 
 export default function Test() {
-	const theme = useMantineTheme();
-
-	function initialScene() {
+	useEffect(() => {
 		const el = document.querySelector('#container') as HTMLDivElement;
 
 		const size = {
 			width: window.innerWidth,
 			height: window.innerHeight,
-			pixelratio: window.devicePixelRatio,
+			pixelRatio: Math.min(2, window.devicePixelRatio),
 		};
 
 		/**
@@ -36,11 +22,11 @@ export default function Test() {
 			antialias: true,
 		});
 		renderer.setSize(size.width, size.height);
-		renderer.setPixelRatio(size.pixelratio);
+		renderer.setPixelRatio(size.pixelRatio);
 		el.append(renderer.domElement);
 
 		const scene = new Scene();
-		scene.background = new Color(theme.colors.dark[9]);
+		scene.background = new Color('#1e1e1e');
 
 		const camera = new PerspectiveCamera(75, size.width / size.height, 0.1, 1000);
 		camera.position.set(3, 3, 3);
@@ -48,42 +34,21 @@ export default function Test() {
 
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.enableDamping = true;
-		controls.dampingFactor = 0.05;
 
-		/**
-		 * Scene
-		 */
-
-		const uniforms = {
-			uTime: new Uniform(0),
-		};
-
-		const sunGeometry = new SphereGeometry(2, 32, 32);
-		const sunMaterial = new ShaderMaterial({
-			vertexShader: sunVertexShader,
-			fragmentShader: sunFragmentShader,
-			uniforms,
-		});
-		const sun = new Mesh(sunGeometry, sunMaterial);
-		scene.add(sun);
-
-		/**
-		 * Pane
-		 */
-		const pane = new Pane({ title: '🐞 Debug' });
-		pane.element.parentElement!.style.width = '320px';
-		// Sun Debug Params
-		const sunPane = pane.addFolder({ title: '☀️ Sun' });
+		const stats = new Stats();
+		el.append(stats.dom);
 
 		/**
 		 * Events
 		 */
 
 		function render(time: number = 0) {
+			// Loop
 			requestAnimationFrame(render);
 
 			// Update
 			controls.update(time);
+			stats.update();
 
 			// Render
 			renderer.render(scene, camera);
@@ -93,17 +58,14 @@ export default function Test() {
 		function resize() {
 			size.width = window.innerWidth;
 			size.height = window.innerHeight;
-			size.pixelratio = Math.min(2, window.devicePixelRatio);
+			size.pixelRatio = Math.min(2, window.devicePixelRatio);
 
 			renderer.setSize(size.width, size.height);
+
 			camera.aspect = size.width / size.height;
 			camera.updateProjectionMatrix();
 		}
 		window.addEventListener('resize', resize);
-	}
-
-	useEffect(() => {
-		initialScene();
 	}, []);
 
 	return <div id='container'></div>;
