@@ -56,3 +56,6 @@ Threejs 提供的`PlaneGeometry`没有配置圆角矩形的参数, 想要实现�
 
 `WebGLRenderer`的 default`toneMapping`是`NoToneMapping`, 而`r3f`中的 gl 默认`toneMapping`是`ACESFilmicToneMapping`
 在使用`RenderTexture`没能正确使用`toneMapping`会导致材质和主场景不同色调
+
+在 shader 中使用 tonemapping 会导致色彩值映射不同, 比如`ACESFilmicToneMapping`会将-1.0 映射到 1.0, 导致负值的颜色会是白色.
+这也正是 tonemappgin 的作用
